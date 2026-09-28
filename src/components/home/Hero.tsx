@@ -15,11 +15,11 @@ export const Hero: React.FC<HeroProps> = ({
   onQuickQuery,
 }) => {
   const exampleSearches = [
-    'Instagram Reels',
-    'Facebook Video',
     'Compress image',
+    'Resize photo',
     'MP4 to MP3',
     'Convert PDF',
+    'Merge PDF',
   ];
 
   return (

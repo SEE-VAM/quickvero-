@@ -25,17 +25,17 @@ export const HomePage: React.FC<HomePageProps> = ({
     const base = getBaseUrl();
     updatePageMeta({
       title: 'QuickVero — Powerful Online Tools. Simple & Fast.',
-      description: 'Free online video downloader, image compressor, PDF tools, and audio converters directly in your browser with QuickVero.',
+      description: 'Free online image compressor, PDF tools, audio converters, and file utilities directly in your browser with QuickVero.',
       canonicalUrl: `${base}/`,
       keywords: [
         'online tools',
-        'video downloader',
-        'instagram reel downloader',
-        'tiktok downloader',
-        'facebook video downloader',
         'image compressor',
         'pdf converter',
+        'pdf compressor',
+        'merge pdf',
+        'split pdf',
         'mp4 to mp3',
+        'webp converter',
         'free file tools',
         'quickvero',
       ],

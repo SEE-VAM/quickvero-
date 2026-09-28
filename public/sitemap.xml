@@ -169,37 +169,6 @@
     <priority>0.8</priority>
   </url>
 
-  <!-- Video Downloader Suite -->
-  <url>
-    <loc>https://quickvero.vercel.app/tools/instagram-video-downloader</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.95</priority>
-  </url>
-  <url>
-    <loc>https://quickvero.vercel.app/tools/facebook-video-downloader</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://quickvero.vercel.app/tools/youtube-video-downloader</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.95</priority>
-  </url>
-  <url>
-    <loc>https://quickvero.vercel.app/tools/tiktok-video-downloader</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://quickvero.vercel.app/tools/twitter-video-downloader</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
-    <loc>https://quickvero.vercel.app/tools/all-video-downloader</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
 
   <!-- Legal & Info Pages -->
   <url>

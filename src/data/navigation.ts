@@ -22,12 +22,12 @@ export const FOOTER_LINKS = {
     { label: 'All Tools Catalog', href: '/tools' },
   ],
   popular: [
-    { label: 'Instagram Reels Downloader', href: '/tools/instagram-video-downloader' },
-    { label: 'Facebook Video Downloader', href: '/tools/facebook-video-downloader' },
     { label: 'Image Compressor', href: '/tools/image-compressor' },
+    { label: 'PDF Compressor', href: '/tools/pdf-compressor' },
     { label: 'Image Resizer', href: '/tools/image-resizer' },
     { label: 'JPG to PDF', href: '/tools/jpg-to-pdf' },
     { label: 'MP4 to MP3', href: '/tools/mp4-to-mp3' },
+    { label: 'WebP Converter', href: '/tools/webp-converter' },
   ],
   company: [
     { label: 'About Us', href: '/about' },

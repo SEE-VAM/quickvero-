@@ -16,7 +16,7 @@ export const CATEGORIES: CategoryDefinition[] = [
     name: 'Video Tools',
     slug: 'video-tools',
     route: '/video-tools',
-    description: 'Download Instagram Reels, Facebook videos, YouTube Shorts, compress clips, and convert to MP3 audio.',
+    description: 'Trim, compress, resize, convert, and extract audio from video clips directly in your browser with zero quality loss.',
     icon: 'VideoIcon',
     color: 'text-purple-500',
     gradient: 'from-purple-500/10 to-pink-500/10',

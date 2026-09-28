@@ -25,7 +25,8 @@ export const AdBanner: React.FC<AdBannerProps> = ({
     ? (import.meta as any).env.VITE_ADSENSE_CLIENT_ID 
     : 'ca-pub-8043431725904194';
 
-  const isConfigured = Boolean(clientId && !clientId.includes('XXXX'));
+  const isRealSlot = Boolean(slot && slot !== '1234567890');
+  const isConfigured = Boolean(clientId && !clientId.includes('XXXX') && isRealSlot);
 
   useEffect(() => {
     if (isConfigured && !isLoaded.current && typeof window !== 'undefined') {
@@ -37,6 +38,12 @@ export const AdBanner: React.FC<AdBannerProps> = ({
       }
     }
   }, [isConfigured]);
+
+  // If no dedicated ad unit slot is configured, return null to avoid empty ad containers
+  // Google Auto Ads from index.html will automatically place ads once approved
+  if (!isConfigured) {
+    return null;
+  }
 
   return (
     <aside
@@ -50,26 +57,15 @@ export const AdBanner: React.FC<AdBannerProps> = ({
       </div>
 
       <div className="flex items-center justify-center min-h-[90px] w-full overflow-hidden">
-        {isConfigured ? (
-          <ins
-            ref={adRef}
-            className="adsbygoogle"
-            style={{ display: 'block', width: '100%', minHeight: '90px' }}
-            data-ad-client={clientId}
-            data-ad-slot={slot}
-            data-ad-format={format === 'leaderboard' ? 'horizontal' : format === 'rectangle' ? 'rectangle' : 'auto'}
-            data-full-width-responsive="true"
-          />
-        ) : (
-          <div className="flex flex-col items-center justify-center py-4 px-4 text-xs text-slate-400 dark:text-slate-500">
-            <span className="font-semibold text-slate-600 dark:text-slate-300 text-sm">
-              Google AdSense Ad Space Ready
-            </span>
-            <span className="text-[11px] text-slate-400 dark:text-slate-500 mt-1 max-w-md">
-              Connect your Google AdSense Publisher ID (<code className="text-[10px] bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded text-brand-600 dark:text-brand-400">ca-pub-XXXXXXXX</code>) to start serving high-paying responsive banner ads on QuickVero.
-            </span>
-          </div>
-        )}
+        <ins
+          ref={adRef}
+          className="adsbygoogle"
+          style={{ display: 'block', width: '100%', minHeight: '90px' }}
+          data-ad-client={clientId}
+          data-ad-slot={slot}
+          data-ad-format={format === 'leaderboard' ? 'horizontal' : format === 'rectangle' ? 'rectangle' : 'auto'}
+          data-full-width-responsive="true"
+        />
       </div>
     </aside>
   );
