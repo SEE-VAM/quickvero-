@@ -131,6 +131,89 @@ export async function compressImage(
 }
 
 /**
+ * Automatically compress image to guarantee it stays below targetSizeBytes (e.g. 20KB, 50KB, 100KB)
+ */
+export async function compressImageToTargetSize(
+  file: File,
+  targetMaxBytes: number,
+  options: { quality?: number; format?: string } = {},
+  onProgress?: (percent: number) => void
+): Promise<ProcessResult> {
+  onProgress?.(15);
+  const img = await loadImageFromFile(file);
+  onProgress?.(35);
+
+  let curWidth = img.naturalWidth;
+  let curHeight = img.naturalHeight;
+  let curQuality = options.quality ?? 0.8;
+  const outputMime = options.format && options.format !== 'original' ? options.format : 'image/jpeg';
+  const targetExtension = outputMime === 'image/png' ? 'png' : outputMime === 'image/webp' ? 'webp' : 'jpg';
+
+  const canvas = document.createElement('canvas');
+  let bestBlob: Blob | null = null;
+
+  for (let iteration = 0; iteration < 8; iteration++) {
+    canvas.width = Math.round(curWidth);
+    canvas.height = Math.round(curHeight);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Could not initialize canvas graphics context.');
+
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+
+    if (outputMime === 'image/jpeg' || outputMime === 'image/jpg') {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    const blob = await new Promise<Blob | null>((res) =>
+      canvas.toBlob((b) => res(b), outputMime, curQuality)
+    );
+
+    if (!blob) break;
+    bestBlob = blob;
+
+    onProgress?.(35 + iteration * 8);
+
+    if (blob.size <= targetMaxBytes) {
+      break;
+    }
+
+    if (curQuality > 0.35) {
+      curQuality -= 0.15;
+    } else {
+      curWidth *= 0.85;
+      curHeight *= 0.85;
+      curQuality = 0.5;
+    }
+  }
+
+  if (!bestBlob) {
+    throw new Error('Image compression failed.');
+  }
+
+  onProgress?.(100);
+  const outFilename = sanitizeFilename(file.name, targetExtension);
+  const downloadUrl = URL.createObjectURL(bestBlob);
+  const savings = calculateSavings(file.size, bestBlob.size);
+
+  return {
+    blob: bestBlob,
+    downloadUrl,
+    filename: outFilename,
+    originalSize: file.size,
+    processedSize: bestBlob.size,
+    savingsPercentage: savings,
+    metadata: {
+      width: Math.round(curWidth),
+      height: Math.round(curHeight),
+      format: outputMime,
+    },
+  };
+}
+
+/**
  * Real client-side image resizing
  */
 export async function resizeImage(

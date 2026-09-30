@@ -25,7 +25,7 @@ import { CalculatorWorkspace } from '../components/tool/controls/CalculatorWorks
 import { VideoDownloaderWorkspace } from '../components/tool/controls/VideoDownloaderWorkspace';
 import { CloudToolNotice } from '../components/tool/controls/CloudToolNotice';
 import { AdBanner } from '../components/common/AdBanner';
-import { updatePageMeta, generateToolStructuredData } from '../utils/seoHelpers';
+import { updatePageMeta, generateToolStructuredData, getBaseUrl } from '../utils/seoHelpers';
 import { toolService } from '../services/toolService';
 import { analytics } from '../services/analytics';
 import { ToastMessage } from '../components/common/Toast';
@@ -67,12 +67,17 @@ export const ToolDetailPage: React.FC<ToolDetailPageProps> = ({
     updatePageMeta({
       title: tool.seoTitle,
       description: tool.seoDescription,
-      canonicalUrl: `https://quickvero.com${tool.route}`,
+      canonicalUrl: `${getBaseUrl()}${tool.route}`,
       keywords: tool.keywords,
       structuredData: schema,
     });
 
     analytics.trackPageView(tool.route, tool.name);
+
+    if (tool.id === 'compress-image-to-20kb') setCompressQuality(35);
+    else if (tool.id === 'compress-image-to-50kb') setCompressQuality(55);
+    else if (tool.id === 'compress-image-to-100kb') setCompressQuality(75);
+    else setCompressQuality(80);
 
     // Reset workspace state on tool change
     handleReset();
@@ -218,7 +223,10 @@ export const ToolDetailPage: React.FC<ToolDetailPageProps> = ({
                   />
 
                   {/* Tool Controls */}
-                  {tool.id === 'image-compressor' && (
+                  {(tool.id === 'image-compressor' ||
+                    tool.id === 'compress-image-to-20kb' ||
+                    tool.id === 'compress-image-to-50kb' ||
+                    tool.id === 'compress-image-to-100kb') && (
                     <ImageCompressorControls
                       quality={compressQuality}
                       setQuality={setCompressQuality}
@@ -262,7 +270,9 @@ export const ToolDetailPage: React.FC<ToolDetailPageProps> = ({
                     />
                   )}
 
-                  {tool.id === 'pdf-compressor' && (
+                  {(tool.id === 'pdf-compressor' ||
+                    tool.id === 'compress-pdf-to-100kb' ||
+                    tool.id === 'compress-pdf-to-200kb') && (
                     <PdfCompressorControls
                       onCompress={(opts) => executeProcessing(opts)}
                       isProcessing={false}

@@ -51,6 +51,103 @@ export const TOOLS: ToolDefinition[] = [
     ]
   },
   {
+    id: 'compress-image-to-20kb',
+    name: 'Compress Image to 20KB',
+    slug: 'compress-image-to-20kb',
+    category: 'image',
+    route: '/tools/compress-image-to-20kb',
+    shortDescription: 'Reduce photo and signature size to exactly 20KB or less online.',
+    description: 'Compress JPG, PNG, and JPEG images to exact 20KB online for free. Ideal for online recruitment forms like SSC CGL, CHSL, MTS, UPSC, Railway RRB, and Police exams without losing visible quality.',
+    icon: 'Minimize2',
+    supportedFormats: ['image/jpeg', 'image/png', 'image/webp'],
+    maxFileSizeMB: 30,
+    engine: 'browser',
+    isPopular: true,
+    seoTitle: 'Compress Image to 20KB Online Free — Exact Photo Size Reducer | QuickVero',
+    seoDescription: 'Compress image to 20KB online for free with QuickVero. Reduce photo size to under 20KB for SSC, UPSC, and Railway exam application forms without blur.',
+    keywords: ['compress image to 20kb', 'reduce image to 20kb', 'photo compressor to 20kb', 'resize photo 20kb', 'ssc photo 20kb converter', 'online photo size reducer to 20kb'],
+    features: [
+      'Targeted 20KB compression algorithm',
+      'Perfect for SSC, UPSC, Railway & Banking forms',
+      'Lossless details retention with no blur',
+      '100% Client-side privacy — photos never uploaded to a server',
+      'Instant free download with zero watermarks'
+    ],
+    howToSteps: [
+      { step: 1, title: 'Upload your photo', description: 'Drag and drop your JPG or PNG image.' },
+      { step: 2, title: 'Apply 20KB optimization', description: 'QuickVero automatically calibrates the compression to achieve under 20KB.' },
+      { step: 3, title: 'Download your 20KB image', description: 'Save your compressed photo instantly and upload directly to your exam portal.' }
+    ],
+    faqs: [
+      { question: 'Will my photo be accepted on SSC and UPSC portals?', answer: 'Yes! The 20KB output strictly complies with official government exam portal size guidelines.' },
+      { question: 'Is my photo private and secure?', answer: '100% yes! QuickVero processes your images directly in your browser. Your private pictures never touch our servers.' }
+    ]
+  },
+  {
+    id: 'compress-image-to-50kb',
+    name: 'Compress Image to 50KB',
+    slug: 'compress-image-to-50kb',
+    category: 'image',
+    route: '/tools/compress-image-to-50kb',
+    shortDescription: 'Compress photos and documents to under 50KB online with crisp clarity.',
+    description: 'Compress JPG, PNG, and JPEG images to exactly 50KB or below online for free. Designed for state PSC, High Court, police recruitment, and university admission portals.',
+    icon: 'Minimize2',
+    supportedFormats: ['image/jpeg', 'image/png', 'image/webp'],
+    maxFileSizeMB: 30,
+    engine: 'browser',
+    isPopular: true,
+    seoTitle: 'Compress Image to 50KB Online Free — Photo & Document Reducer | QuickVero',
+    seoDescription: 'Compress image to 50KB online for free with QuickVero. Easily reduce photo size below 50KB for job applications, passport size photos, and exam portals.',
+    keywords: ['compress image to 50kb', 'reduce photo to 50kb', 'compress jpg to 50kb online', 'photo resizer 50kb', 'image size reducer below 50kb'],
+    features: [
+      'Optimized 50KB output for state exams & police recruitment',
+      'Preserves facial sharpness and clarity',
+      '100% Safe client-side execution',
+      'Supports JPG, JPEG, and PNG formats',
+      'No registration, watermarks, or fees'
+    ],
+    howToSteps: [
+      { step: 1, title: 'Select Image', description: 'Choose any picture from your mobile or PC.' },
+      { step: 2, title: 'Optimize to 50KB', description: 'Fine-tune quality slider to hit your target 50KB size.' },
+      { step: 3, title: 'Download Image', description: 'Save your compressed image file.' }
+    ],
+    faqs: [
+      { question: 'Can I compress my signature to 50KB?', answer: 'Yes, both photos and scanned signatures can be easily compressed to under 50KB.' }
+    ]
+  },
+  {
+    id: 'compress-image-to-100kb',
+    name: 'Compress Image to 100KB',
+    slug: 'compress-image-to-100kb',
+    category: 'image',
+    route: '/tools/compress-image-to-100kb',
+    shortDescription: 'Reduce photo and document file size to 100KB without quality loss.',
+    description: 'Compress JPG, PNG, and WebP images to 100KB online for free. Maintain high resolution while staying within strict government and educational upload limits.',
+    icon: 'Minimize2',
+    supportedFormats: ['image/jpeg', 'image/png', 'image/webp'],
+    maxFileSizeMB: 30,
+    engine: 'browser',
+    isPopular: true,
+    seoTitle: 'Compress Image to 100KB Online Free — Fast Image Optimizer | QuickVero',
+    seoDescription: 'Compress image to 100KB online for free with QuickVero. Reduce image file size below 100KB while preserving high visual quality right in your browser.',
+    keywords: ['compress image to 100kb', 'reduce image size to 100kb', 'compress photo to 100kb', 'jpg compressor 100kb', 'make image 100kb'],
+    features: [
+      'Smart 100KB compression balance',
+      'High DPI resolution preserved',
+      'Universal browser support',
+      'Zero wait time & no signup',
+      'Private on-device execution'
+    ],
+    howToSteps: [
+      { step: 1, title: 'Upload image', description: 'Select your photo or scanned document.' },
+      { step: 2, title: 'Compress to 100KB', description: 'Automatic optimization to match the 100KB ceiling.' },
+      { step: 3, title: 'Download file', description: 'Save and upload anywhere.' }
+    ],
+    faqs: [
+      { question: 'Will the image become blurry at 100KB?', answer: 'No, 100KB is generous for standard photos and documents. Text and images remain sharp.' }
+    ]
+  },
+  {
     id: 'image-resizer',
     name: 'Image Resizer',
     slug: 'image-resizer',
@@ -631,6 +728,68 @@ export const TOOLS: ToolDefinition[] = [
     faqs: [
       { question: 'Will text inside the PDF stay clear and searchable?', answer: 'Yes! Vector text and fonts are preserved intact; the compression focuses on downsampling embedded images and unneeded structural objects.' },
       { question: 'Can I compress password-protected PDFs?', answer: 'You must first remove the password before uploading for compression.' }
+    ]
+  },
+  {
+    id: 'compress-pdf-to-100kb',
+    name: 'Compress PDF to 100KB',
+    slug: 'compress-pdf-to-100kb',
+    category: 'pdf',
+    route: '/tools/compress-pdf-to-100kb',
+    shortDescription: 'Reduce PDF document size to 100KB or less for online portal upload.',
+    description: 'Compress PDF documents to under 100KB online for free. Ideal for 10th/12th marksheets, caste certificates, domicile, income certificates, and job application uploads.',
+    icon: 'FileText',
+    supportedFormats: ['application/pdf'],
+    maxFileSizeMB: 50,
+    engine: 'browser',
+    isPopular: true,
+    seoTitle: 'Compress PDF to 100KB Online Free — PDF Document Reducer | QuickVero',
+    seoDescription: 'Compress PDF to 100KB online for free with QuickVero. Reduce marksheet, certificate, and document PDF size below 100KB for government portals.',
+    keywords: ['compress pdf to 100kb', 'reduce pdf size to 100kb', 'pdf compressor 100kb online', 'compress pdf below 100kb for ssc', 'reduce marksheet pdf size'],
+    features: [
+      'Document clarity preserved with clean text',
+      'Perfect for marksheets, caste certificates & diplomas',
+      '100% In-browser security — documents never uploaded to any server',
+      'Instant download with no watermarks or fees'
+    ],
+    howToSteps: [
+      { step: 1, title: 'Upload PDF', description: 'Select your PDF document or certificate.' },
+      { step: 2, title: 'Choose 100KB Compression', description: 'Our smart algorithm optimizes images and fonts to stay below 100KB.' },
+      { step: 3, title: 'Download File', description: 'Download and upload to your portal.' }
+    ],
+    faqs: [
+      { question: 'Will my marksheet details still be legible?', answer: 'Yes! Text, roll numbers, and official signatures remain crisp and readable.' }
+    ]
+  },
+  {
+    id: 'compress-pdf-to-200kb',
+    name: 'Compress PDF to 200KB',
+    slug: 'compress-pdf-to-200kb',
+    category: 'pdf',
+    route: '/tools/compress-pdf-to-200kb',
+    shortDescription: 'Compress PDF files to 200KB or below with sharp text.',
+    description: 'Compress PDF files to 200KB online for free. Keep text crisp and readable while fitting under college admission and job application file size caps.',
+    icon: 'FileText',
+    supportedFormats: ['application/pdf'],
+    maxFileSizeMB: 50,
+    engine: 'browser',
+    isPopular: true,
+    seoTitle: 'Compress PDF to 200KB Online Free — Fast Document Compressor | QuickVero',
+    seoDescription: 'Compress PDF to 200KB online for free with QuickVero. Optimize large PDF documents to under 200KB without software installation.',
+    keywords: ['compress pdf to 200kb', 'reduce pdf size to 200kb', 'pdf compressor 200kb', 'compress pdf under 200kb online'],
+    features: [
+      'Balanced 200KB document compression',
+      'Crisp text rendering and multi-page support',
+      '100% Private local processing on your device',
+      'Free unlimited usage'
+    ],
+    howToSteps: [
+      { step: 1, title: 'Select PDF', description: 'Upload multi-page or single-page PDF.' },
+      { step: 2, title: 'Optimize to 200KB', description: 'Execute fast client-side compression.' },
+      { step: 3, title: 'Download PDF', description: 'Instant download.' }
+    ],
+    faqs: [
+      { question: 'Can I compress multi-page documents to 200KB?', answer: 'Yes, multi-page PDFs are fully supported and compressed evenly.' }
     ]
   },
   {

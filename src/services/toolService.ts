@@ -1,5 +1,5 @@
 import { ProcessResult, ToolDefinition } from '../types/tool';
-import { compressImage, resizeImage, convertImageFormat } from './imageProcessor';
+import { compressImage, compressImageToTargetSize, resizeImage, convertImageFormat } from './imageProcessor';
 import { convertImageToPdf } from './fileProcessor';
 import { compressPdfFile, splitPdfFile, convertPdfToJpg } from './pdfProcessor';
 import { extractAudioFromVideo, compressAudio, convertAudioFormat } from './audioProcessor';
@@ -25,6 +25,24 @@ export class ToolService {
         const quality = (options.quality ?? 80) / 100;
         const format = options.format === 'original' ? undefined : options.format;
         return await compressImage(file, { quality, format }, onProgress);
+      }
+
+      case 'compress-image-to-20kb': {
+        const quality = options.quality ? options.quality / 100 : 0.4;
+        const format = options.format === 'original' ? undefined : options.format;
+        return await compressImageToTargetSize(file, 20 * 1024, { quality, format }, onProgress);
+      }
+
+      case 'compress-image-to-50kb': {
+        const quality = options.quality ? options.quality / 100 : 0.6;
+        const format = options.format === 'original' ? undefined : options.format;
+        return await compressImageToTargetSize(file, 50 * 1024, { quality, format }, onProgress);
+      }
+
+      case 'compress-image-to-100kb': {
+        const quality = options.quality ? options.quality / 100 : 0.75;
+        const format = options.format === 'original' ? undefined : options.format;
+        return await compressImageToTargetSize(file, 100 * 1024, { quality, format }, onProgress);
       }
 
       case 'image-resizer': {
@@ -58,6 +76,14 @@ export class ToolService {
 
       case 'pdf-compressor': {
         return await compressPdfFile(file, options, onProgress);
+      }
+
+      case 'compress-pdf-to-100kb': {
+        return await compressPdfFile(file, { level: 'extreme', ...options }, onProgress);
+      }
+
+      case 'compress-pdf-to-200kb': {
+        return await compressPdfFile(file, { level: 'recommended', ...options }, onProgress);
       }
 
       case 'split-pdf': {
