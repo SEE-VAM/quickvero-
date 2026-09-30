@@ -13,7 +13,7 @@ export function getBaseUrl(): string {
   if (typeof window !== 'undefined' && window.location.origin) {
     return window.location.origin;
   }
-  return 'https://quickvero.in';
+  return 'https://www.quickvero.in';
 }
 
 export function updatePageMeta({

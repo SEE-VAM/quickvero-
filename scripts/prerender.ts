@@ -100,7 +100,7 @@ console.log('Starting QuickVero Static Pre-rendering (SSG)...');
 // 1. Generate Individual Tool Pages
 for (const tool of TOOLS) {
   const category = CATEGORIES.find(c => c.id === tool.category) || CATEGORIES[0];
-  const canonicalUrl = `https://quickvero.in${tool.route}`;
+  const canonicalUrl = `https://www.quickvero.in${tool.route}`;
 
   // Structured Data
   const jsonLd: object[] = [
@@ -108,7 +108,7 @@ for (const tool of TOOLS) {
       '@context': 'https://schema.org',
       '@type': 'WebSite',
       name: 'QuickVero',
-      url: 'https://quickvero.in/',
+      url: 'https://www.quickvero.in/',
     },
     {
       '@context': 'https://schema.org',
@@ -133,13 +133,13 @@ for (const tool of TOOLS) {
           '@type': 'ListItem',
           position: 1,
           name: 'Home',
-          item: 'https://quickvero.in/',
+          item: 'https://www.quickvero.in/',
         },
         {
           '@type': 'ListItem',
           position: 2,
           name: category.name,
-          item: `https://quickvero.in${category.route}`,
+          item: `https://www.quickvero.in${category.route}`,
         },
         {
           '@type': 'ListItem',
@@ -284,7 +284,7 @@ for (const tool of TOOLS) {
 
 // 2. Generate Category Pages (e.g. /image-tools, /pdf-tools)
 for (const cat of CATEGORIES) {
-  const canonicalUrl = `https://quickvero.in${cat.route}`;
+  const canonicalUrl = `https://www.quickvero.in${cat.route}`;
   const categoryTools = TOOLS.filter(t => t.category === cat.id);
 
   const rootContent = `
@@ -368,7 +368,7 @@ const corePages = [
 ];
 
 for (const p of corePages) {
-  const canonicalUrl = `https://quickvero.in/${p.path}`;
+  const canonicalUrl = `https://www.quickvero.in/${p.path}`;
   const rootContent = `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 32px 16px; color: #1e293b;">
       <h1 style="font-size: 32px; font-weight: 900; color: #0f172a; margin-bottom: 16px;">${escapeHtml(p.h1)}</h1>

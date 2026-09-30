@@ -2,169 +2,169 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <!-- Core Platform Pages -->
   <url>
-    <loc>https://quickvero.in/</loc>
+    <loc>https://www.quickvero.in/</loc>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/tools</loc>
+    <loc>https://www.quickvero.in/tools</loc>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/image-tools</loc>
+    <loc>https://www.quickvero.in/image-tools</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/video-tools</loc>
+    <loc>https://www.quickvero.in/video-tools</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/audio-tools</loc>
+    <loc>https://www.quickvero.in/audio-tools</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/pdf-tools</loc>
+    <loc>https://www.quickvero.in/pdf-tools</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/file-tools</loc>
+    <loc>https://www.quickvero.in/file-tools</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <!-- Individual Tool Pages -->
   <url>
-    <loc>https://quickvero.in/tools/image-compressor</loc>
+    <loc>https://www.quickvero.in/tools/image-compressor</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/tools/image-resizer</loc>
+    <loc>https://www.quickvero.in/tools/image-resizer</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/tools/jpg-to-png</loc>
+    <loc>https://www.quickvero.in/tools/jpg-to-png</loc>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/tools/png-to-jpg</loc>
+    <loc>https://www.quickvero.in/tools/png-to-jpg</loc>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/tools/webp-converter</loc>
+    <loc>https://www.quickvero.in/tools/webp-converter</loc>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/tools/image-cropper</loc>
+    <loc>https://www.quickvero.in/tools/image-cropper</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/tools/video-compressor</loc>
+    <loc>https://www.quickvero.in/tools/video-compressor</loc>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/tools/video-to-gif</loc>
+    <loc>https://www.quickvero.in/tools/video-to-gif</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/tools/video-resizer</loc>
+    <loc>https://www.quickvero.in/tools/video-resizer</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/tools/video-converter</loc>
+    <loc>https://www.quickvero.in/tools/video-converter</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/tools/audio-extractor</loc>
+    <loc>https://www.quickvero.in/tools/audio-extractor</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/tools/mp4-to-mp3</loc>
+    <loc>https://www.quickvero.in/tools/mp4-to-mp3</loc>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/tools/audio-converter</loc>
+    <loc>https://www.quickvero.in/tools/audio-converter</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/tools/audio-compressor</loc>
+    <loc>https://www.quickvero.in/tools/audio-compressor</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/tools/wav-to-mp3</loc>
+    <loc>https://www.quickvero.in/tools/wav-to-mp3</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/tools/mp3-to-wav</loc>
+    <loc>https://www.quickvero.in/tools/mp3-to-wav</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/tools/pdf-compressor</loc>
+    <loc>https://www.quickvero.in/tools/pdf-compressor</loc>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/tools/jpg-to-pdf</loc>
+    <loc>https://www.quickvero.in/tools/jpg-to-pdf</loc>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/tools/pdf-to-jpg</loc>
+    <loc>https://www.quickvero.in/tools/pdf-to-jpg</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/tools/merge-pdf</loc>
+    <loc>https://www.quickvero.in/tools/merge-pdf</loc>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/tools/split-pdf</loc>
+    <loc>https://www.quickvero.in/tools/split-pdf</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/tools/zip-creator</loc>
+    <loc>https://www.quickvero.in/tools/zip-creator</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/tools/file-converter</loc>
+    <loc>https://www.quickvero.in/tools/file-converter</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/tools/file-size-calculator</loc>
+    <loc>https://www.quickvero.in/tools/file-size-calculator</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/tools/hash-generator</loc>
+    <loc>https://www.quickvero.in/tools/hash-generator</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/tools/base64-encoder-decoder</loc>
+    <loc>https://www.quickvero.in/tools/base64-encoder-decoder</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -172,27 +172,27 @@
 
   <!-- Legal & Info Pages -->
   <url>
-    <loc>https://quickvero.in/about</loc>
+    <loc>https://www.quickvero.in/about</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/contact</loc>
+    <loc>https://www.quickvero.in/contact</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/privacy-policy</loc>
+    <loc>https://www.quickvero.in/privacy-policy</loc>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/terms</loc>
+    <loc>https://www.quickvero.in/terms</loc>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://quickvero.in/disclaimer</loc>
+    <loc>https://www.quickvero.in/disclaimer</loc>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
