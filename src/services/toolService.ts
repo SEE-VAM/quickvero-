@@ -1,7 +1,7 @@
 import { ProcessResult, ToolDefinition } from '../types/tool';
 import { compressImage, compressImageToTargetSize, resizeImage, convertImageFormat } from './imageProcessor';
 import { convertImageToPdf } from './fileProcessor';
-import { compressPdfFile, splitPdfFile, convertPdfToJpg } from './pdfProcessor';
+import { compressPdfFile, splitPdfFile, convertPdfToJpg, convertWordToPdf, convertExcelToPdf } from './pdfProcessor';
 import { extractAudioFromVideo, compressAudio, convertAudioFormat } from './audioProcessor';
 import { convertVideo, compressVideo, resizeVideo, convertVideoToGif } from './videoProcessor';
 
@@ -92,6 +92,14 @@ export class ToolService {
 
       case 'pdf-to-jpg': {
         return await convertPdfToJpg(file, options, onProgress);
+      }
+
+      case 'word-to-pdf': {
+        return await convertWordToPdf(file, onProgress);
+      }
+
+      case 'excel-to-pdf': {
+        return await convertExcelToPdf(file, onProgress);
       }
 
       case 'mp4-to-mp3':

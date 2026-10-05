@@ -1152,3 +1152,230 @@ export async function exportPageAsImage(
 
   return { dataUrl, filename };
 }
+
+// ==========================================
+// WORD TO PDF CONVERSION (docx-preview + html2canvas + jspdf)
+// ==========================================
+
+/**
+ * Convert a .docx Word file to PDF using docx-preview for rendering
+ * and jsPDF to package the output.
+ */
+export async function convertWordToPdf(
+  file: File,
+  onProgress?: (percent: number) => void
+): Promise<ProcessResult> {
+  onProgress?.(5);
+
+  // Dynamically import heavy libraries to keep bundle small
+  const [{ renderAsync }, { jsPDF }] = await Promise.all([
+    import('docx-preview'),
+    import('jspdf'),
+  ]);
+
+  onProgress?.(20);
+
+  const arrayBuffer = await file.arrayBuffer();
+
+  // Create hidden container to render Word document as HTML
+  const container = document.createElement('div');
+  container.style.cssText = [
+    'position:fixed', 'top:-9999px', 'left:-9999px',
+    'width:794px', 'background:#fff', 'padding:0', 'z-index:-999',
+    'font-family:Arial,Helvetica,sans-serif', 'color:#000',
+  ].join(';');
+  document.body.appendChild(container);
+
+  try {
+    await renderAsync(arrayBuffer, container, undefined, {
+      className: 'docx-preview-container',
+      inWrapper: false,
+      ignoreWidth: false,
+      ignoreHeight: false,
+      ignoreFonts: false,
+      breakPages: true,
+      useBase64URL: true,
+      renderHeaders: true,
+      renderFooters: true,
+      renderFootnotes: true,
+    });
+
+    onProgress?.(50);
+
+    const A4_HEIGHT_PX = 1123;
+
+    const pdf = new jsPDF({ unit: 'px', format: 'a4', orientation: 'portrait' });
+    const totalHeight = container.scrollHeight;
+    const pageCount = Math.ceil(totalHeight / A4_HEIGHT_PX);
+
+    for (let i = 0; i < pageCount; i++) {
+      const { default: html2canvas } = await import('html2canvas');
+
+      const canvas = await html2canvas(container, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        width: 794,
+        height: Math.min(A4_HEIGHT_PX, totalHeight - i * A4_HEIGHT_PX),
+        y: i * A4_HEIGHT_PX,
+        windowWidth: 794,
+        windowHeight: A4_HEIGHT_PX,
+      });
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.92);
+      if (i > 0) pdf.addPage();
+
+      const pdfW = pdf.internal.pageSize.getWidth();
+      const pdfH = pdf.internal.pageSize.getHeight();
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
+
+      onProgress?.(50 + Math.round(((i + 1) / pageCount) * 45));
+      await new Promise((r) => setTimeout(r, 10));
+    }
+
+    onProgress?.(97);
+    const pdfBytes = pdf.output('arraybuffer');
+    const pdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
+    const base = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+    const outName = sanitizeFilename(`${base}.pdf`);
+    const downloadUrl = URL.createObjectURL(pdfBlob);
+
+    onProgress?.(100);
+
+    return {
+      blob: pdfBlob,
+      downloadUrl,
+      filename: outName,
+      originalSize: file.size,
+      processedSize: pdfBlob.size,
+      savingsPercentage: 0,
+      metadata: { pages: pageCount, source: 'docx' },
+    };
+  } finally {
+    document.body.removeChild(container);
+  }
+}
+
+// ==========================================
+// EXCEL TO PDF CONVERSION (xlsx + jspdf)
+// ==========================================
+
+/**
+ * Convert .xlsx / .xls Excel files to PDF.
+ * Reads all sheets and renders each as a clean HTML table -> jsPDF.
+ */
+export async function convertExcelToPdf(
+  file: File,
+  onProgress?: (percent: number) => void
+): Promise<ProcessResult> {
+  onProgress?.(5);
+
+  const [{ read, utils }, { jsPDF }] = await Promise.all([
+    import('xlsx'),
+    import('jspdf'),
+  ]);
+
+  onProgress?.(20);
+
+  const arrayBuffer = await file.arrayBuffer();
+  const workbook = read(arrayBuffer, { type: 'array' });
+  const sheetNames = workbook.SheetNames;
+
+  if (sheetNames.length === 0) {
+    throw new Error('No sheets found in the Excel file.');
+  }
+
+  onProgress?.(35);
+
+  const container = document.createElement('div');
+  container.style.cssText = [
+    'position:fixed', 'top:-9999px', 'left:-9999px',
+    'width:1100px', 'background:#fff', 'padding:24px',
+    'z-index:-999', 'box-sizing:border-box',
+    'font-family:Arial,Helvetica,sans-serif', 'font-size:12px', 'color:#000',
+  ].join(';');
+  document.body.appendChild(container);
+
+  try {
+    for (let si = 0; si < sheetNames.length; si++) {
+      const sheetName = sheetNames[si];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData: any[][] = utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+
+      const titleEl = document.createElement('h2');
+      titleEl.style.cssText = 'font-size:16px;font-weight:700;margin:0 0 10px 0;color:#1e3a8a;border-bottom:2px solid #3b82f6;padding-bottom:6px;';
+      titleEl.textContent = `Sheet: ${sheetName}`;
+      container.appendChild(titleEl);
+
+      const table = document.createElement('table');
+      table.style.cssText = 'border-collapse:collapse;width:100%;margin-bottom:30px;';
+
+      jsonData.forEach((row, rowIdx) => {
+        const tr = document.createElement('tr');
+        row.forEach((cell) => {
+          const td = document.createElement(rowIdx === 0 ? 'th' : 'td');
+          td.style.cssText = rowIdx === 0
+            ? 'background:#1e3a8a;color:#fff;font-weight:700;font-size:11px;padding:6px 8px;border:1px solid #1e40af;text-align:left;'
+            : `background:${rowIdx % 2 === 0 ? '#f1f5f9' : '#fff'};padding:5px 8px;border:1px solid #e2e8f0;font-size:11px;vertical-align:top;`;
+          td.textContent = String(cell ?? '');
+          tr.appendChild(td);
+        });
+        table.appendChild(tr);
+      });
+
+      container.appendChild(table);
+    }
+
+    onProgress?.(55);
+
+    const { default: html2canvas } = await import('html2canvas');
+    const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'landscape' });
+    const pdfW = pdf.internal.pageSize.getWidth();
+    const pdfH = pdf.internal.pageSize.getHeight();
+
+    const totalHeight = container.scrollHeight;
+    const A4_HEIGHT_PX = Math.round(container.offsetWidth * (pdfH / pdfW));
+    const pageCount = Math.max(1, Math.ceil(totalHeight / A4_HEIGHT_PX));
+
+    for (let i = 0; i < pageCount; i++) {
+      const canvas = await html2canvas(container, {
+        scale: 1.8,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        width: container.offsetWidth,
+        height: Math.min(A4_HEIGHT_PX, totalHeight - i * A4_HEIGHT_PX),
+        y: i * A4_HEIGHT_PX,
+      });
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.92);
+      if (i > 0) pdf.addPage();
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
+
+      onProgress?.(55 + Math.round(((i + 1) / pageCount) * 40));
+      await new Promise((r) => setTimeout(r, 10));
+    }
+
+    onProgress?.(97);
+    const pdfBytes = pdf.output('arraybuffer');
+    const pdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
+    const base = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+    const outName = sanitizeFilename(`${base}.pdf`);
+    const downloadUrl = URL.createObjectURL(pdfBlob);
+
+    onProgress?.(100);
+
+    return {
+      blob: pdfBlob,
+      downloadUrl,
+      filename: outName,
+      originalSize: file.size,
+      processedSize: pdfBlob.size,
+      savingsPercentage: 0,
+      metadata: { sheets: sheetNames.length, source: 'xlsx' },
+    };
+  } finally {
+    document.body.removeChild(container);
+  }
+}

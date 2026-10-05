@@ -10,6 +10,8 @@ import { ImageCompressorControls } from '../components/tool/controls/ImageCompre
 import { ImageResizerControls } from '../components/tool/controls/ImageResizerControls';
 import { FormatConverterControls } from '../components/tool/controls/FormatConverterControls';
 import { PdfControls } from '../components/tool/controls/PdfControls';
+import { WordToPdfControls } from '../components/tool/controls/WordToPdfControls';
+import { ExcelToPdfControls } from '../components/tool/controls/ExcelToPdfControls';
 import { MergePdfWorkspace } from '../components/tool/controls/MergePdfWorkspace';
 import { PdfCompressorControls } from '../components/tool/controls/PdfCompressorControls';
 import { SplitPdfControls } from '../components/tool/controls/SplitPdfControls';
@@ -266,6 +268,20 @@ export const ToolDetailPage: React.FC<ToolDetailPageProps> = ({
                   {tool.id === 'jpg-to-pdf' && (
                     <PdfControls
                       onConvert={(opts) => executeProcessing(opts)}
+                      isProcessing={false}
+                    />
+                  )}
+
+                  {tool.id === 'word-to-pdf' && (
+                    <WordToPdfControls
+                      onConvert={() => executeProcessing()}
+                      isProcessing={false}
+                    />
+                  )}
+
+                  {tool.id === 'excel-to-pdf' && (
+                    <ExcelToPdfControls
+                      onConvert={() => executeProcessing()}
                       isProcessing={false}
                     />
                   )}

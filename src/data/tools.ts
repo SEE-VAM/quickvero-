@@ -903,6 +903,79 @@ export const TOOLS: ToolDefinition[] = [
     ]
   },
 
+  {
+    id: 'word-to-pdf',
+    name: 'Word to PDF',
+    slug: 'word-to-pdf',
+    category: 'pdf',
+    route: '/tools/word-to-pdf',
+    shortDescription: 'Convert .docx Word documents to PDF in one click.',
+    description: 'Convert Microsoft Word (.docx) documents to clean, share-ready PDF files instantly. Text, headings, tables, and basic formatting are preserved. 100% in-browser — your documents are never uploaded to any server.',
+    icon: 'FileText',
+    supportedFormats: ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', '.docx'],
+    maxFileSizeMB: 30,
+    engine: 'browser',
+    isPopular: true,
+    seoTitle: 'Word to PDF Converter Online Free — Convert DOCX to PDF | QuickVero',
+    seoDescription: 'Convert Word documents (.docx) to PDF online for free with QuickVero. Fast, private in-browser conversion — no sign-up, no upload required.',
+    keywords: ['word to pdf', 'docx to pdf', 'convert word to pdf online free', 'microsoft word to pdf', 'docx converter'],
+    features: [
+      'Supports .docx (Microsoft Word 2007+)',
+      'Preserves headings, paragraphs, tables, and bold/italic formatting',
+      '100% Client-Side — documents never leave your browser',
+      'No watermark, no sign-up, instant download',
+      'Works on mobile, tablet, and desktop'
+    ],
+    howToSteps: [
+      { step: 1, title: 'Upload Word File', description: 'Click to upload or drag & drop your .docx file.' },
+      { step: 2, title: 'Click Convert', description: 'Our in-browser engine renders your document instantly.' },
+      { step: 3, title: 'Download PDF', description: 'Save your clean, formatted PDF file.' }
+    ],
+    faqs: [
+      { question: 'Is my Word document safe?', answer: 'Yes! Your document is processed 100% locally in your browser. It is never sent to any external server.' },
+      { question: 'What Word formats are supported?', answer: 'Currently .docx (Office Open XML) files are supported. This covers all Microsoft Word 2007 and later versions.' }
+    ]
+  },
+
+  {
+    id: 'excel-to-pdf',
+    name: 'Excel to PDF',
+    slug: 'excel-to-pdf',
+    category: 'pdf',
+    route: '/tools/excel-to-pdf',
+    shortDescription: 'Convert Excel spreadsheets to clean, printable PDF documents.',
+    description: 'Convert Microsoft Excel (.xlsx, .xls) spreadsheets to PDF in your browser. All sheets are rendered as clean, styled tables in a single PDF — no data ever leaves your device.',
+    icon: 'Table',
+    supportedFormats: [
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-excel',
+      '.xlsx',
+      '.xls'
+    ],
+    maxFileSizeMB: 20,
+    engine: 'browser',
+    isPopular: true,
+    seoTitle: 'Excel to PDF Converter Online Free — Convert XLSX to PDF | QuickVero',
+    seoDescription: 'Convert Excel spreadsheets (.xlsx, .xls) to PDF online for free with QuickVero. All sheets preserved as clean tables — 100% private, in-browser conversion.',
+    keywords: ['excel to pdf', 'xlsx to pdf', 'xls to pdf', 'convert excel to pdf online free', 'spreadsheet to pdf'],
+    features: [
+      'Supports .xlsx and .xls (all Excel versions)',
+      'All worksheets converted — each sheet on its own section',
+      'Clean striped table design for easy reading',
+      '100% Client-Side — your data never leaves your browser',
+      'No watermark, no sign-up, instant download'
+    ],
+    howToSteps: [
+      { step: 1, title: 'Upload Excel File', description: 'Click to upload or drag & drop your .xlsx or .xls file.' },
+      { step: 2, title: 'Click Convert', description: 'Your spreadsheet is read and rendered as tables in your browser.' },
+      { step: 3, title: 'Download PDF', description: 'Save the clean PDF with all your sheets.' }
+    ],
+    faqs: [
+      { question: 'Is my spreadsheet data safe?', answer: 'Absolutely. Your Excel file is processed entirely locally in your browser. No data is ever sent to any server.' },
+      { question: 'What if my Excel file has multiple sheets?', answer: 'All sheets are included! Each sheet appears as a clearly labelled section with its data in a clean table.' }
+    ]
+  },
+
   // ================= FILE TOOLS =================
   {
     id: 'hash-generator',
