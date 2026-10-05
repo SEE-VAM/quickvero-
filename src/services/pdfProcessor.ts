@@ -1158,8 +1158,8 @@ export async function exportPageAsImage(
 // ==========================================
 
 /**
- * Convert a .docx Word file to PDF using docx-preview for rendering
- * and jsPDF to package the output.
+ * Convert a .docx Word file to PDF using docx-preview for DOM rendering
+ * and jsPDF to package each page individually for 100% visual fidelity.
  */
 export async function convertWordToPdf(
   file: File,
@@ -1167,29 +1167,37 @@ export async function convertWordToPdf(
 ): Promise<ProcessResult> {
   onProgress?.(5);
 
-  // Dynamically import heavy libraries to keep bundle small
   const [{ renderAsync }, { jsPDF }] = await Promise.all([
     import('docx-preview'),
     import('jspdf'),
   ]);
 
-  onProgress?.(20);
-
+  onProgress?.(15);
   const arrayBuffer = await file.arrayBuffer();
 
-  // Create hidden container to render Word document as HTML
+  // Create off-screen rendering host below the viewport (so styles & fonts compute properly)
   const container = document.createElement('div');
+  container.id = 'quickvero-docx-host';
   container.style.cssText = [
-    'position:fixed', 'top:-9999px', 'left:-9999px',
-    'width:794px', 'background:#fff', 'padding:0', 'z-index:-999',
-    'font-family:Arial,Helvetica,sans-serif', 'color:#000',
+    'position: fixed',
+    'top: 100vh',
+    'left: 0',
+    'width: auto',
+    'min-width: 850px',
+    'background: #ffffff',
+    'z-index: -9999',
+    'opacity: 1',
+    'visibility: visible',
+    'pointer-events: none',
   ].join(';');
   document.body.appendChild(container);
 
   try {
+    onProgress?.(25);
+    // Use docx-preview's native wrapper & classes so Word margins, tab stops, and font rules are honored
     await renderAsync(arrayBuffer, container, undefined, {
-      className: 'docx-preview-container',
-      inWrapper: false,
+      className: 'docx',
+      inWrapper: true,
       ignoreWidth: false,
       ignoreHeight: false,
       ignoreFonts: false,
@@ -1198,43 +1206,81 @@ export async function convertWordToPdf(
       renderHeaders: true,
       renderFooters: true,
       renderFootnotes: true,
+      renderEndnotes: true,
     });
 
-    onProgress?.(50);
+    onProgress?.(45);
 
-    const A4_HEIGHT_PX = 1123;
+    // Wait for fonts & layout to stabilize
+    if ((document as any).fonts?.ready) {
+      await (document as any).fonts.ready;
+    }
+    await new Promise((r) => setTimeout(r, 200));
 
-    const pdf = new jsPDF({ unit: 'px', format: 'a4', orientation: 'portrait' });
-    const totalHeight = container.scrollHeight;
-    const pageCount = Math.ceil(totalHeight / A4_HEIGHT_PX);
+    const { default: html2canvas } = await import('html2canvas');
 
-    for (let i = 0; i < pageCount; i++) {
-      const { default: html2canvas } = await import('html2canvas');
+    // Query all rendered pages produced by docx-preview
+    let sections = Array.from(container.querySelectorAll<HTMLElement>('section.docx'));
 
-      const canvas = await html2canvas(container, {
-        scale: 2,
+    // Fallback if no section.docx found
+    if (sections.length === 0) {
+      const wrapper = container.querySelector<HTMLElement>('.docx-wrapper') || container;
+      sections = [wrapper];
+    }
+
+    onProgress?.(55);
+
+    let pdf: any = null;
+
+    for (let i = 0; i < sections.length; i++) {
+      const sec = sections[i];
+
+      // Remove any shadows or outside borders for print cleanliness
+      const originalShadow = sec.style.boxShadow;
+      const originalMargin = sec.style.marginBottom;
+      sec.style.boxShadow = 'none';
+      sec.style.marginBottom = '0';
+
+      const secW = sec.offsetWidth || 816;
+      const secH = sec.offsetHeight || 1056;
+
+      const canvas = await html2canvas(sec, {
+        scale: 2.2, // Razor sharp text without excessive memory
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#ffffff',
-        width: 794,
-        height: Math.min(A4_HEIGHT_PX, totalHeight - i * A4_HEIGHT_PX),
-        y: i * A4_HEIGHT_PX,
-        windowWidth: 794,
-        windowHeight: A4_HEIGHT_PX,
+        logging: false,
+        width: secW,
+        height: secH,
       });
 
-      const imgData = canvas.toDataURL('image/jpeg', 0.92);
-      if (i > 0) pdf.addPage();
+      // Restore styling
+      sec.style.boxShadow = originalShadow;
+      sec.style.marginBottom = originalMargin;
 
-      const pdfW = pdf.internal.pageSize.getWidth();
-      const pdfH = pdf.internal.pageSize.getHeight();
-      pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      const isLandscape = secW > secH;
+      const orientation = isLandscape ? 'landscape' : 'portrait';
 
-      onProgress?.(50 + Math.round(((i + 1) / pageCount) * 45));
-      await new Promise((r) => setTimeout(r, 10));
+      if (i === 0) {
+        pdf = new jsPDF({
+          unit: 'px',
+          format: [secW, secH],
+          orientation,
+          hotfixes: ['px_scaling'],
+        });
+      } else {
+        pdf.addPage([secW, secH], orientation);
+      }
+
+      pdf.addImage(imgData, 'JPEG', 0, 0, secW, secH, undefined, 'FAST');
+
+      const currentPercent = Math.round(55 + ((i + 1) / sections.length) * 40);
+      onProgress?.(currentPercent);
+      await new Promise((r) => setTimeout(r, 20));
     }
 
-    onProgress?.(97);
+    onProgress?.(96);
     const pdfBytes = pdf.output('arraybuffer');
     const pdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
     const base = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
@@ -1250,20 +1296,22 @@ export async function convertWordToPdf(
       originalSize: file.size,
       processedSize: pdfBlob.size,
       savingsPercentage: 0,
-      metadata: { pages: pageCount, source: 'docx' },
+      metadata: { pages: sections.length, source: 'docx' },
     };
   } finally {
-    document.body.removeChild(container);
+    if (document.body.contains(container)) {
+      document.body.removeChild(container);
+    }
   }
 }
 
 // ==========================================
-// EXCEL TO PDF CONVERSION (xlsx + jspdf)
+// EXCEL TO PDF CONVERSION (xlsx + html2canvas + jspdf)
 // ==========================================
 
 /**
- * Convert .xlsx / .xls Excel files to PDF.
- * Reads all sheets and renders each as a clean HTML table -> jsPDF.
+ * Convert .xlsx / .xls Excel files to PDF with authentic spreadsheet table styling.
+ * Renders each sheet with clean Excel gridlines, natural column widths, and proper A4 pages.
  */
 export async function convertExcelToPdf(
   file: File,
@@ -1271,9 +1319,10 @@ export async function convertExcelToPdf(
 ): Promise<ProcessResult> {
   onProgress?.(5);
 
-  const [{ read, utils }, { jsPDF }] = await Promise.all([
+  const [{ read, utils }, { jsPDF }, { default: html2canvas }] = await Promise.all([
     import('xlsx'),
     import('jspdf'),
+    import('html2canvas'),
   ]);
 
   onProgress?.(20);
@@ -1288,76 +1337,189 @@ export async function convertExcelToPdf(
 
   onProgress?.(35);
 
-  const container = document.createElement('div');
-  container.style.cssText = [
-    'position:fixed', 'top:-9999px', 'left:-9999px',
-    'width:1100px', 'background:#fff', 'padding:24px',
-    'z-index:-999', 'box-sizing:border-box',
-    'font-family:Arial,Helvetica,sans-serif', 'font-size:12px', 'color:#000',
+  // Host container positioned just below viewport for accurate rendering
+  const host = document.createElement('div');
+  host.id = 'quickvero-excel-host';
+  host.style.cssText = [
+    'position: fixed',
+    'top: 100vh',
+    'left: 0',
+    'z-index: -9999',
+    'background: #ffffff',
+    'opacity: 1',
+    'visibility: visible',
+    'pointer-events: none',
   ].join(';');
-  document.body.appendChild(container);
+  document.body.appendChild(host);
+
+  let pdf: any = null;
+  const ROWS_PER_PAGE = 30; // Clean pagination for long sheets
 
   try {
     for (let si = 0; si < sheetNames.length; si++) {
       const sheetName = sheetNames[si];
       const worksheet = workbook.Sheets[sheetName];
-      const jsonData: any[][] = utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+      const rawData: any[][] = utils.sheet_to_json(worksheet, { header: 1, defval: '' });
 
-      const titleEl = document.createElement('h2');
-      titleEl.style.cssText = 'font-size:16px;font-weight:700;margin:0 0 10px 0;color:#1e3a8a;border-bottom:2px solid #3b82f6;padding-bottom:6px;';
-      titleEl.textContent = `Sheet: ${sheetName}`;
-      container.appendChild(titleEl);
+      // Filter out completely blank trailing rows
+      const data = rawData.filter((row) =>
+        row.some((cell) => cell !== '' && cell !== null && cell !== undefined)
+      );
 
-      const table = document.createElement('table');
-      table.style.cssText = 'border-collapse:collapse;width:100%;margin-bottom:30px;';
+      if (data.length === 0) continue;
 
-      jsonData.forEach((row, rowIdx) => {
-        const tr = document.createElement('tr');
-        row.forEach((cell) => {
-          const td = document.createElement(rowIdx === 0 ? 'th' : 'td');
-          td.style.cssText = rowIdx === 0
-            ? 'background:#1e3a8a;color:#fff;font-weight:700;font-size:11px;padding:6px 8px;border:1px solid #1e40af;text-align:left;'
-            : `background:${rowIdx % 2 === 0 ? '#f1f5f9' : '#fff'};padding:5px 8px;border:1px solid #e2e8f0;font-size:11px;vertical-align:top;`;
-          td.textContent = String(cell ?? '');
-          tr.appendChild(td);
+      // Determine max columns
+      const maxCols = Math.max(...data.map((r) => r.length), 1);
+      // Auto-detect orientation: <= 6 columns fits portrait beautifully, > 6 uses landscape
+      const isLandscape = maxCols > 6;
+      const pageWidthPx = isLandscape ? 1123 : 794;
+      const pageHeightPx = isLandscape ? 794 : 1123;
+
+      const headerRow = data[0] || [];
+      const bodyRows = data.slice(1);
+      const totalPagesForSheet = Math.max(1, Math.ceil(bodyRows.length / ROWS_PER_PAGE));
+
+      for (let pageIdx = 0; pageIdx < totalPagesForSheet; pageIdx++) {
+        const pageRows = bodyRows.slice(pageIdx * ROWS_PER_PAGE, (pageIdx + 1) * ROWS_PER_PAGE);
+
+        // Build single page element
+        const pageEl = document.createElement('div');
+        pageEl.style.cssText = `
+          width: ${pageWidthPx}px;
+          min-height: ${pageHeightPx}px;
+          background: #ffffff;
+          padding: 40px 48px;
+          box-sizing: border-box;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+          color: #1f2937;
+          display: flex;
+          flex-direction: column;
+        `;
+
+        // Sheet Header Badge (Clean & Professional)
+        const headerEl = document.createElement('div');
+        headerEl.style.cssText = `
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding-bottom: 12px;
+          margin-bottom: 16px;
+          border-bottom: 1.5px solid #e2e8f0;
+        `;
+        headerEl.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="background: #107c41; color: #ffffff; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; letter-spacing: 0.5px;">EXCEL</span>
+            <span style="font-size: 15px; font-weight: 700; color: #1e293b;">${escapeHtml(sheetName)}</span>
+          </div>
+          <span style="font-size: 11px; color: #64748b; font-weight: 500;">
+            ${totalPagesForSheet > 1 ? `Page ${pageIdx + 1} of ${totalPagesForSheet}` : ''}
+          </span>
+        `;
+        pageEl.appendChild(headerEl);
+
+        // Table Element (Natural width, crisp Excel borders)
+        const table = document.createElement('table');
+        table.style.cssText = `
+          border-collapse: collapse;
+          width: auto;
+          max-width: 100%;
+          border: 1px solid #cbd5e1;
+          font-size: 12px;
+          border-radius: 4px;
+          overflow: hidden;
+        `;
+
+        // Table Header
+        const thead = document.createElement('thead');
+        const trHead = document.createElement('tr');
+        for (let c = 0; c < maxCols; c++) {
+          const th = document.createElement('th');
+          th.style.cssText = `
+            background: #f1f5f9;
+            color: #0f172a;
+            font-weight: 700;
+            font-size: 12px;
+            padding: 9px 18px;
+            border: 1px solid #cbd5e1;
+            text-align: left;
+            white-space: nowrap;
+          `;
+          th.textContent = String(headerRow[c] ?? '');
+          trHead.appendChild(th);
+        }
+        thead.appendChild(trHead);
+        table.appendChild(thead);
+
+        // Table Body
+        const tbody = document.createElement('tbody');
+        pageRows.forEach((row, rIdx) => {
+          const tr = document.createElement('tr');
+          const isEven = rIdx % 2 === 0;
+          for (let c = 0; c < maxCols; c++) {
+            const td = document.createElement('td');
+            const val = row[c] ?? '';
+            const isNumeric = typeof val === 'number' || (!isNaN(Number(val)) && String(val).trim() !== '');
+
+            td.style.cssText = `
+              background: ${isEven ? '#ffffff' : '#f8fafc'};
+              color: #334155;
+              padding: 8px 18px;
+              border: 1px solid #e2e8f0;
+              font-size: 12px;
+              text-align: ${isNumeric ? 'right' : 'left'};
+              white-space: nowrap;
+            `;
+            td.textContent = String(val);
+            tr.appendChild(td);
+          }
+          tbody.appendChild(tr);
         });
-        table.appendChild(tr);
-      });
+        table.appendChild(tbody);
+        pageEl.appendChild(table);
 
-      container.appendChild(table);
+        host.appendChild(pageEl);
+
+        // Render page element to canvas
+        const canvas = await html2canvas(pageEl, {
+          scale: 2.2, // High resolution
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          logging: false,
+          width: pageWidthPx,
+          height: pageHeightPx,
+        });
+
+        // Clean up from DOM to free memory
+        host.removeChild(pageEl);
+
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        const orientation = isLandscape ? 'landscape' : 'portrait';
+
+        if (!pdf) {
+          pdf = new jsPDF({
+            unit: 'px',
+            format: [pageWidthPx, pageHeightPx],
+            orientation,
+            hotfixes: ['px_scaling'],
+          });
+        } else {
+          pdf.addPage([pageWidthPx, pageHeightPx], orientation);
+        }
+
+        pdf.addImage(imgData, 'JPEG', 0, 0, pageWidthPx, pageHeightPx, undefined, 'FAST');
+
+        const currentProg = Math.round(35 + (((si + 1) * (pageIdx + 1)) / (sheetNames.length * totalPagesForSheet)) * 60);
+        onProgress?.(Math.min(96, currentProg));
+        await new Promise((r) => setTimeout(r, 20));
+      }
     }
 
-    onProgress?.(55);
-
-    const { default: html2canvas } = await import('html2canvas');
-    const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'landscape' });
-    const pdfW = pdf.internal.pageSize.getWidth();
-    const pdfH = pdf.internal.pageSize.getHeight();
-
-    const totalHeight = container.scrollHeight;
-    const A4_HEIGHT_PX = Math.round(container.offsetWidth * (pdfH / pdfW));
-    const pageCount = Math.max(1, Math.ceil(totalHeight / A4_HEIGHT_PX));
-
-    for (let i = 0; i < pageCount; i++) {
-      const canvas = await html2canvas(container, {
-        scale: 1.8,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        width: container.offsetWidth,
-        height: Math.min(A4_HEIGHT_PX, totalHeight - i * A4_HEIGHT_PX),
-        y: i * A4_HEIGHT_PX,
-      });
-
-      const imgData = canvas.toDataURL('image/jpeg', 0.92);
-      if (i > 0) pdf.addPage();
-      pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
-
-      onProgress?.(55 + Math.round(((i + 1) / pageCount) * 40));
-      await new Promise((r) => setTimeout(r, 10));
+    if (!pdf) {
+      throw new Error('No readable data could be found in the Excel document.');
     }
 
-    onProgress?.(97);
+    onProgress?.(98);
     const pdfBytes = pdf.output('arraybuffer');
     const pdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
     const base = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
@@ -1376,6 +1538,19 @@ export async function convertExcelToPdf(
       metadata: { sheets: sheetNames.length, source: 'xlsx' },
     };
   } finally {
-    document.body.removeChild(container);
+    if (document.body.contains(host)) {
+      document.body.removeChild(host);
+    }
   }
 }
+
+function escapeHtml(str: string): string {
+  if (!str) return '';
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
