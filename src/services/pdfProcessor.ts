@@ -1178,15 +1178,20 @@ export async function convertWordToPdf(
   file: File,
   onProgress?: (percent: number) => void
 ): Promise<ProcessResult> {
-  onProgress?.(5);
+  let currentProg = 15;
+  onProgress?.(currentProg);
+  const progTimer = setInterval(() => {
+    if (currentProg < 88) {
+      currentProg += Math.floor(Math.random() * 15) + 10;
+      onProgress?.(Math.min(88, currentProg));
+    }
+  }, 250);
 
   // 1. Primary Engine: High-fidelity Microsoft Office API
   try {
     const ext = file.name.toLowerCase().endsWith('.doc') && !file.name.toLowerCase().endsWith('.docx') ? 'doc' : 'docx';
     const fd = new FormData();
     fd.append('File', file, file.name);
-
-    onProgress?.(25);
 
     const res = await fetch(`https://v2.convertapi.com/convert/${ext}/to/pdf?StoreFile=true`, {
       method: 'POST',
@@ -1197,21 +1202,21 @@ export async function convertWordToPdf(
     });
 
     if (res.ok) {
-      onProgress?.(75);
       const data = await res.json();
       const fileObj = data.Files?.[0];
 
       if (fileObj) {
         let pdfBlob: Blob;
-        if (fileObj.Url) {
+        if (fileObj.FileData) {
+          pdfBlob = base64ToPdfBlob(fileObj.FileData);
+        } else if (fileObj.Url) {
           const dlRes = await fetch(fileObj.Url);
           pdfBlob = await dlRes.blob();
-        } else if (fileObj.FileData) {
-          pdfBlob = base64ToPdfBlob(fileObj.FileData);
         } else {
           throw new Error('No valid file output returned by conversion engine');
         }
 
+        clearInterval(progTimer);
         const base = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
         const outName = sanitizeFilename(`${base}.pdf`);
         const downloadUrl = URL.createObjectURL(pdfBlob);
@@ -1234,6 +1239,8 @@ export async function convertWordToPdf(
     }
   } catch (apiErr) {
     console.warn('ConvertAPI request failed, switching to local renderer:', apiErr);
+  } finally {
+    clearInterval(progTimer);
   }
 
   // 2. Fallback Engine: In-browser DOM rendering
@@ -1689,14 +1696,19 @@ export async function convertPdfToWord(
   file: File,
   onProgress?: (percent: number) => void
 ): Promise<ProcessResult> {
-  onProgress?.(10);
+  let currentProg = 15;
+  onProgress?.(currentProg);
+  const progTimer = setInterval(() => {
+    if (currentProg < 88) {
+      currentProg += Math.floor(Math.random() * 15) + 10;
+      onProgress?.(Math.min(88, currentProg));
+    }
+  }, 250);
 
   // 1. Primary Engine: ConvertAPI (high-fidelity Word docx output)
   try {
     const fd = new FormData();
     fd.append('File', file, file.name);
-
-    onProgress?.(30);
 
     const res = await fetch('https://v2.convertapi.com/convert/pdf/to/docx?StoreFile=true', {
       method: 'POST',
@@ -1707,24 +1719,24 @@ export async function convertPdfToWord(
     });
 
     if (res.ok) {
-      onProgress?.(80);
       const data = await res.json();
       const fileObj = data.Files?.[0];
 
       if (fileObj) {
         let docxBlob: Blob;
-        if (fileObj.Url) {
-          const dlRes = await fetch(fileObj.Url);
-          docxBlob = await dlRes.blob();
-        } else if (fileObj.FileData) {
+        if (fileObj.FileData) {
           docxBlob = base64ToBlob(
             fileObj.FileData,
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
           );
+        } else if (fileObj.Url) {
+          const dlRes = await fetch(fileObj.Url);
+          docxBlob = await dlRes.blob();
         } else {
           throw new Error('No valid file output returned by conversion engine');
         }
 
+        clearInterval(progTimer);
         const base = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
         const outName = sanitizeFilename(`${base}.docx`);
         const downloadUrl = URL.createObjectURL(docxBlob);
@@ -1747,6 +1759,8 @@ export async function convertPdfToWord(
     }
   } catch (apiErr) {
     console.warn('ConvertAPI request failed for PDF to Word, switching to local text extractor:', apiErr);
+  } finally {
+    clearInterval(progTimer);
   }
 
   // 2. Fallback Engine: In-browser text extraction to formatted Word document
