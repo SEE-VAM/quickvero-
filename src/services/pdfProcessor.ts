@@ -1157,9 +1157,21 @@ export async function exportPageAsImage(
 // WORD TO PDF CONVERSION (docx-preview + html2canvas + jspdf)
 // ==========================================
 
+const CONVERT_API_SECRET = 'mfSj1lSiIUJqPU8QoEMyA0aDF70hhpkp';
+
+function base64ToPdfBlob(base64: string): Blob {
+  const binaryString = atob(base64);
+  const len = binaryString.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return new Blob([bytes.buffer], { type: 'application/pdf' });
+}
+
 /**
- * Convert a .docx Word file to PDF using docx-preview for DOM rendering
- * and jsPDF to package each page individually for 100% visual fidelity.
+ * Convert a .docx / .doc Word file to PDF using ConvertAPI (Microsoft Office engine)
+ * with automatic fallback to DOM renderer if offline.
  */
 export async function convertWordToPdf(
   file: File,
@@ -1167,6 +1179,49 @@ export async function convertWordToPdf(
 ): Promise<ProcessResult> {
   onProgress?.(5);
 
+  // 1. Primary Engine: High-fidelity Microsoft Office API
+  try {
+    const ext = file.name.toLowerCase().endsWith('.doc') && !file.name.toLowerCase().endsWith('.docx') ? 'doc' : 'docx';
+    const fd = new FormData();
+    fd.append('File', file, file.name);
+
+    onProgress?.(25);
+
+    const res = await fetch(`https://v2.convertapi.com/convert/${ext}/to/pdf`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${CONVERT_API_SECRET}`,
+      },
+      body: fd,
+    });
+
+    if (res.ok) {
+      onProgress?.(75);
+      const data = await res.json();
+      if (data.Files && data.Files.length > 0 && data.Files[0].FileData) {
+        const pdfBlob = base64ToPdfBlob(data.Files[0].FileData);
+        const base = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+        const outName = sanitizeFilename(`${base}.pdf`);
+        const downloadUrl = URL.createObjectURL(pdfBlob);
+
+        onProgress?.(100);
+
+        return {
+          blob: pdfBlob,
+          downloadUrl,
+          filename: outName,
+          originalSize: file.size,
+          processedSize: pdfBlob.size,
+          savingsPercentage: 0,
+          metadata: { engine: 'microsoft-office', quality: '100% vector' },
+        };
+      }
+    }
+  } catch (apiErr) {
+    console.warn('ConvertAPI request failed, switching to local renderer:', apiErr);
+  }
+
+  // 2. Fallback Engine: In-browser DOM rendering
   const [{ renderAsync }, { jsPDF }] = await Promise.all([
     import('docx-preview'),
     import('jspdf'),
@@ -1310,8 +1365,8 @@ export async function convertWordToPdf(
 // ==========================================
 
 /**
- * Convert .xlsx / .xls Excel files to PDF with authentic spreadsheet table styling.
- * Renders each sheet with clean Excel gridlines, natural column widths, and proper A4 pages.
+ * Convert .xlsx / .xls Excel files to PDF using ConvertAPI (Microsoft Excel engine)
+ * with automatic fallback to client-side spreadsheet engine if offline.
  */
 export async function convertExcelToPdf(
   file: File,
@@ -1319,6 +1374,49 @@ export async function convertExcelToPdf(
 ): Promise<ProcessResult> {
   onProgress?.(5);
 
+  // 1. Primary Engine: High-fidelity Microsoft Excel API
+  try {
+    const ext = file.name.toLowerCase().endsWith('.xls') && !file.name.toLowerCase().endsWith('.xlsx') ? 'xls' : 'xlsx';
+    const fd = new FormData();
+    fd.append('File', file, file.name);
+
+    onProgress?.(25);
+
+    const res = await fetch(`https://v2.convertapi.com/convert/${ext}/to/pdf`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${CONVERT_API_SECRET}`,
+      },
+      body: fd,
+    });
+
+    if (res.ok) {
+      onProgress?.(75);
+      const data = await res.json();
+      if (data.Files && data.Files.length > 0 && data.Files[0].FileData) {
+        const pdfBlob = base64ToPdfBlob(data.Files[0].FileData);
+        const base = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+        const outName = sanitizeFilename(`${base}.pdf`);
+        const downloadUrl = URL.createObjectURL(pdfBlob);
+
+        onProgress?.(100);
+
+        return {
+          blob: pdfBlob,
+          downloadUrl,
+          filename: outName,
+          originalSize: file.size,
+          processedSize: pdfBlob.size,
+          savingsPercentage: 0,
+          metadata: { engine: 'microsoft-excel', quality: '100% vector' },
+        };
+      }
+    }
+  } catch (apiErr) {
+    console.warn('ConvertAPI request failed for Excel, switching to local renderer:', apiErr);
+  }
+
+  // 2. Fallback Engine: In-browser spreadsheet renderer
   const [{ read, utils }, { jsPDF }, { default: html2canvas }] = await Promise.all([
     import('xlsx'),
     import('jspdf'),
