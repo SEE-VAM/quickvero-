@@ -1778,17 +1778,23 @@ export async function convertPdfToWord(
   for (let p = 1; p <= numPages; p++) {
     const page = await pdfDoc.getPage(p);
     const textContent = await page.getTextContent();
-    let lastY: number | null = null;
-    let pageText = `<div style="margin-bottom:30px;page-break-after:always;">`;
-
+    
+    // Group text items by vertical line (Y position) and sort horizontally (X position)
+    const lineMap: Record<number, { x: number; text: string }[]> = {};
     for (const item of textContent.items as any[]) {
-      if (!item.str) continue;
-      const currentY = item.transform ? Math.round(item.transform[5]) : null;
-      if (lastY !== null && currentY !== null && Math.abs(currentY - lastY) > 8) {
-        pageText += '<br/>';
-      }
-      pageText += escapeHtml(item.str) + ' ';
-      lastY = currentY;
+      if (!item.str || !item.str.trim()) continue;
+      const y = item.transform ? Math.round(item.transform[5] / 10) * 10 : 0;
+      const x = item.transform ? Math.round(item.transform[4]) : 0;
+      if (!lineMap[y]) lineMap[y] = [];
+      lineMap[y].push({ x, text: item.str });
+    }
+
+    let pageText = `<div style="margin-bottom:30px;page-break-after:always;">`;
+    const sortedYs = Object.keys(lineMap).map(Number).sort((a, b) => b - a);
+    for (const y of sortedYs) {
+      const lineItems = lineMap[y].sort((a, b) => a.x - b.x);
+      const lineStr = lineItems.map((item) => escapeHtml(item.text)).join('&nbsp;&nbsp;');
+      pageText += `<p style="margin:4px 0;line-height:1.5;">${lineStr}</p>`;
     }
     pageText += `</div>`;
     fullHtml += pageText;
