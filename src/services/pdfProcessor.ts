@@ -1193,7 +1193,7 @@ export async function convertWordToPdf(
     const fd = new FormData();
     fd.append('File', file, file.name);
 
-    const res = await fetch(`https://v2.convertapi.com/convert/${ext}/to/pdf?StoreFile=true`, {
+    const res = await fetch(`https://v2.convertapi.com/convert/${ext}/to/pdf?StoreFile=false`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${CONVERT_API_SECRET}`,
@@ -1404,7 +1404,7 @@ export async function convertExcelToPdf(
 
     onProgress?.(25);
 
-    const res = await fetch(`https://v2.convertapi.com/convert/${ext}/to/pdf?StoreFile=true`, {
+    const res = await fetch(`https://v2.convertapi.com/convert/${ext}/to/pdf?StoreFile=false`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${CONVERT_API_SECRET}`,
@@ -1710,7 +1710,7 @@ export async function convertPdfToWord(
     const fd = new FormData();
     fd.append('File', file, file.name);
 
-    const res = await fetch('https://v2.convertapi.com/convert/pdf/to/docx?StoreFile=true', {
+    const res = await fetch('https://v2.convertapi.com/convert/pdf/to/docx?StoreFile=false', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${CONVERT_API_SECRET}`,
@@ -1833,7 +1833,7 @@ export async function convertPdfToExcel(
 
     onProgress?.(30);
 
-    const res = await fetch('https://v2.convertapi.com/convert/pdf/to/xlsx?StoreFile=true', {
+    const res = await fetch('https://v2.convertapi.com/convert/pdf/to/xlsx?StoreFile=false', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${CONVERT_API_SECRET}`,
