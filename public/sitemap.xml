@@ -179,6 +179,16 @@
     <priority>0.95</priority>
   </url>
   <url>
+    <loc>https://www.quickvero.in/tools/pdf-to-word</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
+    <loc>https://www.quickvero.in/tools/pdf-to-excel</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
     <loc>https://www.quickvero.in/tools/zip-creator</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>

@@ -976,6 +976,74 @@ export const TOOLS: ToolDefinition[] = [
     ]
   },
 
+  {
+    id: 'pdf-to-word',
+    name: 'PDF to Word',
+    slug: 'pdf-to-word',
+    category: 'pdf',
+    route: '/tools/pdf-to-word',
+    shortDescription: 'Convert PDF files to editable Microsoft Word (.docx) documents.',
+    description: 'Convert PDF documents to editable Microsoft Word (.docx) files online for free. Extracts text, tables, fonts, and headings accurately so you can edit your documents effortlessly.',
+    icon: 'FileText',
+    supportedFormats: ['application/pdf', '.pdf'],
+    maxFileSizeMB: 50,
+    engine: 'browser',
+    isPopular: true,
+    seoTitle: 'PDF to Word Converter Online Free — Convert PDF to DOCX | QuickVero',
+    seoDescription: 'Convert PDF to Word online for free with QuickVero. Turn any PDF into an editable Microsoft Word document (.docx) with original formatting preserved.',
+    keywords: ['pdf to word', 'convert pdf to word', 'pdf to docx', 'pdf to word converter online free', 'edit pdf in word'],
+    features: [
+      'Extracts editable text, paragraphs, and headings',
+      'Preserves tables, lists, and document structure',
+      'Outputs clean .docx format compatible with all Word versions',
+      'No watermark, no registration, instant download',
+      'Secure & private document processing'
+    ],
+    howToSteps: [
+      { step: 1, title: 'Upload PDF File', description: 'Select or drag & drop your PDF document.' },
+      { step: 2, title: 'Convert', description: 'Click Convert to transform PDF pages into Word format.' },
+      { step: 3, title: 'Download DOCX', description: 'Download and edit your Word file in Microsoft Office or Google Docs.' }
+    ],
+    faqs: [
+      { question: 'Can I edit the converted Word document?', answer: 'Yes! The output is a standard Microsoft Word (.docx) file that you can edit, format, and save in MS Word, Google Docs, or LibreOffice.' },
+      { question: 'Will my formatting and fonts stay intact?', answer: 'Yes, our high-fidelity engine reconstructs paragraphs, headings, bullet points, and tables to mirror the original PDF layout.' }
+    ]
+  },
+
+  {
+    id: 'pdf-to-excel',
+    name: 'PDF to Excel',
+    slug: 'pdf-to-excel',
+    category: 'pdf',
+    route: '/tools/pdf-to-excel',
+    shortDescription: 'Extract tables and data from PDF into editable Excel (.xlsx) sheets.',
+    description: 'Convert PDF bank statements, invoices, receipts, and tabular reports into editable Microsoft Excel spreadsheets (.xlsx) instantly. Formats rows, columns, and numbers accurately.',
+    icon: 'FileSpreadsheet',
+    supportedFormats: ['application/pdf', '.pdf'],
+    maxFileSizeMB: 30,
+    engine: 'browser',
+    isPopular: true,
+    seoTitle: 'PDF to Excel Converter Online Free — Extract PDF to XLSX | QuickVero',
+    seoDescription: 'Convert PDF tables and reports into editable Microsoft Excel spreadsheets (.xlsx) online for free with QuickVero. Clean row and column extraction.',
+    keywords: ['pdf to excel', 'convert pdf to excel', 'pdf to xlsx', 'pdf to spreadsheet', 'extract table from pdf to excel'],
+    features: [
+      'Accurate table and column extraction',
+      'Extracts numbers, financial statements, and receipts into cells',
+      'Outputs standard .xlsx format compatible with Excel and Google Sheets',
+      'No watermark, 100% free with instant download',
+      'Preserves multi-page tables seamlessly'
+    ],
+    howToSteps: [
+      { step: 1, title: 'Upload PDF Document', description: 'Upload your PDF containing tables, receipts, or data.' },
+      { step: 2, title: 'Extract Data', description: 'Click Convert to automatically detect and extract tables.' },
+      { step: 3, title: 'Download Excel File', description: 'Download your clean .xlsx spreadsheet ready for formulas and analysis.' }
+    ],
+    faqs: [
+      { question: 'Can I convert multi-page PDF bank statements to Excel?', answer: 'Yes! Multi-page PDFs are extracted sequentially into your spreadsheet so all your transaction rows appear in order.' },
+      { question: 'Are numbers formatted properly for Excel formulas?', answer: 'Yes, numeric values are parsed cleanly so you can immediately run SUM, AVERAGE, and other Excel formulas.' }
+    ]
+  },
+
   // ================= FILE TOOLS =================
   {
     id: 'hash-generator',

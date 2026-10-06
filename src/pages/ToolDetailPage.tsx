@@ -12,6 +12,8 @@ import { FormatConverterControls } from '../components/tool/controls/FormatConve
 import { PdfControls } from '../components/tool/controls/PdfControls';
 import { WordToPdfControls } from '../components/tool/controls/WordToPdfControls';
 import { ExcelToPdfControls } from '../components/tool/controls/ExcelToPdfControls';
+import { PdfToWordControls } from '../components/tool/controls/PdfToWordControls';
+import { PdfToExcelControls } from '../components/tool/controls/PdfToExcelControls';
 import { MergePdfWorkspace } from '../components/tool/controls/MergePdfWorkspace';
 import { PdfCompressorControls } from '../components/tool/controls/PdfCompressorControls';
 import { SplitPdfControls } from '../components/tool/controls/SplitPdfControls';
@@ -281,6 +283,20 @@ export const ToolDetailPage: React.FC<ToolDetailPageProps> = ({
 
                   {tool.id === 'excel-to-pdf' && (
                     <ExcelToPdfControls
+                      onConvert={() => executeProcessing()}
+                      isProcessing={false}
+                    />
+                  )}
+
+                  {tool.id === 'pdf-to-word' && (
+                    <PdfToWordControls
+                      onConvert={() => executeProcessing()}
+                      isProcessing={false}
+                    />
+                  )}
+
+                  {tool.id === 'pdf-to-excel' && (
+                    <PdfToExcelControls
                       onConvert={() => executeProcessing()}
                       isProcessing={false}
                     />

@@ -1159,15 +1159,16 @@ export async function exportPageAsImage(
 
 const CONVERT_API_SECRET = 'mfSj1lSiIUJqPU8QoEMyA0aDF70hhpkp';
 
-function base64ToPdfBlob(base64: string): Blob {
+function base64ToBlob(base64: string, mime: string = 'application/pdf'): Blob {
   const binaryString = atob(base64);
   const len = binaryString.length;
   const bytes = new Uint8Array(len);
   for (let i = 0; i < len; i++) {
     bytes[i] = binaryString.charCodeAt(i);
   }
-  return new Blob([bytes.buffer], { type: 'application/pdf' });
+  return new Blob([bytes.buffer], { type: mime });
 }
+const base64ToPdfBlob = (b: string) => base64ToBlob(b, 'application/pdf');
 
 /**
  * Convert a .docx / .doc Word file to PDF using ConvertAPI (Microsoft Office engine)
@@ -1651,4 +1652,226 @@ function escapeHtml(str: string): string {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 }
+
+// ==========================================
+// PDF TO WORD CONVERSION (ConvertAPI + Client Fallback)
+// ==========================================
+
+export async function convertPdfToWord(
+  file: File,
+  onProgress?: (percent: number) => void
+): Promise<ProcessResult> {
+  onProgress?.(10);
+
+  // 1. Primary Engine: ConvertAPI (high-fidelity Word docx output)
+  try {
+    const fd = new FormData();
+    fd.append('File', file, file.name);
+
+    onProgress?.(30);
+
+    const res = await fetch('https://v2.convertapi.com/convert/pdf/to/docx', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${CONVERT_API_SECRET}`,
+      },
+      body: fd,
+    });
+
+    if (res.ok) {
+      onProgress?.(80);
+      const data = await res.json();
+      if (data.Files && data.Files.length > 0 && data.Files[0].FileData) {
+        const docxBlob = base64ToBlob(
+          data.Files[0].FileData,
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        );
+        const base = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+        const outName = sanitizeFilename(`${base}.docx`);
+        const downloadUrl = URL.createObjectURL(docxBlob);
+
+        onProgress?.(100);
+
+        return {
+          blob: docxBlob,
+          downloadUrl,
+          filename: outName,
+          originalSize: file.size,
+          processedSize: docxBlob.size,
+          savingsPercentage: 0,
+          metadata: { engine: 'microsoft-word', quality: '100% editable' },
+        };
+      }
+    }
+  } catch (apiErr) {
+    console.warn('ConvertAPI request failed for PDF to Word, switching to local text extractor:', apiErr);
+  }
+
+  // 2. Fallback Engine: In-browser text extraction to formatted Word document
+  onProgress?.(50);
+  const arrayBuffer = await file.arrayBuffer();
+  const loadingTask = pdfjsLib.getDocument({
+    data: new Uint8Array(arrayBuffer),
+    cMapPacked: true,
+  });
+  const pdfDoc = await loadingTask.promise;
+  const numPages = pdfDoc.numPages;
+
+  let fullHtml = '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="font-family:Arial,sans-serif;line-height:1.6;padding:24px;">';
+
+  for (let p = 1; p <= numPages; p++) {
+    const page = await pdfDoc.getPage(p);
+    const textContent = await page.getTextContent();
+    let lastY: number | null = null;
+    let pageText = `<div style="margin-bottom:30px;page-break-after:always;">`;
+
+    for (const item of textContent.items as any[]) {
+      if (!item.str) continue;
+      const currentY = item.transform ? Math.round(item.transform[5]) : null;
+      if (lastY !== null && currentY !== null && Math.abs(currentY - lastY) > 8) {
+        pageText += '<br/>';
+      }
+      pageText += escapeHtml(item.str) + ' ';
+      lastY = currentY;
+    }
+    pageText += `</div>`;
+    fullHtml += pageText;
+    onProgress?.(50 + Math.round((p / numPages) * 45));
+  }
+  fullHtml += '</body></html>';
+
+  const wordBlob = new Blob(['\ufeff' + fullHtml], {
+    type: 'application/msword',
+  });
+  const base = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+  const outName = sanitizeFilename(`${base}.doc`);
+  const downloadUrl = URL.createObjectURL(wordBlob);
+
+  onProgress?.(100);
+
+  return {
+    blob: wordBlob,
+    downloadUrl,
+    filename: outName,
+    originalSize: file.size,
+    processedSize: wordBlob.size,
+    savingsPercentage: 0,
+    metadata: { pages: numPages, fallback: true },
+  };
+}
+
+// ==========================================
+// PDF TO EXCEL CONVERSION (ConvertAPI + Client Fallback)
+// ==========================================
+
+export async function convertPdfToExcel(
+  file: File,
+  onProgress?: (percent: number) => void
+): Promise<ProcessResult> {
+  onProgress?.(10);
+
+  // 1. Primary Engine: ConvertAPI
+  try {
+    const fd = new FormData();
+    fd.append('File', file, file.name);
+
+    onProgress?.(30);
+
+    const res = await fetch('https://v2.convertapi.com/convert/pdf/to/xlsx', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${CONVERT_API_SECRET}`,
+      },
+      body: fd,
+    });
+
+    if (res.ok) {
+      onProgress?.(80);
+      const data = await res.json();
+      if (data.Files && data.Files.length > 0 && data.Files[0].FileData) {
+        const xlsxBlob = base64ToBlob(
+          data.Files[0].FileData,
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        );
+        const base = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+        const outName = sanitizeFilename(`${base}.xlsx`);
+        const downloadUrl = URL.createObjectURL(xlsxBlob);
+
+        onProgress?.(100);
+
+        return {
+          blob: xlsxBlob,
+          downloadUrl,
+          filename: outName,
+          originalSize: file.size,
+          processedSize: xlsxBlob.size,
+          savingsPercentage: 0,
+          metadata: { engine: 'microsoft-excel', quality: '100% spreadsheet' },
+        };
+      }
+    }
+  } catch (apiErr) {
+    console.warn('ConvertAPI request failed for PDF to Excel, switching to local table extractor:', apiErr);
+  }
+
+  // 2. Fallback Engine: In-browser table extraction to SheetJS XLSX
+  onProgress?.(50);
+  const [{ utils, write }] = await Promise.all([import('xlsx')]);
+  const arrayBuffer = await file.arrayBuffer();
+  const loadingTask = pdfjsLib.getDocument({
+    data: new Uint8Array(arrayBuffer),
+    cMapPacked: true,
+  });
+  const pdfDoc = await loadingTask.promise;
+  const numPages = pdfDoc.numPages;
+
+  const rows: string[][] = [];
+
+  for (let p = 1; p <= numPages; p++) {
+    const page = await pdfDoc.getPage(p);
+    const textContent = await page.getTextContent();
+
+    const lineMap: Record<number, { x: number; text: string }[]> = {};
+    for (const item of textContent.items as any[]) {
+      if (!item.str || !item.str.trim()) continue;
+      const y = item.transform ? Math.round(item.transform[5] / 10) * 10 : 0;
+      const x = item.transform ? Math.round(item.transform[4]) : 0;
+      if (!lineMap[y]) lineMap[y] = [];
+      lineMap[y].push({ x, text: item.str.trim() });
+    }
+
+    const sortedYs = Object.keys(lineMap).map(Number).sort((a, b) => b - a);
+    for (const y of sortedYs) {
+      const itemsInLine = lineMap[y].sort((a, b) => a.x - b.x);
+      rows.push(itemsInLine.map((i) => i.text));
+    }
+
+    onProgress?.(50 + Math.round((p / numPages) * 45));
+  }
+
+  const wb = utils.book_new();
+  const ws = utils.aoa_to_sheet(rows.length > 0 ? rows : [['No tabular data found in PDF']]);
+  utils.book_append_sheet(wb, ws, 'Extracted Data');
+  const xlsxArray = write(wb, { type: 'array', bookType: 'xlsx' });
+  const xlsxBlob = new Blob([xlsxArray], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  });
+
+  const base = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+  const outName = sanitizeFilename(`${base}.xlsx`);
+  const downloadUrl = URL.createObjectURL(xlsxBlob);
+
+  onProgress?.(100);
+
+  return {
+    blob: xlsxBlob,
+    downloadUrl,
+    filename: outName,
+    originalSize: file.size,
+    processedSize: xlsxBlob.size,
+    savingsPercentage: 0,
+    metadata: { pages: numPages, fallback: true },
+  };
+}
+
 
