@@ -5,7 +5,6 @@ import { SearchModal } from '../components/common/SearchModal';
 import { Toast, ToastMessage } from '../components/common/Toast';
 import { useTheme } from '../hooks/useTheme';
 import { useSearch } from '../hooks/useSearch';
-import { useFavorites } from '../hooks/useFavorites';
 import { useRecentTools } from '../hooks/useRecentTools';
 import { TOOLS } from '../data/tools';
 import { ToolDefinition } from '../types/tool';
@@ -27,7 +26,6 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
 }) => {
   const { theme, resolvedTheme, toggleTheme } = useTheme();
   const { isOpen, setIsOpen, query, setQuery, results, openSearch, closeSearch } = useSearch();
-  const { favorites } = useFavorites();
   const { recentTools } = useRecentTools();
 
   const handleSelectTool = (tool: ToolDefinition) => {
@@ -45,7 +43,6 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
         theme={theme}
         resolvedTheme={resolvedTheme}
         onToggleTheme={toggleTheme}
-        favoritesCount={favorites.length}
       />
 
       {/* Main Page Content */}
@@ -62,7 +59,6 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
         results={results}
         onSelectTool={handleSelectTool}
         recentTools={recentTools}
-        favorites={favorites}
         allTools={TOOLS}
       />
 

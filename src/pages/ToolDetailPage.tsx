@@ -43,8 +43,6 @@ import { ToastMessage } from '../components/common/Toast';
 interface ToolDetailPageProps {
   tool: ToolDefinition;
   onNavigate: (path: string) => void;
-  isFavorite: boolean;
-  onToggleFavorite: (id: string) => void;
   onAddRecentTool: (id: string) => void;
   onShowToast: (toast: Omit<ToastMessage, 'id'>) => void;
 }
@@ -52,8 +50,6 @@ interface ToolDetailPageProps {
 export const ToolDetailPage: React.FC<ToolDetailPageProps> = ({
   tool,
   onNavigate,
-  isFavorite,
-  onToggleFavorite,
   onAddRecentTool,
   onShowToast,
 }) => {
@@ -194,8 +190,6 @@ export const ToolDetailPage: React.FC<ToolDetailPageProps> = ({
         {/* Tool Header */}
         <ToolHeader
           tool={tool}
-          isFavorite={isFavorite}
-          onToggleFavorite={onToggleFavorite}
           onNavigate={onNavigate}
         />
 

@@ -1,46 +1,25 @@
 import React from 'react';
-import { ArrowRight, Heart, Zap, Cloud } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { ToolDefinition } from '../../types/tool';
 import { DynamicIcon } from './DynamicIcon';
 
 interface ToolCardProps {
   tool: ToolDefinition;
   onSelect: (tool: ToolDefinition) => void;
-  isFavorite?: boolean;
-  onToggleFavorite?: (toolId: string) => void;
 }
 
 export const ToolCard: React.FC<ToolCardProps> = ({
   tool,
   onSelect,
-  isFavorite = false,
-  onToggleFavorite,
 }) => {
   return (
     <div className="group relative flex flex-col justify-between rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-surface-cardDark p-5 sm:p-6 shadow-subtle hover:shadow-card-hover transition-all duration-200 hover:-translate-y-0.5">
       <div>
-        {/* Header row: icon + favorite */}
+        {/* Header row: icon */}
         <div className="flex items-center justify-between gap-3 mb-4">
           <div className="w-11 h-11 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-brand-600 dark:text-brand-400 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
             <DynamicIcon name={tool.icon} className="w-5 h-5" />
           </div>
-
-          {onToggleFavorite && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggleFavorite(tool.id);
-              }}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-            >
-              <Heart
-                className={`w-4 h-4 ${
-                  isFavorite ? 'fill-rose-500 text-rose-500' : 'text-slate-400'
-                }`}
-              />
-            </button>
-          )}
         </div>
 
         {/* Name & description */}

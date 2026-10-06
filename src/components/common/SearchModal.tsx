@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Search, X, Heart, Clock, ArrowRight, CornerDownLeft } from 'lucide-react';
+import { Search, X, Clock, ArrowRight, CornerDownLeft } from 'lucide-react';
 import { ToolDefinition } from '../../types/tool';
 import { DynamicIcon } from './DynamicIcon';
 import { POPULAR_TOOLS } from '../../data/tools';
@@ -12,7 +12,6 @@ interface SearchModalProps {
   results: ToolDefinition[];
   onSelectTool: (tool: ToolDefinition) => void;
   recentTools: ToolDefinition[];
-  favorites: string[];
   allTools: ToolDefinition[];
 }
 
@@ -24,7 +23,6 @@ export const SearchModal: React.FC<SearchModalProps> = ({
   results,
   onSelectTool,
   recentTools,
-  favorites,
   allTools,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -37,9 +35,6 @@ export const SearchModal: React.FC<SearchModalProps> = ({
       setSelectedIndex(0);
     }
   }, [isOpen]);
-
-  // Favorite tools objects
-  const favoriteTools = allTools.filter(t => favorites.includes(t.id));
 
   // Determine current display list for keyboard navigation
   const currentList = query.trim() ? results : (recentTools.length > 0 ? recentTools : POPULAR_TOOLS);
@@ -188,30 +183,6 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                           </span>
                         </div>
                         <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Favorites Section */}
-              {favoriteTools.length > 0 && (
-                <div>
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                    <Heart className="w-3.5 h-3.5 text-rose-500" />
-                    Your Favorites
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
-                    {favoriteTools.map((tool) => (
-                      <button
-                        key={tool.id}
-                        onClick={() => onSelectTool(tool)}
-                        className="flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-200/80 dark:border-slate-800 hover:border-brand-500/40 hover:bg-brand-50/40 dark:hover:bg-brand-950/20 text-left transition-colors"
-                      >
-                        <DynamicIcon name={tool.icon} className="w-4 h-4 text-brand-500 shrink-0" />
-                        <span className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">
-                          {tool.name}
-                        </span>
                       </button>
                     ))}
                   </div>

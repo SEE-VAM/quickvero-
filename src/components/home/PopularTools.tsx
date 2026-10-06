@@ -5,14 +5,10 @@ import { ToolCard } from '../common/ToolCard';
 
 interface PopularToolsProps {
   onSelectTool: (tool: ToolDefinition) => void;
-  favorites: string[];
-  onToggleFavorite: (toolId: string) => void;
 }
 
 export const PopularTools: React.FC<PopularToolsProps> = ({
   onSelectTool,
-  favorites,
-  onToggleFavorite,
 }) => {
   return (
     <section id="popular-tools" className="py-12 md:py-16 bg-slate-50/50 dark:bg-slate-900/30 border-y border-slate-200/60 dark:border-slate-800/60">
@@ -32,8 +28,6 @@ export const PopularTools: React.FC<PopularToolsProps> = ({
               key={tool.id}
               tool={tool}
               onSelect={onSelectTool}
-              isFavorite={favorites.includes(tool.id)}
-              onToggleFavorite={onToggleFavorite}
             />
           ))}
         </div>

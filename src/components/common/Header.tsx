@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Sun, Moon, Menu, X, Sparkles, Heart } from 'lucide-react';
+import { Search, Sun, Moon, Menu, X, Sparkles } from 'lucide-react';
 import { HEADER_NAV_ITEMS } from '../../data/navigation';
 import { Theme } from '../../types/theme';
 
@@ -10,7 +10,6 @@ interface HeaderProps {
   theme: Theme;
   resolvedTheme: 'light' | 'dark';
   onToggleTheme: () => void;
-  favoritesCount?: number;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -19,7 +18,6 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenSearch,
   resolvedTheme,
   onToggleTheme,
-  favoritesCount = 0,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -88,21 +86,6 @@ export const Header: React.FC<HeaderProps> = ({
             </kbd>
           </button>
 
-          {/* Favorites Button */}
-          <button
-            onClick={() => handleLinkClick('/tools?filter=favorites')}
-            className="relative p-2 text-slate-600 hover:text-rose-500 dark:text-slate-400 dark:hover:text-rose-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
-            title="Favorite Tools"
-            aria-label="View Favorite Tools"
-          >
-            <Heart className={`w-4 h-4 transition-colors ${favoritesCount > 0 ? 'fill-rose-500 text-rose-500' : ''}`} />
-            {favoritesCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-xs">
-                {favoritesCount}
-              </span>
-            )}
-          </button>
-
           {/* Theme Toggle */}
           <button
             onClick={onToggleTheme}
@@ -144,21 +127,7 @@ export const Header: React.FC<HeaderProps> = ({
               {item.label}
             </button>
           ))}
-          <div className="pt-2 border-t border-slate-200 dark:border-slate-800 space-y-1">
-            <button
-              onClick={() => handleLinkClick('/tools?filter=favorites')}
-              className="flex items-center justify-between w-full px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-sm font-medium"
-            >
-              <div className="flex items-center gap-2">
-                <Heart className={`w-4 h-4 ${favoritesCount > 0 ? 'fill-rose-500 text-rose-500' : ''}`} />
-                <span>Favorite Tools</span>
-              </div>
-              {favoritesCount > 0 && (
-                <span className="px-1.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-300">
-                  {favoritesCount}
-                </span>
-              )}
-            </button>
+          <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
             <button
               onClick={() => {
                 onOpenSearch();

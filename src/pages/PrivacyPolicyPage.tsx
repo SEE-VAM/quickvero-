@@ -52,7 +52,7 @@ export const PrivacyPolicyPage: React.FC = () => {
           <section className="space-y-2">
             <h2 className="text-xl font-bold text-slate-900 dark:text-white">3. Local Storage (Cookies &amp; Preferences)</h2>
             <p>
-              QuickVero uses modern browser <code className="text-xs bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">localStorage</code> strictly to remember your preferred UI theme (Dark or Light), your pinned Favorite Tools, and your Recently Visited tools. This data never leaves your browser.
+              QuickVero uses modern browser <code className="text-xs bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">localStorage</code> strictly to remember your preferred UI theme (Dark or Light) and your Recently Visited tools. This data never leaves your browser.
             </p>
           </section>
 

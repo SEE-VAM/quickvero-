@@ -12,15 +12,11 @@ import { ChevronRight } from 'lucide-react';
 interface CategoryPageProps {
   categoryId: ToolCategory;
   onNavigate: (path: string) => void;
-  favorites: string[];
-  onToggleFavorite: (id: string) => void;
 }
 
 export const CategoryPage: React.FC<CategoryPageProps> = ({
   categoryId,
   onNavigate,
-  favorites,
-  onToggleFavorite,
 }) => {
   const category = CATEGORIES.find((c) => c.id === categoryId);
   const categoryTools = TOOLS.filter((t) => t.category === categoryId);
@@ -130,8 +126,6 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
                         key={tool.id}
                         tool={tool}
                         onSelect={(t) => onNavigate(t.route)}
-                        isFavorite={favorites.includes(tool.id)}
-                        onToggleFavorite={onToggleFavorite}
                       />
                     ))}
                   </div>
@@ -146,8 +140,6 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
                 key={tool.id}
                 tool={tool}
                 onSelect={(t) => onNavigate(t.route)}
-                isFavorite={favorites.includes(tool.id)}
-                onToggleFavorite={onToggleFavorite}
               />
             ))}
           </div>

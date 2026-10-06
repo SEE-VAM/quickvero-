@@ -1,13 +1,11 @@
 import React from 'react';
-import { Search, Sparkles, ShieldCheck, Zap, Lock, Heart } from 'lucide-react';
+import { Search, Sparkles, ShieldCheck, Zap, Lock } from 'lucide-react';
 
 interface HeroProps {
   onSearchClick: () => void;
   onExploreTools: () => void;
   onPopularTools: () => void;
   onQuickQuery: (q: string) => void;
-  onFavoritesClick?: () => void;
-  favoritesCount?: number;
 }
 
 export const Hero: React.FC<HeroProps> = ({
@@ -15,8 +13,6 @@ export const Hero: React.FC<HeroProps> = ({
   onExploreTools,
   onPopularTools,
   onQuickQuery,
-  onFavoritesClick,
-  favoritesCount = 0,
 }) => {
   const exampleSearches = [
     'Compress image',
@@ -101,24 +97,6 @@ export const Hero: React.FC<HeroProps> = ({
           >
             Popular Tools
           </button>
-          {onFavoritesClick && (
-            <button
-              onClick={onFavoritesClick}
-              className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-150 focus:outline-none ${
-                favoritesCount > 0
-                  ? 'bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-300 border border-rose-200/80 dark:border-rose-900/60 shadow-xs'
-                  : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
-              }`}
-            >
-              <Heart className={`w-4 h-4 ${favoritesCount > 0 ? 'fill-rose-500 text-rose-500' : 'text-slate-500 dark:text-slate-400'}`} />
-              <span>Favorites</span>
-              {favoritesCount > 0 && (
-                <span className="px-1.5 py-0.5 rounded-full text-xs font-bold bg-rose-500 text-white">
-                  {favoritesCount}
-                </span>
-              )}
-            </button>
-          )}
         </div>
 
         {/* Micro Trust Indicators */}

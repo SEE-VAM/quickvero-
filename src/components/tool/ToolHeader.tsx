@@ -1,19 +1,15 @@
 import React from 'react';
-import { ShieldCheck, Zap, Cloud, Heart, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { ToolDefinition } from '../../types/tool';
 import { DynamicIcon } from '../common/DynamicIcon';
 
 interface ToolHeaderProps {
   tool: ToolDefinition;
-  isFavorite: boolean;
-  onToggleFavorite: (id: string) => void;
   onNavigate: (path: string) => void;
 }
 
 export const ToolHeader: React.FC<ToolHeaderProps> = ({
   tool,
-  isFavorite,
-  onToggleFavorite,
   onNavigate,
 }) => {
   return (
@@ -53,22 +49,6 @@ export const ToolHeader: React.FC<ToolHeaderProps> = ({
               {tool.description}
             </p>
           </div>
-        </div>
-
-        {/* Favorite toggle */}
-        <div className="flex sm:flex-col items-center justify-end shrink-0">
-          <button
-            onClick={() => onToggleFavorite(tool.id)}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium border transition-colors ${
-              isFavorite
-                ? 'bg-rose-50 dark:bg-rose-950/60 border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-300'
-                : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-rose-500'
-            }`}
-            aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-          >
-            <Heart className={`w-4 h-4 ${isFavorite ? 'fill-rose-500 text-rose-500' : ''}`} />
-            <span>{isFavorite ? 'Favorited' : 'Favorite'}</span>
-          </button>
         </div>
       </div>
     </div>

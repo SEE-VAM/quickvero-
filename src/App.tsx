@@ -12,7 +12,6 @@ import { DisclaimerPage } from './pages/DisclaimerPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { TOOLS } from './data/tools';
 import { CATEGORIES } from './data/categories';
-import { useFavorites } from './hooks/useFavorites';
 import { useRecentTools } from './hooks/useRecentTools';
 import { ToastMessage } from './components/common/Toast';
 import { analytics } from './services/analytics';
@@ -31,7 +30,6 @@ export function App() {
   const [currentPath, setCurrentPath] = useState<string>(getInitialPath);
 
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
-  const { favorites, toggleFavorite } = useFavorites();
   const { addRecentTool } = useRecentTools();
 
   // Initialize analytics on app mount
@@ -95,8 +93,6 @@ export function App() {
             const event = new KeyboardEvent('keydown', { key: 'k', ctrlKey: true });
             window.dispatchEvent(event);
           }}
-          favorites={favorites}
-          onToggleFavorite={toggleFavorite}
         />
       );
     }
@@ -105,8 +101,6 @@ export function App() {
       return (
         <ToolsCatalogPage
           onNavigate={navigate}
-          favorites={favorites}
-          onToggleFavorite={toggleFavorite}
         />
       );
     }
@@ -117,8 +111,6 @@ export function App() {
         <CategoryPage
           categoryId="image"
           onNavigate={navigate}
-          favorites={favorites}
-          onToggleFavorite={toggleFavorite}
         />
       );
     }
@@ -128,8 +120,6 @@ export function App() {
         <CategoryPage
           categoryId="video"
           onNavigate={navigate}
-          favorites={favorites}
-          onToggleFavorite={toggleFavorite}
         />
       );
     }
@@ -139,8 +129,6 @@ export function App() {
         <CategoryPage
           categoryId="audio"
           onNavigate={navigate}
-          favorites={favorites}
-          onToggleFavorite={toggleFavorite}
         />
       );
     }
@@ -150,8 +138,6 @@ export function App() {
         <CategoryPage
           categoryId="pdf"
           onNavigate={navigate}
-          favorites={favorites}
-          onToggleFavorite={toggleFavorite}
         />
       );
     }
@@ -161,8 +147,6 @@ export function App() {
         <CategoryPage
           categoryId="file"
           onNavigate={navigate}
-          favorites={favorites}
-          onToggleFavorite={toggleFavorite}
         />
       );
     }
@@ -198,8 +182,6 @@ export function App() {
           <ToolDetailPage
             tool={tool}
             onNavigate={navigate}
-            isFavorite={favorites.includes(tool.id)}
-            onToggleFavorite={toggleFavorite}
             onAddRecentTool={addRecentTool}
             onShowToast={showToast}
           />
