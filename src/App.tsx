@@ -67,6 +67,7 @@ export function App() {
     const clean = path.split('?')[0].replace(/\/index\.html$/i, '').replace(/\/$/, '') || '/';
     setCurrentPath(clean);
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+    window.dispatchEvent(new Event('popstate'));
   };
 
   const showToast = (toast: Omit<ToastMessage, 'id'>) => {

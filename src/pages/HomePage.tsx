@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Hero } from '../components/home/Hero';
 import { CategorySection } from '../components/home/CategorySection';
+import { FavoriteTools } from '../components/home/FavoriteTools';
 import { PopularTools } from '../components/home/PopularTools';
 import { TrustSection } from '../components/home/TrustSection';
 import { AdBanner } from '../components/common/AdBanner';
@@ -78,7 +79,20 @@ export const HomePage: React.FC<HomePageProps> = ({
           const el = document.getElementById('popular-tools');
           el?.scrollIntoView({ behavior: 'smooth' });
         }}
+        onFavoritesClick={() => {
+          const el = document.getElementById('favorite-tools');
+          el?.scrollIntoView({ behavior: 'smooth' });
+        }}
+        favoritesCount={favorites.length}
         onQuickQuery={handleQuickQuery}
+      />
+
+      {/* Favorite Tools Section */}
+      <FavoriteTools
+        onSelectTool={handleSelectTool}
+        favorites={favorites}
+        onToggleFavorite={onToggleFavorite}
+        onExploreAll={() => onNavigate('/tools')}
       />
 
       {/* Popular Tools Section */}

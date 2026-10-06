@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, SlidersHorizontal, Sparkles } from 'lucide-react';
+import { Search, SlidersHorizontal, Sparkles, Heart } from 'lucide-react';
 import { TOOLS } from '../data/tools';
 import { CATEGORIES } from '../data/categories';
 import { ToolCard } from '../components/common/ToolCard';
@@ -23,12 +23,20 @@ export const ToolsCatalogPage: React.FC<ToolsCatalogPageProps> = ({
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   useEffect(() => {
-    // Check initial search query from URL if available
-    const urlParams = new URLSearchParams(window.location.search);
-    const q = urlParams.get('q');
-    if (q) {
-      setSearchQuery(q);
-    }
+    const handleUrlState = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const q = urlParams.get('q');
+      if (q !== null) {
+        setSearchQuery(q);
+      }
+      const filter = urlParams.get('filter') || urlParams.get('category');
+      if (filter) {
+        setSelectedCategory(filter);
+      }
+    };
+
+    handleUrlState();
+    window.addEventListener('popstate', handleUrlState);
 
     const base = getBaseUrl();
     updatePageMeta({
@@ -39,12 +47,19 @@ export const ToolsCatalogPage: React.FC<ToolsCatalogPageProps> = ({
     });
 
     analytics.trackPageView('/tools', 'QuickVero - All Tools Catalog');
+
+    return () => {
+      window.removeEventListener('popstate', handleUrlState);
+    };
   }, []);
 
   const filteredTools = useMemo(() => {
     return TOOLS.filter((tool) => {
-      const matchesCategory = selectedCategory === 'all' || tool.category === selectedCategory;
-      if (!matchesCategory) return false;
+      if (selectedCategory === 'favorites') {
+        if (!favorites.includes(tool.id)) return false;
+      } else if (selectedCategory !== 'all') {
+        if (tool.category !== selectedCategory) return false;
+      }
 
       if (!searchQuery.trim()) return true;
 
@@ -61,7 +76,7 @@ export const ToolsCatalogPage: React.FC<ToolsCatalogPageProps> = ({
 
       return terms.every((t) => corpus.includes(t));
     });
-  }, [selectedCategory, searchQuery]);
+  }, [selectedCategory, searchQuery, favorites]);
 
   return (
     <div className="py-10 md:py-16">
@@ -93,6 +108,23 @@ export const ToolsCatalogPage: React.FC<ToolsCatalogPageProps> = ({
               }`}
             >
               All Tools ({TOOLS.length})
+            </button>
+            <button
+              onClick={() => setSelectedCategory('favorites')}
+              className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors ${
+                selectedCategory === 'favorites'
+                  ? 'bg-rose-600 text-white shadow-xs'
+                  : 'bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200/80 dark:border-rose-900/60 hover:bg-rose-100'
+              }`}
+            >
+              <Heart
+                className={`w-3.5 h-3.5 ${
+                  selectedCategory === 'favorites'
+                    ? 'fill-white text-white'
+                    : 'fill-rose-500 text-rose-500'
+                }`}
+              />
+              <span>Favorites ({favorites.length})</span>
             </button>
             {CATEGORIES.map((cat) => {
               const count = TOOLS.filter((t) => t.category === cat.id).length;
@@ -128,21 +160,46 @@ export const ToolsCatalogPage: React.FC<ToolsCatalogPageProps> = ({
         {/* Tools Grid */}
         {filteredTools.length === 0 ? (
           <div className="text-center py-16 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8">
-            <p className="text-base font-semibold text-slate-800 dark:text-slate-200">
-              No tools match your filter criteria.
-            </p>
-            <p className="text-xs text-slate-400 mt-1">
-              Try clearing your search query or selecting a different category.
-            </p>
-            <button
-              onClick={() => {
-                setSelectedCategory('all');
-                setSearchQuery('');
-              }}
-              className="mt-4 px-4 py-2 rounded-xl text-xs font-semibold bg-brand-600 text-white"
-            >
-              Reset Filters
-            </button>
+            {selectedCategory === 'favorites' ? (
+              <>
+                <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-500 flex items-center justify-center">
+                  <Heart className="w-6 h-6 stroke-[1.75]" />
+                </div>
+                <p className="text-base font-semibold text-slate-800 dark:text-slate-200">
+                  No Favorite Tools Saved Yet
+                </p>
+                <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+                  Click the heart icon on any tool card across QuickVero to pin your favorites here for fast access.
+                </p>
+                <button
+                  onClick={() => {
+                    setSelectedCategory('all');
+                    setSearchQuery('');
+                  }}
+                  className="mt-4 px-4 py-2 rounded-xl text-xs font-semibold bg-brand-600 hover:bg-brand-700 text-white transition-colors"
+                >
+                  Browse All Tools
+                </button>
+              </>
+            ) : (
+              <>
+                <p className="text-base font-semibold text-slate-800 dark:text-slate-200">
+                  No tools match your filter criteria.
+                </p>
+                <p className="text-xs text-slate-400 mt-1">
+                  Try clearing your search query or selecting a different category.
+                </p>
+                <button
+                  onClick={() => {
+                    setSelectedCategory('all');
+                    setSearchQuery('');
+                  }}
+                  className="mt-4 px-4 py-2 rounded-xl text-xs font-semibold bg-brand-600 hover:bg-brand-700 text-white transition-colors"
+                >
+                  Reset Filters
+                </button>
+              </>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">

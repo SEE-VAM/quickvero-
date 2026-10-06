@@ -1,11 +1,13 @@
 import React from 'react';
-import { Search, Sparkles, ShieldCheck, Zap, Lock } from 'lucide-react';
+import { Search, Sparkles, ShieldCheck, Zap, Lock, Heart } from 'lucide-react';
 
 interface HeroProps {
   onSearchClick: () => void;
   onExploreTools: () => void;
   onPopularTools: () => void;
   onQuickQuery: (q: string) => void;
+  onFavoritesClick?: () => void;
+  favoritesCount?: number;
 }
 
 export const Hero: React.FC<HeroProps> = ({
@@ -13,6 +15,8 @@ export const Hero: React.FC<HeroProps> = ({
   onExploreTools,
   onPopularTools,
   onQuickQuery,
+  onFavoritesClick,
+  favoritesCount = 0,
 }) => {
   const exampleSearches = [
     'Compress image',
@@ -31,7 +35,7 @@ export const Hero: React.FC<HeroProps> = ({
         {/* Release Pill */}
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/80 border border-blue-200/80 dark:border-blue-800 text-xs font-medium text-brand-700 dark:text-brand-300 mb-6 shadow-xs animate-in fade-in slide-in-from-top-3">
           <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-          <span>New: Instant Client-Side Image &amp; PDF Engines</span>
+          <span>New: Instant High-Performance Image &amp; PDF Engines</span>
         </div>
 
         {/* Main Headline */}
@@ -44,7 +48,7 @@ export const Hero: React.FC<HeroProps> = ({
 
         {/* Subheadline */}
         <p className="mt-5 text-lg sm:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
-          Compress, convert, resize and optimize your files directly in your browser. No registration, no watermarks, and zero file storage.
+          Compress, convert, resize and optimize your files directly with maximum privacy. No registration, no watermarks, and zero file storage.
         </p>
 
         {/* Search Bar Input Container */}
@@ -97,21 +101,39 @@ export const Hero: React.FC<HeroProps> = ({
           >
             Popular Tools
           </button>
+          {onFavoritesClick && (
+            <button
+              onClick={onFavoritesClick}
+              className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-150 focus:outline-none ${
+                favoritesCount > 0
+                  ? 'bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-300 border border-rose-200/80 dark:border-rose-900/60 shadow-xs'
+                  : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+              }`}
+            >
+              <Heart className={`w-4 h-4 ${favoritesCount > 0 ? 'fill-rose-500 text-rose-500' : 'text-slate-500 dark:text-slate-400'}`} />
+              <span>Favorites</span>
+              {favoritesCount > 0 && (
+                <span className="px-1.5 py-0.5 rounded-full text-xs font-bold bg-rose-500 text-white">
+                  {favoritesCount}
+                </span>
+              )}
+            </button>
+          )}
         </div>
 
         {/* Micro Trust Indicators */}
         <div className="mt-12 pt-8 border-t border-slate-200/60 dark:border-slate-800/60 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-slate-500 dark:text-slate-400">
           <div className="flex items-center justify-center gap-2">
             <ShieldCheck className="w-4 h-4 text-emerald-500" />
-            <span>100% In-Browser Privacy</span>
+            <span>100% Private &amp; Secure</span>
           </div>
           <div className="flex items-center justify-center gap-2">
             <Zap className="w-4 h-4 text-amber-500" />
-            <span>Instant Client-Side Speed</span>
+            <span>Instant Lightning Speed</span>
           </div>
           <div className="flex items-center justify-center gap-2">
             <Lock className="w-4 h-4 text-blue-500" />
-            <span>No File Storage or Tracking</span>
+            <span>Zero File Storage or Tracking</span>
           </div>
         </div>
       </div>

@@ -45,6 +45,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
         theme={theme}
         resolvedTheme={resolvedTheme}
         onToggleTheme={toggleTheme}
+        favoritesCount={favorites.length}
       />
 
       {/* Main Page Content */}
