@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowRight } from 'lucide-react';
 import { CategoryDefinition } from '../../types/tool';
 import { DynamicIcon } from './DynamicIcon';
+import { getToolTheme } from '../../utils/toolColors';
 
 interface CategoryCardProps {
   category: CategoryDefinition;
@@ -14,6 +15,8 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
   toolCount,
   onSelect,
 }) => {
+  const theme = getToolTheme('', category.id);
+
   return (
     <div
       onClick={() => onSelect(category)}
@@ -21,10 +24,8 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
     >
       <div>
         <div className="flex items-center justify-between mb-4">
-          <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
-            <div className={category.color}>
-              <DynamicIcon name={category.icon} className="w-6 h-6" />
-            </div>
+          <div className={`w-12 h-12 rounded-2xl ${theme.bg} ${theme.text} ${theme.border} border flex items-center justify-center group-hover:scale-110 shadow-xs transition-all duration-200`}>
+            <DynamicIcon name={category.icon} className="w-6 h-6" />
           </div>
           <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
             {toolCount} Tools

@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowRight } from 'lucide-react';
 import { ToolDefinition } from '../../types/tool';
 import { DynamicIcon } from './DynamicIcon';
+import { getToolTheme } from '../../utils/toolColors';
 
 interface ToolCardProps {
   tool: ToolDefinition;
@@ -12,13 +13,15 @@ export const ToolCard: React.FC<ToolCardProps> = ({
   tool,
   onSelect,
 }) => {
+  const theme = getToolTheme(tool.id, tool.category);
+
   return (
     <div className="group relative flex flex-col justify-between rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-surface-cardDark p-5 sm:p-6 shadow-subtle hover:shadow-card-hover transition-all duration-200 hover:-translate-y-0.5">
       <div>
-        {/* Header row: icon */}
+        {/* Header row: colorful icon */}
         <div className="flex items-center justify-between gap-3 mb-4">
-          <div className="w-11 h-11 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-brand-600 dark:text-brand-400 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
-            <DynamicIcon name={tool.icon} className="w-5 h-5" />
+          <div className={`w-12 h-12 rounded-2xl ${theme.bg} ${theme.text} ${theme.border} border flex items-center justify-center group-hover:scale-110 shadow-xs transition-all duration-200`}>
+            <DynamicIcon name={tool.icon} className="w-6 h-6" />
           </div>
         </div>
 

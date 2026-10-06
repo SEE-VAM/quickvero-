@@ -2,6 +2,7 @@ import React from 'react';
 import { ChevronRight } from 'lucide-react';
 import { ToolDefinition } from '../../types/tool';
 import { DynamicIcon } from '../common/DynamicIcon';
+import { getToolTheme } from '../../utils/toolColors';
 
 interface ToolHeaderProps {
   tool: ToolDefinition;
@@ -12,6 +13,8 @@ export const ToolHeader: React.FC<ToolHeaderProps> = ({
   tool,
   onNavigate,
 }) => {
+  const theme = getToolTheme(tool.id, tool.category);
+
   return (
     <div className="mb-8">
       {/* Breadcrumbs */}
@@ -36,7 +39,7 @@ export const ToolHeader: React.FC<ToolHeaderProps> = ({
       {/* Header Container */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-start gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-brand-600 dark:text-brand-400 flex items-center justify-center shrink-0 shadow-xs">
+          <div className={`w-14 h-14 rounded-2xl ${theme.bg} ${theme.text} ${theme.border} border flex items-center justify-center shrink-0 shadow-xs`}>
             <DynamicIcon name={tool.icon} className="w-7 h-7" />
           </div>
           <div>

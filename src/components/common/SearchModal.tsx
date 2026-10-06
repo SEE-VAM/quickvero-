@@ -3,6 +3,7 @@ import { Search, X, Clock, ArrowRight, CornerDownLeft } from 'lucide-react';
 import { ToolDefinition } from '../../types/tool';
 import { DynamicIcon } from './DynamicIcon';
 import { POPULAR_TOOLS } from '../../data/tools';
+import { getToolTheme } from '../../utils/toolColors';
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -122,6 +123,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                 <div className="space-y-1 mt-1">
                   {results.map((tool, idx) => {
                     const isSelected = idx === selectedIndex;
+                    const theme = getToolTheme(tool.id, tool.category);
                     return (
                       <button
                         key={tool.id}
@@ -134,9 +136,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                         }`}
                       >
                         <div className="flex items-center gap-3 min-w-0">
-                          <div className={`p-2 rounded-lg ${
-                            isSelected ? 'bg-brand-100 dark:bg-brand-900/60 text-brand-600' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-                          }`}>
+                          <div className={`p-2 rounded-xl ${theme.bg} ${theme.text} ${theme.border} border shrink-0`}>
                             <DynamicIcon name={tool.icon} className="w-5 h-5" />
                           </div>
                           <div className="min-w-0">
@@ -168,23 +168,26 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                     Recently Visited
                   </div>
                   <div className="space-y-1 mt-1">
-                    {recentTools.map((tool, idx) => (
-                      <button
-                        key={tool.id}
-                        onClick={() => onSelectTool(tool)}
-                        className="w-full flex items-center justify-between p-2.5 rounded-xl text-left hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors"
-                      >
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-                            <DynamicIcon name={tool.icon} className="w-4 h-4" />
+                    {recentTools.map((tool, idx) => {
+                      const theme = getToolTheme(tool.id, tool.category);
+                      return (
+                        <button
+                          key={tool.id}
+                          onClick={() => onSelectTool(tool)}
+                          className="w-full flex items-center justify-between p-2.5 rounded-xl text-left hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className={`p-1.5 rounded-lg ${theme.bg} ${theme.text} ${theme.border} border shrink-0`}>
+                              <DynamicIcon name={tool.icon} className="w-4 h-4" />
+                            </div>
+                            <span className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">
+                              {tool.name}
+                            </span>
                           </div>
-                          <span className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">
-                            {tool.name}
-                          </span>
-                        </div>
-                        <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
-                      </button>
-                    ))}
+                          <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -195,28 +198,31 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                   Popular Tools
                 </div>
                 <div className="space-y-1 mt-1">
-                  {POPULAR_TOOLS.slice(0, 5).map((tool) => (
-                    <button
-                      key={tool.id}
-                      onClick={() => onSelectTool(tool)}
-                      className="w-full flex items-center justify-between p-2.5 rounded-xl text-left hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-brand-600 dark:text-brand-400">
-                          <DynamicIcon name={tool.icon} className="w-4 h-4" />
-                        </div>
-                        <div className="truncate">
-                          <div className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">
-                            {tool.name}
+                  {POPULAR_TOOLS.slice(0, 5).map((tool) => {
+                    const theme = getToolTheme(tool.id, tool.category);
+                    return (
+                      <button
+                        key={tool.id}
+                        onClick={() => onSelectTool(tool)}
+                        className="w-full flex items-center justify-between p-2.5 rounded-xl text-left hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className={`p-1.5 rounded-lg ${theme.bg} ${theme.text} ${theme.border} border shrink-0`}>
+                            <DynamicIcon name={tool.icon} className="w-4 h-4" />
                           </div>
-                          <div className="text-xs text-slate-400 truncate">
-                            {tool.shortDescription}
+                          <div className="truncate">
+                            <div className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">
+                              {tool.name}
+                            </div>
+                            <div className="text-xs text-slate-400 truncate">
+                              {tool.shortDescription}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <ArrowRight className="w-4 h-4 text-slate-400 shrink-0" />
-                    </button>
-                  ))}
+                        <ArrowRight className="w-4 h-4 text-slate-400 shrink-0" />
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </>
