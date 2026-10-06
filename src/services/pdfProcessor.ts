@@ -1188,7 +1188,7 @@ export async function convertWordToPdf(
 
     onProgress?.(25);
 
-    const res = await fetch(`https://v2.convertapi.com/convert/${ext}/to/pdf`, {
+    const res = await fetch(`https://v2.convertapi.com/convert/${ext}/to/pdf?StoreFile=true`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${CONVERT_API_SECRET}`,
@@ -1199,8 +1199,19 @@ export async function convertWordToPdf(
     if (res.ok) {
       onProgress?.(75);
       const data = await res.json();
-      if (data.Files && data.Files.length > 0 && data.Files[0].FileData) {
-        const pdfBlob = base64ToPdfBlob(data.Files[0].FileData);
+      const fileObj = data.Files?.[0];
+
+      if (fileObj) {
+        let pdfBlob: Blob;
+        if (fileObj.Url) {
+          const dlRes = await fetch(fileObj.Url);
+          pdfBlob = await dlRes.blob();
+        } else if (fileObj.FileData) {
+          pdfBlob = base64ToPdfBlob(fileObj.FileData);
+        } else {
+          throw new Error('No valid file output returned by conversion engine');
+        }
+
         const base = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
         const outName = sanitizeFilename(`${base}.pdf`);
         const downloadUrl = URL.createObjectURL(pdfBlob);
@@ -1217,6 +1228,9 @@ export async function convertWordToPdf(
           metadata: { engine: 'microsoft-office', quality: '100% vector' },
         };
       }
+    } else {
+      const errTxt = await res.text();
+      console.warn('ConvertAPI Word to PDF returned error status:', res.status, errTxt);
     }
   } catch (apiErr) {
     console.warn('ConvertAPI request failed, switching to local renderer:', apiErr);
@@ -1383,7 +1397,7 @@ export async function convertExcelToPdf(
 
     onProgress?.(25);
 
-    const res = await fetch(`https://v2.convertapi.com/convert/${ext}/to/pdf`, {
+    const res = await fetch(`https://v2.convertapi.com/convert/${ext}/to/pdf?StoreFile=true`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${CONVERT_API_SECRET}`,
@@ -1394,8 +1408,19 @@ export async function convertExcelToPdf(
     if (res.ok) {
       onProgress?.(75);
       const data = await res.json();
-      if (data.Files && data.Files.length > 0 && data.Files[0].FileData) {
-        const pdfBlob = base64ToPdfBlob(data.Files[0].FileData);
+      const fileObj = data.Files?.[0];
+
+      if (fileObj) {
+        let pdfBlob: Blob;
+        if (fileObj.Url) {
+          const dlRes = await fetch(fileObj.Url);
+          pdfBlob = await dlRes.blob();
+        } else if (fileObj.FileData) {
+          pdfBlob = base64ToPdfBlob(fileObj.FileData);
+        } else {
+          throw new Error('No valid file output returned by conversion engine');
+        }
+
         const base = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
         const outName = sanitizeFilename(`${base}.pdf`);
         const downloadUrl = URL.createObjectURL(pdfBlob);
@@ -1412,6 +1437,9 @@ export async function convertExcelToPdf(
           metadata: { engine: 'microsoft-excel', quality: '100% vector' },
         };
       }
+    } else {
+      const errTxt = await res.text();
+      console.warn('ConvertAPI Excel to PDF returned error status:', res.status, errTxt);
     }
   } catch (apiErr) {
     console.warn('ConvertAPI request failed for Excel, switching to local renderer:', apiErr);
@@ -1670,7 +1698,7 @@ export async function convertPdfToWord(
 
     onProgress?.(30);
 
-    const res = await fetch('https://v2.convertapi.com/convert/pdf/to/docx', {
+    const res = await fetch('https://v2.convertapi.com/convert/pdf/to/docx?StoreFile=true', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${CONVERT_API_SECRET}`,
@@ -1681,11 +1709,22 @@ export async function convertPdfToWord(
     if (res.ok) {
       onProgress?.(80);
       const data = await res.json();
-      if (data.Files && data.Files.length > 0 && data.Files[0].FileData) {
-        const docxBlob = base64ToBlob(
-          data.Files[0].FileData,
-          'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-        );
+      const fileObj = data.Files?.[0];
+
+      if (fileObj) {
+        let docxBlob: Blob;
+        if (fileObj.Url) {
+          const dlRes = await fetch(fileObj.Url);
+          docxBlob = await dlRes.blob();
+        } else if (fileObj.FileData) {
+          docxBlob = base64ToBlob(
+            fileObj.FileData,
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+          );
+        } else {
+          throw new Error('No valid file output returned by conversion engine');
+        }
+
         const base = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
         const outName = sanitizeFilename(`${base}.docx`);
         const downloadUrl = URL.createObjectURL(docxBlob);
@@ -1702,6 +1741,9 @@ export async function convertPdfToWord(
           metadata: { engine: 'microsoft-word', quality: '100% editable' },
         };
       }
+    } else {
+      const errTxt = await res.text();
+      console.warn('ConvertAPI PDF to Word returned error status:', res.status, errTxt);
     }
   } catch (apiErr) {
     console.warn('ConvertAPI request failed for PDF to Word, switching to local text extractor:', apiErr);
@@ -1777,7 +1819,7 @@ export async function convertPdfToExcel(
 
     onProgress?.(30);
 
-    const res = await fetch('https://v2.convertapi.com/convert/pdf/to/xlsx', {
+    const res = await fetch('https://v2.convertapi.com/convert/pdf/to/xlsx?StoreFile=true', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${CONVERT_API_SECRET}`,
@@ -1788,11 +1830,22 @@ export async function convertPdfToExcel(
     if (res.ok) {
       onProgress?.(80);
       const data = await res.json();
-      if (data.Files && data.Files.length > 0 && data.Files[0].FileData) {
-        const xlsxBlob = base64ToBlob(
-          data.Files[0].FileData,
-          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        );
+      const fileObj = data.Files?.[0];
+
+      if (fileObj) {
+        let xlsxBlob: Blob;
+        if (fileObj.Url) {
+          const dlRes = await fetch(fileObj.Url);
+          xlsxBlob = await dlRes.blob();
+        } else if (fileObj.FileData) {
+          xlsxBlob = base64ToBlob(
+            fileObj.FileData,
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+          );
+        } else {
+          throw new Error('No valid file output returned by conversion engine');
+        }
+
         const base = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
         const outName = sanitizeFilename(`${base}.xlsx`);
         const downloadUrl = URL.createObjectURL(xlsxBlob);
@@ -1809,6 +1862,9 @@ export async function convertPdfToExcel(
           metadata: { engine: 'microsoft-excel', quality: '100% spreadsheet' },
         };
       }
+    } else {
+      const errTxt = await res.text();
+      console.warn('ConvertAPI PDF to Excel returned error status:', res.status, errTxt);
     }
   } catch (apiErr) {
     console.warn('ConvertAPI request failed for PDF to Excel, switching to local table extractor:', apiErr);
