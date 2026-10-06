@@ -48,17 +48,6 @@ export const ToolHeader: React.FC<ToolHeaderProps> = ({
               <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
                 {tool.name}
               </h1>
-              {tool.engine === 'browser' ? (
-                <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                  <Zap className="w-3 h-3" />
-                  In-Browser Engine
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                  <Cloud className="w-3 h-3" />
-                  Cloud API Ready
-                </span>
-              )}
             </div>
             <p className="mt-1.5 text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-2xl leading-relaxed">
               {tool.description}
@@ -81,16 +70,6 @@ export const ToolHeader: React.FC<ToolHeaderProps> = ({
             <span>{isFavorite ? 'Favorited' : 'Favorite'}</span>
           </button>
         </div>
-      </div>
-
-      {/* Trust & Privacy Notice */}
-      <div className="mt-5 flex items-center gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-400">
-        <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
-        <span>
-          {tool.engine === 'browser'
-            ? 'Processing happens directly in your browser. Your files never leave your device.'
-            : 'Your files are processed securely and are not stored permanently. Cloud API engine ready.'}
-        </span>
       </div>
     </div>
   );
