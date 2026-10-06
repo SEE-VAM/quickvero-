@@ -1,4 +1,4 @@
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, degrees, rgb, StandardFonts } from 'pdf-lib';
 import * as pdfjsLib from 'pdfjs-dist';
 import { ProcessResult } from '../types/tool';
 import { sanitizeFilename } from '../utils/fileHelpers';
@@ -1873,5 +1873,437 @@ export async function convertPdfToExcel(
     metadata: { pages: numPages, fallback: true },
   };
 }
+
+/**
+ * Rotate PDF pages by 90, 180, or 270 degrees
+ */
+export async function rotatePdfFile(
+  file: File,
+  options: { angle?: number } = {},
+  onProgress?: (percent: number) => void
+): Promise<ProcessResult> {
+  onProgress?.(15);
+  const arrayBuffer = await file.arrayBuffer();
+  const angle = options.angle ?? 90;
+
+  onProgress?.(40);
+  const doc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+  const pages = doc.getPages();
+
+  for (let i = 0; i < pages.length; i++) {
+    const page = pages[i];
+    const currentRotation = page.getRotation().angle;
+    page.setRotation(degrees((currentRotation + angle) % 360));
+  }
+
+  onProgress?.(80);
+  const pdfBytes = await doc.save({ useObjectStreams: true });
+  const finalBlob = new Blob([pdfBytes.buffer as ArrayBuffer], { type: 'application/pdf' });
+  const base = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+  const outName = sanitizeFilename(`${base}_rotated.pdf`);
+  const downloadUrl = URL.createObjectURL(finalBlob);
+
+  onProgress?.(100);
+
+  return {
+    blob: finalBlob,
+    downloadUrl,
+    filename: outName,
+    originalSize: file.size,
+    processedSize: finalBlob.size,
+    savingsPercentage: 0,
+    metadata: { pages: pages.length, rotation: angle },
+  };
+}
+
+/**
+ * Helper to parse hex color to pdf-lib rgb
+ */
+function hexToRgb(hex: string) {
+  let clean = hex.replace('#', '');
+  if (clean.length === 3) {
+    clean = clean.split('').map((c) => c + c).join('');
+  }
+  const num = parseInt(clean, 16);
+  const r = ((num >> 16) & 255) / 255;
+  const g = ((num >> 8) & 255) / 255;
+  const b = (num & 255) / 255;
+  return rgb(r, g, b);
+}
+
+/**
+ * Add text watermark to all PDF pages
+ */
+export async function addWatermarkToPdf(
+  file: File,
+  options: {
+    text: string;
+    fontSize?: number;
+    opacity?: number;
+    rotation?: number;
+    color?: string;
+  },
+  onProgress?: (percent: number) => void
+): Promise<ProcessResult> {
+  onProgress?.(15);
+  const arrayBuffer = await file.arrayBuffer();
+  const doc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+  const font = await doc.embedFont(StandardFonts.HelveticaBold);
+  const pages = doc.getPages();
+
+  const watermarkText = options.text || 'CONFIDENTIAL';
+  const size = options.fontSize || 48;
+  const opacity = options.opacity ?? 0.35;
+  const angle = options.rotation ?? 45;
+  const color = hexToRgb(options.color || '#ef4444');
+
+  for (let i = 0; i < pages.length; i++) {
+    const page = pages[i];
+    const { width, height } = page.getSize();
+    const textWidth = font.widthOfTextAtSize(watermarkText, size);
+    const textHeight = font.heightAtSize(size);
+
+    // Approximate center with rotation
+    const rad = (angle * Math.PI) / 180;
+    const cos = Math.cos(rad);
+    const sin = Math.sin(rad);
+    const x = width / 2 - (textWidth / 2) * cos + (textHeight / 2) * sin;
+    const y = height / 2 - (textWidth / 2) * sin - (textHeight / 2) * cos;
+
+    page.drawText(watermarkText, {
+      x,
+      y,
+      size,
+      font,
+      color,
+      rotate: degrees(angle),
+      opacity,
+    });
+
+    onProgress?.(20 + Math.round(((i + 1) / pages.length) * 60));
+  }
+
+  const pdfBytes = await doc.save({ useObjectStreams: true });
+  const finalBlob = new Blob([pdfBytes.buffer as ArrayBuffer], { type: 'application/pdf' });
+  const base = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+  const outName = sanitizeFilename(`${base}_watermarked.pdf`);
+  const downloadUrl = URL.createObjectURL(finalBlob);
+
+  onProgress?.(100);
+
+  return {
+    blob: finalBlob,
+    downloadUrl,
+    filename: outName,
+    originalSize: file.size,
+    processedSize: finalBlob.size,
+    savingsPercentage: 0,
+    metadata: { pages: pages.length, watermarkText },
+  };
+}
+
+/**
+ * Add page numbers to all PDF pages
+ */
+export async function addPageNumbersToPdf(
+  file: File,
+  options: {
+    position?: 'bottom-center' | 'bottom-right' | 'bottom-left' | 'top-right' | 'top-center';
+    format?: 'Page X of Y' | 'X of Y' | 'Page X' | 'X';
+    fontSize?: number;
+    margin?: number;
+  } = {},
+  onProgress?: (percent: number) => void
+): Promise<ProcessResult> {
+  onProgress?.(15);
+  const arrayBuffer = await file.arrayBuffer();
+  const doc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+  const font = await doc.embedFont(StandardFonts.Helvetica);
+  const pages = doc.getPages();
+  const total = pages.length;
+
+  const position = options.position || 'bottom-center';
+  const format = options.format || 'Page X of Y';
+  const size = options.fontSize || 11;
+  const margin = options.margin || 24;
+  const textColor = rgb(0.25, 0.25, 0.25);
+
+  for (let i = 0; i < total; i++) {
+    const page = pages[i];
+    const { width, height } = page.getSize();
+    const current = i + 1;
+
+    let text = `Page ${current} of ${total}`;
+    if (format === 'X of Y') text = `${current} of ${total}`;
+    else if (format === 'Page X') text = `Page ${current}`;
+    else if (format === 'X') text = `${current}`;
+
+    const textWidth = font.widthOfTextAtSize(text, size);
+    let x = width / 2 - textWidth / 2;
+    let y = margin;
+
+    if (position === 'bottom-right') {
+      x = width - margin - textWidth;
+      y = margin;
+    } else if (position === 'bottom-left') {
+      x = margin;
+      y = margin;
+    } else if (position === 'top-center') {
+      x = width / 2 - textWidth / 2;
+      y = height - margin - size;
+    } else if (position === 'top-right') {
+      x = width - margin - textWidth;
+      y = height - margin - size;
+    }
+
+    page.drawText(text, {
+      x,
+      y,
+      size,
+      font,
+      color: textColor,
+    });
+
+    onProgress?.(20 + Math.round(((i + 1) / total) * 60));
+  }
+
+  const pdfBytes = await doc.save({ useObjectStreams: true });
+  const finalBlob = new Blob([pdfBytes.buffer as ArrayBuffer], { type: 'application/pdf' });
+  const base = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+  const outName = sanitizeFilename(`${base}_numbered.pdf`);
+  const downloadUrl = URL.createObjectURL(finalBlob);
+
+  onProgress?.(100);
+
+  return {
+    blob: finalBlob,
+    downloadUrl,
+    filename: outName,
+    originalSize: file.size,
+    processedSize: finalBlob.size,
+    savingsPercentage: 0,
+    metadata: { pages: total, style: format },
+  };
+}
+
+/**
+ * Remove specified pages from PDF
+ */
+export async function removePdfPages(
+  file: File,
+  options: { pagesToRemove: string },
+  onProgress?: (percent: number) => void
+): Promise<ProcessResult> {
+  onProgress?.(15);
+  const arrayBuffer = await file.arrayBuffer();
+  const doc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+  const totalPages = doc.getPageCount();
+
+  const toRemoveSet = new Set<number>();
+  const parts = options.pagesToRemove.split(/[,;\s]+/);
+
+  for (const part of parts) {
+    if (!part) continue;
+    if (part.includes('-')) {
+      const [sStr, eStr] = part.split('-');
+      const s = parseInt(sStr, 10);
+      const e = parseInt(eStr, 10);
+      if (!isNaN(s) && !isNaN(e)) {
+        const from = Math.max(1, Math.min(s, e));
+        const to = Math.min(totalPages, Math.max(s, e));
+        for (let p = from; p <= to; p++) toRemoveSet.add(p - 1);
+      }
+    } else {
+      const p = parseInt(part, 10);
+      if (!isNaN(p) && p >= 1 && p <= totalPages) {
+        toRemoveSet.add(p - 1);
+      }
+    }
+  }
+
+  if (toRemoveSet.size === 0) {
+    throw new Error('Please specify valid page numbers to remove.');
+  }
+
+  if (toRemoveSet.size >= totalPages) {
+    throw new Error('Cannot remove all pages from the PDF document.');
+  }
+
+  // Remove pages in descending order so earlier indices remain valid
+  const sortedToRemove = Array.from(toRemoveSet).sort((a, b) => b - a);
+  for (const idx of sortedToRemove) {
+    doc.removePage(idx);
+  }
+
+  onProgress?.(70);
+  const pdfBytes = await doc.save({ useObjectStreams: true });
+  const finalBlob = new Blob([pdfBytes.buffer as ArrayBuffer], { type: 'application/pdf' });
+  const base = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+  const outName = sanitizeFilename(`${base}_edited.pdf`);
+  const downloadUrl = URL.createObjectURL(finalBlob);
+
+  onProgress?.(100);
+
+  return {
+    blob: finalBlob,
+    downloadUrl,
+    filename: outName,
+    originalSize: file.size,
+    processedSize: finalBlob.size,
+    savingsPercentage: 0,
+    metadata: { remainingPages: doc.getPageCount(), removedCount: sortedToRemove.length },
+  };
+}
+
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const res = reader.result as string;
+      const base64 = res.split(',')[1] || res;
+      resolve(base64);
+    };
+    reader.onerror = (e) => reject(e);
+    reader.readAsDataURL(file);
+  });
+}
+
+/**
+ * Encrypt and protect PDF with password via ConvertAPI
+ */
+export async function protectPdfFile(
+  file: File,
+  options: { password: string },
+  onProgress?: (percent: number) => void
+): Promise<ProcessResult> {
+  if (!options.password) {
+    throw new Error('Please specify a password to protect the PDF document.');
+  }
+
+  onProgress?.(20);
+  const base64Data = await fileToBase64(file);
+  const secret = 'mfSj1lSiIUJqPU8QoEMyA0aDF70hhpkp';
+
+  onProgress?.(45);
+  const response = await fetch(`https://v2.convertapi.com/convert/pdf/to/encrypt?Secret=${secret}&StoreFile=true`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      Parameters: [
+        {
+          Name: 'File',
+          FileValue: {
+            Name: file.name,
+            Data: base64Data,
+          },
+        },
+        {
+          Name: 'UserPassword',
+          Value: options.password,
+        },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Failed to protect PDF: ${errorText || response.statusText}`);
+  }
+
+  onProgress?.(80);
+  const json = await response.json();
+  const fileUrl = json?.Files?.[0]?.Url;
+  if (!fileUrl) {
+    throw new Error('Encryption completed but no file URL was returned.');
+  }
+
+  const fileRes = await fetch(fileUrl);
+  const protectedBlob = await fileRes.blob();
+
+  const base = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+  const outName = sanitizeFilename(`${base}_protected.pdf`);
+  const downloadUrl = URL.createObjectURL(protectedBlob);
+
+  onProgress?.(100);
+
+  return {
+    blob: protectedBlob,
+    downloadUrl,
+    filename: outName,
+    originalSize: file.size,
+    processedSize: protectedBlob.size,
+    savingsPercentage: 0,
+    metadata: { protected: true },
+  };
+}
+
+/**
+ * Decrypt and unlock PDF with password via ConvertAPI
+ */
+export async function unlockPdfFile(
+  file: File,
+  options: { password?: string } = {},
+  onProgress?: (percent: number) => void
+): Promise<ProcessResult> {
+  onProgress?.(20);
+  const base64Data = await fileToBase64(file);
+  const secret = 'mfSj1lSiIUJqPU8QoEMyA0aDF70hhpkp';
+
+  const parameters: any[] = [
+    {
+      Name: 'File',
+      FileValue: {
+        Name: file.name,
+        Data: base64Data,
+      },
+    },
+  ];
+
+  if (options.password) {
+    parameters.push({
+      Name: 'Password',
+      Value: options.password,
+    });
+  }
+
+  onProgress?.(45);
+  const response = await fetch(`https://v2.convertapi.com/convert/pdf/to/decrypt?Secret=${secret}&StoreFile=true`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ Parameters: parameters }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Failed to unlock PDF: ${errorText || 'Incorrect password or unsupported file format'}`);
+  }
+
+  onProgress?.(80);
+  const json = await response.json();
+  const fileUrl = json?.Files?.[0]?.Url;
+  if (!fileUrl) {
+    throw new Error('Decryption completed but no file URL was returned.');
+  }
+
+  const fileRes = await fetch(fileUrl);
+  const unlockedBlob = await fileRes.blob();
+
+  const base = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+  const outName = sanitizeFilename(`${base}_unlocked.pdf`);
+  const downloadUrl = URL.createObjectURL(unlockedBlob);
+
+  onProgress?.(100);
+
+  return {
+    blob: unlockedBlob,
+    downloadUrl,
+    filename: outName,
+    originalSize: file.size,
+    processedSize: unlockedBlob.size,
+    savingsPercentage: 0,
+    metadata: { unlocked: true },
+  };
+}
+
 
 

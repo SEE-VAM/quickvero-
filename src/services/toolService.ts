@@ -1,7 +1,21 @@
 import { ProcessResult, ToolDefinition } from '../types/tool';
 import { compressImage, compressImageToTargetSize, resizeImage, convertImageFormat } from './imageProcessor';
 import { convertImageToPdf } from './fileProcessor';
-import { compressPdfFile, splitPdfFile, convertPdfToJpg, convertWordToPdf, convertExcelToPdf, convertPdfToWord, convertPdfToExcel } from './pdfProcessor';
+import {
+  compressPdfFile,
+  splitPdfFile,
+  convertPdfToJpg,
+  convertWordToPdf,
+  convertExcelToPdf,
+  convertPdfToWord,
+  convertPdfToExcel,
+  rotatePdfFile,
+  addWatermarkToPdf,
+  addPageNumbersToPdf,
+  removePdfPages,
+  protectPdfFile,
+  unlockPdfFile,
+} from './pdfProcessor';
 import { extractAudioFromVideo, compressAudio, convertAudioFormat } from './audioProcessor';
 import { convertVideo, compressVideo, resizeVideo, convertVideoToGif } from './videoProcessor';
 
@@ -108,6 +122,30 @@ export class ToolService {
 
       case 'pdf-to-excel': {
         return await convertPdfToExcel(file, onProgress);
+      }
+
+      case 'rotate-pdf': {
+        return await rotatePdfFile(file, options, onProgress);
+      }
+
+      case 'protect-pdf': {
+        return await protectPdfFile(file, options as { password: string }, onProgress);
+      }
+
+      case 'unlock-pdf': {
+        return await unlockPdfFile(file, options, onProgress);
+      }
+
+      case 'add-watermark-to-pdf': {
+        return await addWatermarkToPdf(file, options as any, onProgress);
+      }
+
+      case 'add-page-numbers-to-pdf': {
+        return await addPageNumbersToPdf(file, options as any, onProgress);
+      }
+
+      case 'remove-pdf-pages': {
+        return await removePdfPages(file, options as { pagesToRemove: string }, onProgress);
       }
 
       case 'mp4-to-mp3':

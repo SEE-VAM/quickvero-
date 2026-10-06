@@ -82,17 +82,76 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
         </div>
 
         {/* Tools Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-          {categoryTools.map((tool) => (
-            <ToolCard
-              key={tool.id}
-              tool={tool}
-              onSelect={(t) => onNavigate(t.route)}
-              isFavorite={favorites.includes(tool.id)}
-              onToggleFavorite={onToggleFavorite}
-            />
-          ))}
-        </div>
+        {categoryId === 'pdf' ? (
+          <div className="space-y-12">
+            {[
+              {
+                title: 'ORGANIZE PDF',
+                desc: 'Merge, split, rotate, and manage pages in your PDF documents.',
+                ids: ['merge-pdf', 'split-pdf', 'remove-pdf-pages', 'rotate-pdf'],
+              },
+              {
+                title: 'OPTIMIZE PDF',
+                desc: 'Compress and shrink PDF file size for fast uploads and email attachments.',
+                ids: ['pdf-compressor', 'compress-pdf-to-100kb', 'compress-pdf-to-200kb'],
+              },
+              {
+                title: 'CONVERT TO PDF',
+                desc: 'Convert images, Word, and Excel files into professional PDF documents.',
+                ids: ['jpg-to-pdf', 'word-to-pdf', 'excel-to-pdf'],
+              },
+              {
+                title: 'CONVERT FROM PDF',
+                desc: 'Extract JPG photos, editable Word files, and Excel tables from PDF.',
+                ids: ['pdf-to-jpg', 'pdf-to-word', 'pdf-to-excel'],
+              },
+              {
+                title: 'EDIT & PDF SECURITY',
+                desc: 'Directly edit text, stamp watermarks, add page numbers, protect, and unlock PDFs.',
+                ids: ['pdf-editor', 'add-watermark-to-pdf', 'add-page-numbers-to-pdf', 'protect-pdf', 'unlock-pdf'],
+              },
+            ].map((section) => {
+              const toolsInSection = categoryTools.filter((t) => section.ids.includes(t.id));
+              if (toolsInSection.length === 0) return null;
+              return (
+                <div key={section.title} className="space-y-4">
+                  <div className="border-b border-slate-200 dark:border-slate-800 pb-3">
+                    <h2 className="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-white uppercase flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-rose-500"></span>
+                      {section.title}
+                    </h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                      {section.desc}
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                    {toolsInSection.map((tool) => (
+                      <ToolCard
+                        key={tool.id}
+                        tool={tool}
+                        onSelect={(t) => onNavigate(t.route)}
+                        isFavorite={favorites.includes(tool.id)}
+                        onToggleFavorite={onToggleFavorite}
+                      />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {categoryTools.map((tool) => (
+              <ToolCard
+                key={tool.id}
+                tool={tool}
+                onSelect={(t) => onNavigate(t.route)}
+                isFavorite={favorites.includes(tool.id)}
+                onToggleFavorite={onToggleFavorite}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Ad Placement */}
         <div className="mt-12">

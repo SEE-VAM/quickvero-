@@ -1044,6 +1044,209 @@ export const TOOLS: ToolDefinition[] = [
     ]
   },
 
+  {
+    id: 'rotate-pdf',
+    name: 'Rotate PDF',
+    slug: 'rotate-pdf',
+    category: 'pdf',
+    route: '/tools/rotate-pdf',
+    shortDescription: 'Rotate PDF pages by 90, 180, or 270 degrees clockwise.',
+    description: 'Rotate PDF pages permanently online for free. Fix upside-down scans, adjust orientation between portrait and landscape, and download a properly oriented PDF instantly in your browser.',
+    icon: 'RotateCw',
+    supportedFormats: ['application/pdf', '.pdf'],
+    maxFileSizeMB: 100,
+    engine: 'browser',
+    isPopular: true,
+    seoTitle: 'Rotate PDF Online Free — Turn PDF Pages 90, 180, 270 Degrees | QuickVero',
+    seoDescription: 'Rotate PDF pages online for free with QuickVero. Permanently rotate PDF 90 degrees clockwise, counterclockwise, or 180 degrees flip. 100% private, no sign-up.',
+    keywords: ['rotate pdf', 'turn pdf pages', 'rotate pdf 90 degrees', 'fix upside down pdf', 'rotate pdf permanently online'],
+    features: [
+      'Rotate 90° clockwise, 180° flip, or 270° counterclockwise',
+      'Rotates all pages permanently in high resolution',
+      '100% Client-side processing — documents never leave your browser',
+      'Instant download with zero watermarks',
+      'Preserves original PDF quality, fonts, and hyperlinks'
+    ],
+    howToSteps: [
+      { step: 1, title: 'Upload PDF', description: 'Select or drag & drop your PDF file.' },
+      { step: 2, title: 'Choose Rotation Angle', description: 'Select 90° Right, 180° Flip, or 90° Left.' },
+      { step: 3, title: 'Rotate & Download', description: 'Click Rotate PDF and instantly download your corrected document.' }
+    ],
+    faqs: [
+      { question: 'Will rotating my PDF reduce text or photo quality?', answer: 'No! The rotation modifies page viewport orientation metadata without re-encoding or rasterizing your content. Everything remains crystal clear.' },
+      { question: 'Is my document uploaded to any server?', answer: 'No, all rotation takes place 100% locally in your web browser.' }
+    ]
+  },
+
+  {
+    id: 'protect-pdf',
+    name: 'Protect PDF',
+    slug: 'protect-pdf',
+    category: 'pdf',
+    route: '/tools/protect-pdf',
+    shortDescription: 'Encrypt PDF files with a secure password to prevent unauthorized access.',
+    description: 'Protect sensitive PDF documents with robust password encryption online. Add a secure password to prevent unauthorized viewing, printing, or copying of contracts, financial statements, and confidential records.',
+    icon: 'Lock',
+    supportedFormats: ['application/pdf', '.pdf'],
+    maxFileSizeMB: 50,
+    engine: 'browser',
+    isPopular: true,
+    seoTitle: 'Protect PDF Online Free — Password Protect PDF | QuickVero',
+    seoDescription: 'Encrypt and password protect your PDF files online for free with QuickVero. Lock confidential documents, contracts, and financial records with secure encryption.',
+    keywords: ['protect pdf', 'password protect pdf', 'encrypt pdf', 'lock pdf with password', 'secure pdf online'],
+    features: [
+      'Standard 128-bit / 256-bit AES PDF encryption',
+      'Prevents unauthorized opening, printing, and copying',
+      'Requires password prompt across all PDF viewers (Adobe Acrobat, Chrome, Preview)',
+      'Free, fast, and simple to use',
+      'No registration or personal details required'
+    ],
+    howToSteps: [
+      { step: 1, title: 'Upload PDF Document', description: 'Upload the PDF you want to password protect.' },
+      { step: 2, title: 'Enter Password', description: 'Type and confirm your desired confidential password.' },
+      { step: 3, title: 'Download Protected PDF', description: 'Download your encrypted PDF file immediately.' }
+    ],
+    faqs: [
+      { question: 'What happens if I forget the password?', answer: 'Because standard PDF encryption is secure, you will not be able to open the document without the password. Be sure to note it down safely!' },
+      { question: 'Will this password work on mobile and Mac Preview?', answer: 'Yes, the encryption follows standard PDF specifications and will prompt for a password in Adobe Acrobat, Apple Preview, Google Chrome, and iOS/Android viewers.' }
+    ]
+  },
+
+  {
+    id: 'unlock-pdf',
+    name: 'Unlock PDF',
+    slug: 'unlock-pdf',
+    category: 'pdf',
+    route: '/tools/unlock-pdf',
+    shortDescription: 'Remove password and restrictions from protected PDF documents.',
+    description: 'Unlock password-protected PDF documents online for free. Remove view passwords and editing/printing restrictions so you can freely read, edit, print, and share your PDF without entering a password every time.',
+    icon: 'Unlock',
+    supportedFormats: ['application/pdf', '.pdf'],
+    maxFileSizeMB: 50,
+    engine: 'browser',
+    isPopular: true,
+    seoTitle: 'Unlock PDF Online Free — Remove PDF Password & Restrictions | QuickVero',
+    seoDescription: 'Unlock password protected PDF files online for free with QuickVero. Remove owner password and restrictions to view, edit, and print freely.',
+    keywords: ['unlock pdf', 'remove pdf password', 'decrypt pdf', 'pdf password remover', 'unprotect pdf'],
+    features: [
+      'Removes passwords and permission locks permanently',
+      'Enables printing, copying, and editing restrictions',
+      'Produces clean, standard unencrypted PDF',
+      'Fast online decryption',
+      'Instant download without watermarks'
+    ],
+    howToSteps: [
+      { step: 1, title: 'Upload Locked PDF', description: 'Select your encrypted or restricted PDF file.' },
+      { step: 2, title: 'Provide Password', description: 'Enter the password to authenticate and remove encryption.' },
+      { step: 3, title: 'Download Unlocked PDF', description: 'Save your open PDF file.' }
+    ],
+    faqs: [
+      { question: 'Do I need to know the password to unlock the PDF?', answer: 'For standard user-password protected documents, entering the password once decrypts the file permanently so you never need to type it again.' }
+    ]
+  },
+
+  {
+    id: 'add-watermark-to-pdf',
+    name: 'Add Watermark to PDF',
+    slug: 'add-watermark-to-pdf',
+    category: 'pdf',
+    route: '/tools/add-watermark-to-pdf',
+    shortDescription: 'Stamp custom text watermarks like CONFIDENTIAL or DRAFT onto PDF.',
+    description: 'Add custom text watermarks to your PDF documents online for free. Choose custom text like CONFIDENTIAL, DRAFT, SAMPLE, or your brand name with adjustable opacity, angle, font size, and color across all pages.',
+    icon: 'Stamp',
+    supportedFormats: ['application/pdf', '.pdf'],
+    maxFileSizeMB: 100,
+    engine: 'browser',
+    isPopular: true,
+    seoTitle: 'Add Watermark to PDF Online Free — Stamp Text on PDF | QuickVero',
+    seoDescription: 'Add text watermark to PDF documents online for free with QuickVero. Stamp CONFIDENTIAL, DRAFT, or custom text with adjustable angle, opacity, and color in your browser.',
+    keywords: ['add watermark to pdf', 'watermark pdf online', 'stamp pdf', 'confidential watermark pdf', 'draft watermark pdf'],
+    features: [
+      'Custom text stamping with one-click presets (CONFIDENTIAL, DRAFT, SAMPLE)',
+      'Adjustable rotation angle (45° diagonal, horizontal, vertical)',
+      'Opacity control from subtle 10% to prominent 90%',
+      'Custom color picker for bold or delicate branding',
+      '100% in-browser processing with zero server uploads'
+    ],
+    howToSteps: [
+      { step: 1, title: 'Upload PDF', description: 'Select or drag & drop your PDF file.' },
+      { step: 2, title: 'Customize Watermark', description: 'Enter text, pick angle, opacity, and color.' },
+      { step: 3, title: 'Apply & Download', description: 'Download your stamped PDF document.' }
+    ],
+    faqs: [
+      { question: 'Does the watermark appear on every page?', answer: 'Yes! The watermark is automatically stamped onto all pages in the document uniformly.' },
+      { question: 'Can the watermark be removed easily by others?', answer: 'The watermark is embedded directly into the PDF content stream, making it permanent for regular viewers and printers.' }
+    ]
+  },
+
+  {
+    id: 'add-page-numbers-to-pdf',
+    name: 'Add Page Numbers to PDF',
+    slug: 'add-page-numbers-to-pdf',
+    category: 'pdf',
+    route: '/tools/add-page-numbers-to-pdf',
+    shortDescription: 'Insert clean page numbers and headers/footers into PDF documents.',
+    description: 'Add page numbers to PDF documents online for free. Choose numbering styles like "Page 1 of 12" or "1 of 12" and customize position (bottom-center, bottom-right, top-right) with clean typography.',
+    icon: 'Hash',
+    supportedFormats: ['application/pdf', '.pdf'],
+    maxFileSizeMB: 100,
+    engine: 'browser',
+    isPopular: true,
+    seoTitle: 'Add Page Numbers to PDF Online Free — Number PDF Pages | QuickVero',
+    seoDescription: 'Add page numbers to PDF documents online for free with QuickVero. Number pages easily with custom positions (bottom-center, bottom-right) and formats in your browser.',
+    keywords: ['add page numbers to pdf', 'number pdf pages', 'pdf pagination', 'insert page numbers pdf online', 'pdf page numbering'],
+    features: [
+      'Flexible numbering styles: "Page X of Y", "X of Y", "Page X", "X"',
+      '5 position presets (Bottom Center, Bottom Right, Bottom Left, Top Right, Top Center)',
+      'Adjustable font size and professional margins',
+      '100% Client-side processing — works completely offline in your browser',
+      'Instant download with zero watermarks'
+    ],
+    howToSteps: [
+      { step: 1, title: 'Upload PDF', description: 'Select the PDF document you want to number.' },
+      { step: 2, title: 'Select Position & Style', description: 'Choose your desired placement and numbering format.' },
+      { step: 3, title: 'Download Numbered PDF', description: 'Save your paginated PDF document instantly.' }
+    ],
+    faqs: [
+      { question: 'Will page numbers overlap my document text?', answer: 'Page numbers are placed in standard margin areas (bottom or top edge) to keep your main body content clear.' },
+      { question: 'Does it update the total page count automatically?', answer: 'Yes, if you choose "Page X of Y" or "X of Y", it calculates the exact total page count of your PDF.' }
+    ]
+  },
+
+  {
+    id: 'remove-pdf-pages',
+    name: 'Remove PDF Pages',
+    slug: 'remove-pdf-pages',
+    category: 'pdf',
+    route: '/tools/remove-pdf-pages',
+    shortDescription: 'Delete unwanted pages or blank sheets from PDF files online.',
+    description: 'Delete specific pages from a PDF document online for free. Remove blank pages, outdated sections, cover sheets, or confidential appendices by entering page numbers or ranges.',
+    icon: 'Trash2',
+    supportedFormats: ['application/pdf', '.pdf'],
+    maxFileSizeMB: 100,
+    engine: 'browser',
+    isPopular: true,
+    seoTitle: 'Remove PDF Pages Online Free — Delete Pages from PDF | QuickVero',
+    seoDescription: 'Delete pages from PDF documents online for free with QuickVero. Remove unwanted single pages or page ranges in your browser with zero server uploads.',
+    keywords: ['remove pdf pages', 'delete pages from pdf', 'cut pages out of pdf', 'remove blank pages pdf', 'delete pdf page online'],
+    features: [
+      'Delete individual pages or ranges (e.g. 1, 3, 5-8)',
+      'Quick presets to delete first or last page',
+      '100% In-browser processing — maximum privacy',
+      'Preserves resolution and vector typography of remaining pages',
+      'Instant download with zero watermarks'
+    ],
+    howToSteps: [
+      { step: 1, title: 'Upload PDF', description: 'Select the PDF you want to remove pages from.' },
+      { step: 2, title: 'Specify Pages to Delete', description: 'Enter page numbers or ranges (e.g. 1, 4, 7-9).' },
+      { step: 3, title: 'Download Clean PDF', description: 'Save your streamlined PDF document.' }
+    ],
+    faqs: [
+      { question: 'Can I remove multiple non-consecutive pages at once?', answer: 'Yes! Simply separate page numbers with commas, such as "1, 3, 7-10".' },
+      { question: 'Does removing pages alter the quality of the remaining document?', answer: 'No! The remaining pages are copied verbatim with identical quality and vector graphics.' }
+    ]
+  },
+
   // ================= FILE TOOLS =================
   {
     id: 'hash-generator',

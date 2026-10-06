@@ -18,6 +18,12 @@ import { MergePdfWorkspace } from '../components/tool/controls/MergePdfWorkspace
 import { PdfCompressorControls } from '../components/tool/controls/PdfCompressorControls';
 import { SplitPdfControls } from '../components/tool/controls/SplitPdfControls';
 import { PdfToJpgControls } from '../components/tool/controls/PdfToJpgControls';
+import { RotatePdfControls } from '../components/tool/controls/RotatePdfControls';
+import { ProtectPdfControls } from '../components/tool/controls/ProtectPdfControls';
+import { UnlockPdfControls } from '../components/tool/controls/UnlockPdfControls';
+import { WatermarkPdfControls } from '../components/tool/controls/WatermarkPdfControls';
+import { PageNumbersPdfControls } from '../components/tool/controls/PageNumbersPdfControls';
+import { RemovePdfPagesControls } from '../components/tool/controls/RemovePdfPagesControls';
 import { PdfEditorWorkspace } from '../components/tool/controls/PdfEditorWorkspace';
 import { Mp4ToMp3Controls } from '../components/tool/controls/Mp4ToMp3Controls';
 import { AudioCompressorControls } from '../components/tool/controls/AudioCompressorControls';
@@ -315,6 +321,49 @@ export const ToolDetailPage: React.FC<ToolDetailPageProps> = ({
                     <SplitPdfControls
                       file={selectedFile}
                       onSplit={(opts) => executeProcessing(opts)}
+                      isProcessing={false}
+                    />
+                  )}
+
+                  {tool.id === 'rotate-pdf' && (
+                    <RotatePdfControls
+                      onRotate={(opts) => executeProcessing(opts)}
+                      isProcessing={false}
+                    />
+                  )}
+
+                  {tool.id === 'protect-pdf' && (
+                    <ProtectPdfControls
+                      onProtect={(opts) => executeProcessing(opts)}
+                      isProcessing={false}
+                    />
+                  )}
+
+                  {tool.id === 'unlock-pdf' && (
+                    <UnlockPdfControls
+                      onUnlock={(opts) => executeProcessing(opts)}
+                      isProcessing={false}
+                    />
+                  )}
+
+                  {tool.id === 'add-watermark-to-pdf' && (
+                    <WatermarkPdfControls
+                      onWatermark={(opts) => executeProcessing(opts)}
+                      isProcessing={false}
+                    />
+                  )}
+
+                  {tool.id === 'add-page-numbers-to-pdf' && (
+                    <PageNumbersPdfControls
+                      onAddPageNumbers={(opts) => executeProcessing(opts)}
+                      isProcessing={false}
+                    />
+                  )}
+
+                  {tool.id === 'remove-pdf-pages' && (
+                    <RemovePdfPagesControls
+                      file={selectedFile}
+                      onRemovePages={(opts) => executeProcessing(opts)}
                       isProcessing={false}
                     />
                   )}
