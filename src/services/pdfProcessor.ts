@@ -427,9 +427,11 @@ export interface DetectedTextItem {
   heightPercent: number;
   fontSize: number;
   fontFamily: string;
+  fontWeight?: number | string;
   isBold: boolean;
   isItalic: boolean;
   textColor: string;
+  backgroundColor?: string;
 }
 
 export interface CustomTextBox {
@@ -504,21 +506,31 @@ export function loadImageFromDataUrl(dataUrl: string): Promise<HTMLImageElement>
   });
 }
 
-export function normalizeFontFamily(rawFontName: string, rawFamily?: string): string {
+export function normalizeFontFamily(rawFontName: string, rawFamily?: string, charWidthRatio?: number): string {
   // Strip subset prefix (e.g. "ABCDEF+TimesNewRoman" -> "TimesNewRoman")
   const cleanName = rawFontName.includes('+') ? rawFontName.split('+')[1] : rawFontName;
   const combined = `${cleanName} ${rawFontName} ${rawFamily || ''}`.toLowerCase();
 
-  // 1. Monospace fonts
-  if (
+  // 1. Monospace fonts (Bank statements, invoices, receipts, CBS Finacle outputs)
+  const isMonoName =
     combined.includes('courier') ||
     combined.includes('mono') ||
     combined.includes('consolas') ||
     combined.includes('menlo') ||
     combined.includes('inconsolata') ||
-    rawFamily?.toLowerCase() === 'monospace'
-  ) {
-    return "'Courier New', 'Courier', 'Consolas', monospace";
+    combined.includes('typewriter') ||
+    combined.includes('ocr') ||
+    combined.includes('lineprinter') ||
+    combined.includes('draft') ||
+    rawFamily?.toLowerCase() === 'monospace';
+
+  // In Indian banking PDFs (Canara, SBI, PNB etc.) fonts often get generic names like F1, F2, C1, TT1, TT2.
+  // Their characters have strict monospace pitch ratio (~0.48 to 0.68 of font height)
+  const isMonoPitch = charWidthRatio !== undefined && charWidthRatio >= 0.48 && charWidthRatio <= 0.68;
+  const isGenericBankingFont = /^(f\d+|tt\d+|c\d+|r\d+|font|g_d\d+_f\d+)/i.test(cleanName);
+
+  if (isMonoName || (isMonoPitch && isGenericBankingFont)) {
+    return "'Courier New', 'Courier', 'Lucida Console', monospace";
   }
 
   // 2. Genuine Serif typefaces (Check Serif before falling back to sans-serif!)
@@ -585,6 +597,53 @@ export function normalizeFontFamily(rawFontName: string, rawFamily?: string): st
   }
 
   return "'Arial', 'Helvetica Neue', Helvetica, sans-serif";
+}
+
+/**
+ * Accurately sample the background color from the rendered canvas behind the text box.
+ * This guarantees replacement text patches blend 100% invisibly into the paper or table cell.
+ */
+function sampleBackgroundColor(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number
+): string {
+  try {
+    const startX = Math.max(0, Math.min(ctx.canvas.width - 1, Math.round(x)));
+    const startY = Math.max(0, Math.min(ctx.canvas.height - 1, Math.round(y)));
+    const sampleW = Math.max(1, Math.min(ctx.canvas.width - startX, Math.round(Math.min(w, 24))));
+    const sampleH = Math.max(1, Math.min(ctx.canvas.height - startY, Math.round(Math.min(h, 20))));
+
+    const imgData = ctx.getImageData(startX, startY, sampleW, sampleH).data;
+    let maxBrightness = 0;
+    let bgR = 255;
+    let bgG = 255;
+    let bgB = 255;
+
+    for (let i = 0; i < imgData.length; i += 4) {
+      const r = imgData[i];
+      const g = imgData[i + 1];
+      const b = imgData[i + 2];
+      const a = imgData[i + 3];
+
+      if (a < 50) continue;
+      const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
+      if (brightness > maxBrightness) {
+        maxBrightness = brightness;
+        bgR = r;
+        bgG = g;
+        bgB = b;
+      }
+    }
+
+    if (maxBrightness > 160) {
+      const toHex = (c: number) => c.toString(16).padStart(2, '0');
+      return `#${toHex(bgR)}${toHex(bgG)}${toHex(bgB)}`;
+    }
+  } catch (_) {}
+  return '#ffffff';
 }
 
 /**
@@ -687,11 +746,16 @@ export async function loadPdfPageForEditing(
 
     // Viewport coordinates
     const [vx, vy] = viewport.convertToViewportPoint(item.transform[4], item.transform[5]);
-    const fontHeight = Math.hypot(item.transform[0], item.transform[1]) * scale;
+    
+    // Calculate accurate font scale
+    const fontScaleY = Math.hypot(item.transform[2], item.transform[3]) || Math.hypot(item.transform[0], item.transform[1]);
+    const pdfFontHeight = item.height > 0 ? item.height : fontScaleY;
+    const fontHeight = pdfFontHeight * scale;
+
     const itemWidth = Math.max(item.width * scale * 1.02, 12);
-    const itemHeight = Math.max(fontHeight * 1.10, 13);
+    const itemHeight = Math.max(fontHeight * 1.15, 14);
     // Baseline-adjusted top
-    const itemTop = Math.max(0, vy - fontHeight * 0.82);
+    const itemTop = Math.max(0, vy - fontHeight * 0.84);
 
     const xPercent = (vx / viewport.width) * 100;
     const yPercent = (itemTop / viewport.height) * 100;
@@ -711,7 +775,9 @@ export async function loadPdfPageForEditing(
     } catch (_) {}
 
     const style = textContent.styles[item.fontName];
-    const fontFam = normalizeFontFamily(rawFontName, style?.fontFamily);
+    const charWidthRatio = item.str.length > 0 ? (item.width / item.str.length) / pdfFontHeight : undefined;
+    const fontFam = normalizeFontFamily(rawFontName, style?.fontFamily, charWidthRatio);
+
     const isBold =
       /bold|black|heavy|700|800|900|\bbd\b|-bd\b|_bd\b/i.test(rawFontName) ||
       /bold|black|heavy|700|800|900|\bbd\b|-bd\b|_bd\b/i.test(item.fontName) ||
@@ -722,8 +788,9 @@ export async function loadPdfPageForEditing(
       (style?.fontFamily && /italic|oblique/i.test(style.fontFamily)) ||
       (Array.isArray(item.transform) && Math.abs(item.transform[2]) > 0.05);
 
-    // Accurately sample the text color from the rendered canvas
+    // Accurately sample the text color and background color from the rendered canvas
     const detectedColor = sampleTextColor(ctx, vx, vy - fontHeight * 0.7, itemWidth, fontHeight);
+    const detectedBgColor = sampleBackgroundColor(ctx, vx, vy - fontHeight * 0.7, itemWidth, fontHeight);
 
     textItems.push({
       id: `p${targetPageNum}_t${i}`,
@@ -736,9 +803,11 @@ export async function loadPdfPageForEditing(
       heightPercent,
       fontSize: Math.round(fontHeight),
       fontFamily: fontFam,
+      fontWeight: isBold ? 700 : 500,
       isBold: !!isBold,
       isItalic: !!isItalic,
       textColor: detectedColor,
+      backgroundColor: detectedBgColor,
     });
   }
 
@@ -829,7 +898,8 @@ export async function exportEditedPdf(
 
           // Render replacement text in exact matching font
           const scaledFontSize = Math.round(item.fontSize * (scale / 1.5));
-          ctx.font = `${item.isBold ? 'bold ' : ''}${item.isItalic ? 'italic ' : ''}${scaledFontSize}px ${item.fontFamily}`;
+          const weight = item.fontWeight || (item.isBold ? 'bold' : 'normal');
+          ctx.font = `${weight} ${item.isItalic ? 'italic ' : ''}${scaledFontSize}px ${item.fontFamily}`;
 
           // Accurately measure new text width with font set
           const measuredWidth = ctx.measureText(newText).width;
@@ -840,8 +910,8 @@ export async function exportEditedPdf(
             ? (item.baselineYPercent / 100) * canvas.height
             : iy + scaledFontSize * 0.82;
 
-          // Whiteout old text area cleanly without bleeding into adjacent lines
-          ctx.fillStyle = '#ffffff';
+          // Eraser matches the exact sampled background of the paper or table cell
+          ctx.fillStyle = item.backgroundColor || '#ffffff';
           const ascent = scaledFontSize * 0.88;
           const descent = scaledFontSize * 0.28;
           ctx.fillRect(ix, baselineY - ascent, fillWidth, ascent + descent);

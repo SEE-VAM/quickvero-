@@ -1595,23 +1595,19 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
 
         {pageDataUrl && (
           <div
-            className="flex justify-center items-start w-full my-auto shrink-0 mb-4"
+            className="relative my-auto shrink-0 mb-4 shadow-2xl rounded-lg bg-white"
             style={{
               width: `${Math.round(pageDimensions.width * (zoomLevel / 100))}px`,
               height: `${Math.round(pageDimensions.height * (zoomLevel / 100))}px`,
-              minWidth: `${Math.round(pageDimensions.width * (zoomLevel / 100))}px`,
-              minHeight: `${Math.round(pageDimensions.height * (zoomLevel / 100))}px`,
             }}
           >
             <div
               ref={documentContainerRef}
               onClick={handleContainerClick}
-              className="relative shadow-2xl rounded-lg bg-white overflow-hidden select-none origin-top-left shrink-0"
+              className="absolute top-0 left-0 bg-white overflow-hidden select-none origin-top-left shrink-0"
               style={{
                 width: `${pageDimensions.width}px`,
                 height: `${pageDimensions.height}px`,
-                minWidth: `${pageDimensions.width}px`,
-                minHeight: `${pageDimensions.height}px`,
                 transform: `scale(${zoomLevel / 100})`,
                 transformOrigin: 'top left',
                 cursor: mode === 'add-text' ? 'crosshair' : mode === 'whiteout' ? 'cell' : 'default',
@@ -1725,14 +1721,15 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
                     fontFamily: item.fontFamily,
                     fontSize: `${item.fontSize}px`,
                     lineHeight: 1,
-                    fontWeight: item.isBold ? 'bold' : 'normal',
+                    fontWeight: item.fontWeight || (item.isBold ? 700 : 500),
                     fontStyle: item.isItalic ? 'italic' : 'normal',
+                    backgroundColor: (isEditing || isEdited) ? (item.backgroundColor || '#ffffff') : undefined,
                   }}
                   className={`absolute transition-all flex items-center ${
                     isEditing
-                      ? 'z-50 bg-white ring-2 ring-blue-600 border-2 border-blue-600 shadow-2xl rounded-xs'
+                      ? 'z-50 ring-2 ring-blue-600 border-2 border-blue-600 shadow-xl rounded-xs'
                       : isEdited
-                      ? 'z-20 bg-white text-slate-900 cursor-text ' +
+                      ? 'z-20 text-slate-900 cursor-text ' +
                         (mode === 'edit-text'
                           ? 'border-[1.5px] border-dashed border-blue-500 hover:border-blue-700 hover:bg-blue-50/20'
                           : 'hover:outline hover:outline-1 hover:outline-blue-400')
@@ -1767,8 +1764,10 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
                           item.fontFamily.includes('Times') ||
                           (item.fontFamily.includes('serif') && !item.fontFamily.includes('sans'))
                             ? 'serif'
-                            : item.fontFamily.includes('mono')
+                            : item.fontFamily.includes('mono') || item.fontFamily.includes('Courier')
                             ? 'monospace'
+                            : item.fontFamily.includes('Calibri')
+                            ? 'calibri'
                             : 'sans-serif'
                         }
                         onChange={(e) => {
@@ -1779,15 +1778,18 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
                               val === 'serif'
                                 ? "'Times New Roman', 'Times', 'Liberation Serif', serif"
                                 : val === 'monospace'
-                                ? "'Courier New', 'Courier', monospace"
+                                ? "'Courier New', 'Courier', 'Lucida Console', monospace"
+                                : val === 'calibri'
+                                ? "'Calibri', 'Arial', sans-serif"
                                 : "'Arial', 'Helvetica Neue', Helvetica, sans-serif",
                           }));
                         }}
                         className="px-2 py-1 rounded-lg text-[11px] font-medium border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 cursor-pointer"
                       >
+                        <option value="monospace">Courier (Bank/Mono)</option>
+                        <option value="sans-serif">Arial (Sans-serif)</option>
                         <option value="serif">Times New Roman (Serif)</option>
-                        <option value="sans-serif">Arial / Helvetica (Sans)</option>
-                        <option value="monospace">Courier (Mono)</option>
+                        <option value="calibri">Calibri (Modern)</option>
                       </select>
 
                       {/* Font size decrement/increment */}
@@ -1917,16 +1919,17 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
                       style={{
                         fontFamily: item.fontFamily,
                         fontSize: `${item.fontSize}px`,
-                        fontWeight: item.isBold ? 'bold' : 'normal',
+                        fontWeight: item.fontWeight || (item.isBold ? 700 : 500),
                         fontStyle: item.isItalic ? 'italic' : 'normal',
                         color: item.textColor || '#000000',
+                        backgroundColor: item.backgroundColor || '#ffffff',
                         minWidth: '100%',
                         width: `${Math.max(displayText.length + 1, 4)}ch`,
                         lineHeight: 1,
                         padding: 0,
                         margin: 0,
                       }}
-                      className="bg-white p-0 m-0 outline-none border-none leading-none block h-full select-text"
+                      className="p-0 m-0 outline-none border-none leading-none block h-full select-text"
                     />
                   ) : isEdited ? (
                     <span
@@ -1935,7 +1938,7 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
                         color: item.textColor || '#000000',
                         fontFamily: item.fontFamily,
                         fontSize: `${item.fontSize}px`,
-                        fontWeight: item.isBold ? 'bold' : 'normal',
+                        fontWeight: item.fontWeight || (item.isBold ? 700 : 500),
                         fontStyle: item.isItalic ? 'italic' : 'normal',
                         padding: 0,
                         margin: 0,
