@@ -30,3 +30,6 @@ dist-ssr
 scratch/
 
 .vercel
+
+Deploy-To-Vercel.bat
+
