@@ -25,7 +25,10 @@ import {
   ShieldCheck,
   X,
   Move,
-  FileDown
+  FileDown,
+  ZoomIn,
+  ZoomOut,
+  Maximize2
 } from 'lucide-react';
 import {
   loadPdfPageForEditing,
@@ -77,6 +80,7 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
   const [currentPage, setCurrentPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
   const [isLoadingPage, setIsLoadingPage] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState<number>(100);
 
   // Active Canva Category Tab & Interaction Mode
   const [activeTab, setActiveTab] = useState<CanvaTab>('text');
@@ -988,7 +992,7 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
       {/* Top Canva Tool Navigation Tabs */}
       <div className="p-2.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex items-center justify-between gap-2 overflow-x-auto">
         <div className="flex items-center gap-1.5 shrink-0">
-          {/* Text Tab */}
+          {/* Edit Text Tab (In-place editing with blue dashed bounding boxes like PDFAid) */}
           <button
             type="button"
             onClick={() => {
@@ -996,13 +1000,37 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
               setMode('edit-text');
             }}
             className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              activeTab === 'text'
-                ? 'bg-brand-600 text-white shadow-sm'
+              activeTab === 'text' && mode === 'edit-text'
+                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/25 ring-2 ring-blue-500/20'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+            }`}
+          >
+            <Edit3 className="w-4 h-4" />
+            <span>Edit Text</span>
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+              activeTab === 'text' && mode === 'edit-text'
+                ? 'bg-white/20 text-white'
+                : 'bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300'
+            }`}>
+              Auto-Detect
+            </span>
+          </button>
+
+          {/* Add Text Tab */}
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab('text');
+              setMode('add-text');
+            }}
+            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              activeTab === 'text' && mode === 'add-text'
+                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/25'
                 : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
           >
             <Type className="w-4 h-4" />
-            <span>Text</span>
+            <span>Add Text</span>
           </button>
 
           {/* Signature Tab */}
@@ -1512,7 +1540,11 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
         <div className="flex items-center gap-2">
           <HelpCircle className="w-4 h-4 shrink-0 text-blue-500" />
           <span>
-            {activeTab === 'text' && mode === 'edit-text' && 'Click directly on any line or word below to edit its text in the original matching font.'}
+            {activeTab === 'text' && mode === 'edit-text' && (
+              <span>
+                <strong className="font-semibold text-blue-700 dark:text-blue-300">Live In-Place Text Editing:</strong> All text lines are outlined with <span className="underline decoration-blue-500 font-bold">blue dashed boxes</span>. Click any box to edit text in the original font, customize font size/color, or erase!
+              </span>
+            )}
             {activeTab === 'text' && mode === 'add-text' && 'Click anywhere on the document to insert a new text box.'}
             {activeTab === 'whiteout' && 'Click on the page to place a whiteout box (eraser). Drag over content you want to hide.'}
             {activeTab === 'sign' && 'Signatures placed on page can be dragged and repositioned freely.'}
@@ -1536,7 +1568,7 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
 
       {/* Document Viewport */}
       <div
-        className="p-4 sm:p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 overflow-x-auto flex justify-center min-h-[600px] relative select-none"
+        className="p-4 sm:p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 overflow-auto flex flex-col items-center min-h-[650px] relative select-none pb-20"
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
@@ -1554,11 +1586,13 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
           <div
             ref={documentContainerRef}
             onClick={handleContainerClick}
-            className="relative shadow-2xl rounded-lg bg-white overflow-hidden select-none"
+            className="relative shadow-2xl rounded-lg bg-white overflow-hidden select-none transition-transform duration-100 origin-top mb-4"
             style={{
               width: `${pageDimensions.width}px`,
               maxWidth: '100%',
               height: `${pageDimensions.height}px`,
+              transform: `scale(${zoomLevel / 100})`,
+              transformOrigin: 'top center',
               cursor: mode === 'add-text' ? 'crosshair' : mode === 'whiteout' ? 'cell' : 'default',
             }}
           >
@@ -1650,7 +1684,7 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
               </div>
             ))}
 
-            {/* Detected In-Line Text Elements */}
+            {/* Detected In-Line Text Elements (PDFAid Style Blue Dashed Interactive Boxes) */}
             {currentTextItems.map((item) => {
               const editedValue = currentPageEdits.editedItems[item.id];
               const isEdited = editedValue !== undefined && editedValue !== item.originalText;
@@ -1673,12 +1707,17 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
                     fontWeight: item.isBold ? 'bold' : 'normal',
                     fontStyle: item.isItalic ? 'italic' : 'normal',
                   }}
-                  className={`absolute z-15 transition-all flex items-center ${
+                  className={`absolute transition-all flex items-center ${
                     isEditing
-                      ? 'ring-2 ring-brand-500 bg-white shadow-lg z-30 rounded-xs'
+                      ? 'z-50 bg-white ring-2 ring-blue-600 border-2 border-blue-600 shadow-2xl rounded-xs'
                       : isEdited
-                      ? 'bg-white text-slate-900 z-15 hover:outline hover:outline-1 hover:outline-brand-400 cursor-text'
-                      : 'hover:bg-brand-500/15 hover:ring-1 hover:ring-brand-400 cursor-text'
+                      ? 'z-20 bg-white text-slate-900 shadow-xs cursor-text ' +
+                        (mode === 'edit-text'
+                          ? 'border-[1.5px] border-dashed border-blue-500 hover:border-blue-700 hover:bg-blue-50/20'
+                          : 'hover:outline hover:outline-1 hover:outline-blue-400')
+                      : mode === 'edit-text'
+                      ? 'z-15 border-[1.5px] border-dashed border-blue-500 bg-blue-500/[0.06] hover:bg-blue-500/20 hover:border-blue-700 hover:shadow-xs cursor-text rounded-xs'
+                      : 'z-15 hover:bg-blue-500/15 hover:ring-1 hover:ring-blue-400 cursor-text'
                   }`}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -1686,15 +1725,169 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
                       setActiveItemId(item.id);
                     }
                   }}
+                  title={
+                    mode === 'edit-text'
+                      ? `Click to edit text: "${displayText.substring(0, 30)}..."`
+                      : undefined
+                  }
                 >
+                  {/* Floating Formatting Toolbar Docked Above Active Text Box */}
+                  {isEditing && (
+                    <div
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={(e) => e.stopPropagation()}
+                      className={`absolute left-0 z-50 flex items-center gap-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-2xl rounded-xl p-1 text-xs whitespace-nowrap select-none animate-in fade-in zoom-in-95 duration-100 ${
+                        item.yPercent < 10 ? 'top-full mt-2' : '-top-11'
+                      }`}
+                    >
+                      {/* Font Family selector */}
+                      <select
+                        value={
+                          item.fontFamily.includes('Times') ||
+                          (item.fontFamily.includes('serif') && !item.fontFamily.includes('sans'))
+                            ? 'serif'
+                            : item.fontFamily.includes('mono')
+                            ? 'monospace'
+                            : 'sans-serif'
+                        }
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          updateCurrentItemTypography((it) => ({
+                            ...it,
+                            fontFamily:
+                              val === 'serif'
+                                ? "'Times New Roman', 'Times', serif"
+                                : val === 'monospace'
+                                ? "'Consolas', 'Courier New', monospace"
+                                : "'Calibri', 'Arial', sans-serif",
+                          }));
+                        }}
+                        className="px-2 py-1 rounded-lg text-[11px] font-medium border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 cursor-pointer"
+                      >
+                        <option value="sans-serif">Arial / Calibri</option>
+                        <option value="serif">Times New Roman</option>
+                        <option value="monospace">Courier (Mono)</option>
+                      </select>
+
+                      {/* Font size decrement/increment */}
+                      <div className="flex items-center border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden bg-slate-50 dark:bg-slate-800">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            updateCurrentItemTypography((it) => ({
+                              ...it,
+                              fontSize: Math.max(8, it.fontSize - 1),
+                            }))
+                          }
+                          className="px-1.5 py-0.5 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer font-bold"
+                          title="Decrease font size"
+                        >
+                          -
+                        </button>
+                        <span className="px-1.5 text-[11px] font-semibold text-slate-800 dark:text-slate-200 font-mono">
+                          {item.fontSize}px
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            updateCurrentItemTypography((it) => ({
+                              ...it,
+                              fontSize: Math.min(54, it.fontSize + 1),
+                            }))
+                          }
+                          className="px-1.5 py-0.5 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer font-bold"
+                          title="Increase font size"
+                        >
+                          +
+                        </button>
+                      </div>
+
+                      {/* Text Color Picker */}
+                      <input
+                        type="color"
+                        value={item.textColor || '#111827'}
+                        onChange={(e) =>
+                          updateCurrentItemTypography((it) => ({
+                            ...it,
+                            textColor: e.target.value,
+                          }))
+                        }
+                        title="Text Color"
+                        className="w-6 h-6 rounded border border-slate-200 dark:border-slate-700 cursor-pointer p-0 bg-transparent"
+                      />
+
+                      {/* Bold Toggle */}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          updateCurrentItemTypography((it) => ({
+                            ...it,
+                            isBold: !it.isBold,
+                          }))
+                        }
+                        className={`p-1 rounded border text-xs cursor-pointer ${
+                          item.isBold
+                            ? 'border-blue-600 bg-blue-50 text-blue-700 dark:bg-blue-950/60'
+                            : 'border-slate-200 dark:border-slate-700 text-slate-600 hover:bg-slate-100'
+                        }`}
+                        title="Bold"
+                      >
+                        <Bold className="w-3 h-3" />
+                      </button>
+
+                      {/* Italic Toggle */}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          updateCurrentItemTypography((it) => ({
+                            ...it,
+                            isItalic: !it.isItalic,
+                          }))
+                        }
+                        className={`p-1 rounded border text-xs cursor-pointer ${
+                          item.isItalic
+                            ? 'border-blue-600 bg-blue-50 text-blue-700 dark:bg-blue-950/60'
+                            : 'border-slate-200 dark:border-slate-700 text-slate-600 hover:bg-slate-100'
+                        }`}
+                        title="Italic"
+                      >
+                        <Italic className="w-3 h-3" />
+                      </button>
+
+                      <div className="w-px h-3.5 bg-slate-200 dark:bg-slate-700 mx-0.5" />
+
+                      {/* Delete / Clear Text */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          handleTextChange(item.id, '');
+                          setActiveItemId(null);
+                        }}
+                        className="p-1 rounded text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer"
+                        title="Delete / Erase this text line"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+
+                      {/* Done Checkmark */}
+                      <button
+                        type="button"
+                        onClick={() => setActiveItemId(null)}
+                        className="p-1 rounded text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 cursor-pointer font-bold"
+                        title="Save and finish editing"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
+
                   {isEditing ? (
                     <input
                       type="text"
                       autoFocus
                       value={displayText}
-                      size={Math.max(displayText.length + 1, 6)}
+                      size={Math.max(displayText.length + 1, 4)}
                       onChange={(e) => handleTextChange(item.id, e.target.value)}
-                      onBlur={() => setActiveItemId(null)}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' || e.key === 'Escape') {
                           setActiveItemId(null);
@@ -1707,10 +1900,10 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
                         fontStyle: item.isItalic ? 'italic' : 'normal',
                         color: item.textColor || '#111827',
                         minWidth: '100%',
-                        width: `${Math.max(displayText.length + 1, 6)}ch`,
+                        width: `${Math.max(displayText.length + 1, 4)}ch`,
                         lineHeight: 1,
                       }}
-                      className="bg-white px-0.5 py-0 outline-none border-none leading-none block h-full"
+                      className="bg-white px-1 py-0.5 outline-none border-none leading-none block h-full select-text shadow-xs"
                     />
                   ) : isEdited ? (
                     <span
@@ -1722,9 +1915,9 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
                         fontWeight: item.isBold ? 'bold' : 'normal',
                         fontStyle: item.isItalic ? 'italic' : 'normal',
                       }}
-                      className="block px-0.5 py-0 leading-none whitespace-nowrap overflow-visible select-none"
+                      className="block px-1 py-0.5 leading-none whitespace-nowrap overflow-visible select-none"
                     >
-                      {displayText}
+                      {displayText || '\u00A0'}
                     </span>
                   ) : null}
                 </div>
@@ -2114,6 +2307,74 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
             })}
           </div>
         )}
+
+        {/* Floating Bottom Pill Bar for Navigation & Zoom (PDFAid Style) */}
+        <div className="sticky bottom-4 z-40 flex items-center gap-2 px-4 py-2 rounded-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200 dark:border-slate-800 shadow-2xl text-xs font-semibold select-none mt-4 max-w-fit mx-auto">
+          {/* Page Navigation */}
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              disabled={currentPage <= 1 || isLoadingPage}
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              className="p-1 rounded-full text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 cursor-pointer"
+              title="Previous Page"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <span className="px-2 text-slate-700 dark:text-slate-200 min-w-[55px] text-center font-mono">
+              {currentPage} / {numPages}
+            </span>
+            <button
+              type="button"
+              disabled={currentPage >= numPages || isLoadingPage}
+              onClick={() => setCurrentPage((p) => Math.min(numPages, p + 1))}
+              className="p-1 rounded-full text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 cursor-pointer"
+              title="Next Page"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="w-px h-4 bg-slate-200 dark:bg-slate-700 mx-1" />
+
+          {/* Zoom Controls */}
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setZoomLevel((z) => Math.max(50, z - 15))}
+              disabled={zoomLevel <= 50}
+              className="p-1.5 rounded-full text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 cursor-pointer"
+              title="Zoom Out (-15%)"
+            >
+              <ZoomOut className="w-3.5 h-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setZoomLevel(100)}
+              className="px-2 py-0.5 rounded text-[11px] font-mono text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer font-bold"
+              title="Reset Zoom to 100%"
+            >
+              {zoomLevel}%
+            </button>
+            <button
+              type="button"
+              onClick={() => setZoomLevel((z) => Math.min(200, z + 15))}
+              disabled={zoomLevel >= 200}
+              className="p-1.5 rounded-full text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 cursor-pointer"
+              title="Zoom In (+15%)"
+            >
+              <ZoomIn className="w-3.5 h-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setZoomLevel(100)}
+              className="p-1.5 rounded-full text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer ml-0.5"
+              title="Fit to Screen (100%)"
+            >
+              <Maximize2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* DIGITAL SIGNATURE MODAL */}
