@@ -735,9 +735,9 @@ function sampleColors(
 
     const toHex = (c: number) => Math.max(0, Math.min(255, c)).toString(16).padStart(2, '0');
 
-    // If brightness is high (paper background >= 220), snap to pure #ffffff to prevent any gray box
+    // If brightness is high (paper background >= 210), snap to pure #ffffff to prevent any gray box
     let backgroundColor = '#ffffff';
-    if (bgBrightness < 220 || bgR < 205 || bgG < 205 || bgB < 205) {
+    if (bgBrightness < 210 || (bgR < 195 || bgG < 195 || bgB < 195)) {
       backgroundColor = `#${toHex(bgR)}${toHex(bgG)}${toHex(bgB)}`;
     }
 
@@ -764,7 +764,7 @@ function sampleColors(
       const textB = Math.round(fgBin.sumB / fgBin.count);
       const textBrightness = 0.299 * textR + 0.587 * textG + 0.114 * textB;
 
-      if (textBrightness <= 50 || (textR <= 45 && textG <= 45 && textB <= 45)) {
+      if (textBrightness <= 65 || (textR <= 55 && textG <= 55 && textB <= 55)) {
         textColor = '#000000';
       } else if (textBrightness >= 235) {
         textColor = '#ffffff';
@@ -907,8 +907,10 @@ export async function loadPdfPageForEditing(
     const charWidthRatio = item.str.length > 0 ? (item.width / item.str.length) / pdfFontHeight : undefined;
     const analysis = normalizeFontFamily(rawFontName, style?.fontFamily, charWidthRatio);
 
-    // Use the accurately matched system font family (Arial, Calibri, Times, etc.)
-    const resolvedFontFamily = analysis.fontFamily;
+    // Prefer browser-loaded PDF font face ("g_d0_f3") with exact normalized system fallback
+    const resolvedFontFamily = fontObj?.loadedName
+      ? `"${fontObj.loadedName}", ${analysis.fontFamily}`
+      : analysis.fontFamily;
 
     // Accurately sample the text color and background color from the rendered canvas
     const colors = sampleColors(ctx, vx, vy - fontHeight * 0.78, itemWidth, fontHeight);
@@ -922,7 +924,7 @@ export async function loadPdfPageForEditing(
       baselineYPercent,
       widthPercent,
       heightPercent,
-      fontSize: Math.round(fontHeight),
+      fontSize: Number(fontHeight.toFixed(1)),
       fontFamily: resolvedFontFamily,
       fontWeight: analysis.fontWeight,
       isBold: analysis.isBold,
@@ -1268,21 +1270,28 @@ export async function exportPageAsImage(
 
           // Render replacement text in exact matching font
           const scaledFontSize = Math.round(item.fontSize * (scale / 1.5));
-          ctx.font = `${item.isBold ? 'bold ' : ''}${item.isItalic ? 'italic ' : ''}${scaledFontSize}px ${item.fontFamily}`;
+          const weight = item.fontWeight || (item.isBold ? 'bold' : 'normal');
+          ctx.font = `${weight} ${item.isItalic ? 'italic ' : ''}${scaledFontSize}px ${item.fontFamily}`;
 
           // Accurately measure new text width with font set
           const measuredWidth = ctx.measureText(replacement).width;
           const fillWidth = Math.max(iw, measuredWidth) + 4;
-          const fillHeight = Math.max(ih, scaledFontSize * 1.05);
 
-          // Whiteout old text area cleanly without bleeding into adjacent lines
-          ctx.fillStyle = '#ffffff';
-          ctx.fillRect(ix - 1, iy, fillWidth, fillHeight);
+          // Calculate exact baseline Y coordinate
+          const baselineY = item.baselineYPercent !== undefined
+            ? (item.baselineYPercent / 100) * canvas.height
+            : iy + scaledFontSize * 0.82;
+
+          // Eraser matches the exact sampled background of the paper or table cell
+          ctx.fillStyle = item.backgroundColor || '#ffffff';
+          const ascent = scaledFontSize * 0.88;
+          const descent = scaledFontSize * 0.28;
+          ctx.fillRect(ix - 1, baselineY - ascent, fillWidth, ascent + descent);
 
           if (replacement.trim()) {
             ctx.fillStyle = item.textColor || '#000000';
-            ctx.textBaseline = 'top';
-            ctx.fillText(replacement, ix, iy);
+            ctx.textBaseline = 'alphabetic';
+            ctx.fillText(replacement, ix, baselineY);
           }
         }
       }

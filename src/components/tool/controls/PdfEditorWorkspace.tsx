@@ -1741,18 +1741,16 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
                     fontWeight: item.fontWeight || (item.isBold ? 700 : 400),
                     fontStyle: item.isItalic ? 'italic' : 'normal',
                     backgroundColor: (isEditing || isEdited) ? (item.backgroundColor || '#ffffff') : undefined,
+                    boxShadow: (isEditing || isEdited) ? `0 0 0 2px ${item.backgroundColor || '#ffffff'}` : undefined,
                   }}
                   className={`absolute flex items-center ${
                     isEditing
-                      ? 'z-50 ring-2 ring-blue-600 border-2 border-blue-600 shadow-xl rounded-xs'
+                      ? 'z-50 outline outline-2 outline-blue-600 rounded-xs shadow-md'
                       : isEdited
-                      ? 'z-20 cursor-text ' +
-                        (mode === 'edit-text'
-                          ? 'border-[1.5px] border-dashed border-blue-500 hover:border-blue-700 hover:bg-blue-50/20'
-                          : 'hover:outline hover:outline-1 hover:outline-blue-400')
+                      ? 'z-20 cursor-text border border-transparent hover:border-blue-400 hover:border-dashed rounded-xs'
                       : mode === 'edit-text'
-                      ? 'z-15 border-[1.5px] border-dashed border-blue-500 bg-blue-500/[0.06] hover:bg-blue-500/20 hover:border-blue-700 hover:shadow-xs cursor-text rounded-xs'
-                      : 'z-15 hover:bg-blue-500/15 hover:ring-1 hover:ring-blue-400 cursor-text'
+                      ? 'z-15 border border-transparent hover:border-blue-400 hover:border-dashed bg-transparent cursor-text rounded-xs'
+                      : 'z-15 bg-transparent hover:outline hover:outline-1 hover:outline-blue-400 cursor-text'
                   }`}
                   onMouseDown={(e) => {
                     if (mode === 'edit-text') {
@@ -1944,14 +1942,14 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
                         fontWeight: item.fontWeight || (item.isBold ? 700 : 400),
                         fontStyle: item.isItalic ? 'italic' : 'normal',
                         color: item.textColor || '#000000',
-                        backgroundColor: item.backgroundColor || '#ffffff',
+                        backgroundColor: 'transparent',
                         minWidth: '100%',
                         width: `${Math.max(displayText.length + 1, 4)}ch`,
                         lineHeight: 1,
                         padding: 0,
                         margin: 0,
                       }}
-                      className="p-0 m-0 outline-none border-none leading-none block h-full select-text"
+                      className="p-0 m-0 outline-none border-none leading-none block h-full bg-transparent select-text"
                     />
                   ) : isEdited ? (
                     <span
