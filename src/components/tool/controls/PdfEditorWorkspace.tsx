@@ -3,6 +3,7 @@ import {
   Edit3,
   Type,
   Eraser,
+  Eye,
   Download,
   ChevronLeft,
   ChevronRight,
@@ -1192,6 +1193,22 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
                 <Type className="w-3.5 h-3.5" />
                 <span>Insert New Text Box</span>
               </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMode(mode === 'none' ? 'edit-text' : 'none');
+                  setActiveItemId(null);
+                }}
+                className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
+                  mode === 'none'
+                    ? 'bg-emerald-600 text-white shadow-xs ring-2 ring-emerald-500/20'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+                title={mode === 'none' ? 'Click to show edit boxes again' : 'Click to hide all edit boxes and see 100% clean document preview'}
+              >
+                <Eye className="w-3.5 h-3.5" />
+                <span>{mode === 'none' ? 'Edit Mode' : 'Preview Clean'}</span>
+              </button>
             </div>
 
             {(mode === 'add-text' || activeItemId !== null) && (
@@ -1725,11 +1742,11 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
                     fontStyle: item.isItalic ? 'italic' : 'normal',
                     backgroundColor: (isEditing || isEdited) ? (item.backgroundColor || '#ffffff') : undefined,
                   }}
-                  className={`absolute transition-all flex items-center ${
+                  className={`absolute flex items-center ${
                     isEditing
                       ? 'z-50 ring-2 ring-blue-600 border-2 border-blue-600 shadow-xl rounded-xs'
                       : isEdited
-                      ? 'z-20 text-slate-900 cursor-text ' +
+                      ? 'z-20 cursor-text ' +
                         (mode === 'edit-text'
                           ? 'border-[1.5px] border-dashed border-blue-500 hover:border-blue-700 hover:bg-blue-50/20'
                           : 'hover:outline hover:outline-1 hover:outline-blue-400')
@@ -1737,6 +1754,11 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
                       ? 'z-15 border-[1.5px] border-dashed border-blue-500 bg-blue-500/[0.06] hover:bg-blue-500/20 hover:border-blue-700 hover:shadow-xs cursor-text rounded-xs'
                       : 'z-15 hover:bg-blue-500/15 hover:ring-1 hover:ring-blue-400 cursor-text'
                   }`}
+                  onMouseDown={(e) => {
+                    if (mode === 'edit-text') {
+                      e.stopPropagation();
+                    }
+                  }}
                   onClick={(e) => {
                     e.stopPropagation();
                     if (mode === 'edit-text') {

@@ -735,9 +735,9 @@ function sampleColors(
 
     const toHex = (c: number) => Math.max(0, Math.min(255, c)).toString(16).padStart(2, '0');
 
-    // If brightness is high (paper background >= 230), snap to pure #ffffff to prevent any gray box
+    // If brightness is high (paper background >= 220), snap to pure #ffffff to prevent any gray box
     let backgroundColor = '#ffffff';
-    if (bgBrightness < 230) {
+    if (bgBrightness < 220 || bgR < 205 || bgG < 205 || bgB < 205) {
       backgroundColor = `#${toHex(bgR)}${toHex(bgG)}${toHex(bgB)}`;
     }
 
@@ -907,13 +907,11 @@ export async function loadPdfPageForEditing(
     const charWidthRatio = item.str.length > 0 ? (item.width / item.str.length) / pdfFontHeight : undefined;
     const analysis = normalizeFontFamily(rawFontName, style?.fontFamily, charWidthRatio);
 
-    // If browser loaded the fontFace, prefer it with fallback
-    const resolvedFontFamily = fontObj?.loadedName
-      ? `"${fontObj.loadedName}", ${analysis.fontFamily}`
-      : analysis.fontFamily;
+    // Use the accurately matched system font family (Arial, Calibri, Times, etc.)
+    const resolvedFontFamily = analysis.fontFamily;
 
     // Accurately sample the text color and background color from the rendered canvas
-    const colors = sampleColors(ctx, vx, vy - fontHeight * 0.7, itemWidth, fontHeight);
+    const colors = sampleColors(ctx, vx, vy - fontHeight * 0.78, itemWidth, fontHeight);
 
     textItems.push({
       id: `p${targetPageNum}_t${i}`,
