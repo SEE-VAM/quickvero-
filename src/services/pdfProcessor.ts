@@ -422,6 +422,7 @@ export interface DetectedTextItem {
   currentText: string;
   xPercent: number;
   yPercent: number;
+  baselineYPercent?: number;
   widthPercent: number;
   heightPercent: number;
   fontSize: number;
@@ -504,7 +505,9 @@ export function loadImageFromDataUrl(dataUrl: string): Promise<HTMLImageElement>
 }
 
 export function normalizeFontFamily(rawFontName: string, rawFamily?: string): string {
-  const combined = `${rawFontName} ${rawFamily || ''}`.toLowerCase();
+  // Strip subset prefix (e.g. "ABCDEF+TimesNewRoman" -> "TimesNewRoman")
+  const cleanName = rawFontName.includes('+') ? rawFontName.split('+')[1] : rawFontName;
+  const combined = `${cleanName} ${rawFontName} ${rawFamily || ''}`.toLowerCase();
 
   // 1. Monospace fonts
   if (
@@ -512,48 +515,15 @@ export function normalizeFontFamily(rawFontName: string, rawFamily?: string): st
     combined.includes('mono') ||
     combined.includes('consolas') ||
     combined.includes('menlo') ||
-    combined.includes('inconsolata')
+    combined.includes('inconsolata') ||
+    rawFamily?.toLowerCase() === 'monospace'
   ) {
-    return "'Consolas', 'Courier New', monospace";
+    return "'Courier New', 'Courier', 'Consolas', monospace";
   }
 
-  // 2. Clear Sans-Serif font checks (check FIRST so Arial-Roman, Helvetica-Roman aren't misidentified as serif!)
+  // 2. Genuine Serif typefaces (Check Serif before falling back to sans-serif!)
   if (
-    combined.includes('sans') ||
-    combined.includes('arial') ||
-    combined.includes('helvetica') ||
-    combined.includes('calibri') ||
-    combined.includes('roboto') ||
-    combined.includes('aptos') ||
-    combined.includes('segoe') ||
-    combined.includes('tahoma') ||
-    combined.includes('verdana') ||
-    combined.includes('trebuchet') ||
-    combined.includes('open') ||
-    combined.includes('lato') ||
-    combined.includes('inter') ||
-    combined.includes('gothic') ||
-    combined.includes('futura') ||
-    combined.includes('noto') ||
-    combined.includes('gill')
-  ) {
-    if (combined.includes('calibri')) {
-      return "'Calibri', 'Arial', sans-serif";
-    }
-    if (combined.includes('aptos')) {
-      return "'Aptos', 'Calibri', 'Arial', sans-serif";
-    }
-    if (combined.includes('roboto')) {
-      return "'Roboto', 'Segoe UI', 'Arial', sans-serif";
-    }
-    if (combined.includes('segoe')) {
-      return "'Segoe UI', 'Arial', sans-serif";
-    }
-    return "'Arial', 'Helvetica Neue', Helvetica, sans-serif";
-  }
-
-  // 3. Genuine Serif typefaces (must explicitly be a known serif font)
-  if (
+    (combined.includes('serif') && !combined.includes('sans')) ||
     combined.includes('times') ||
     combined.includes('georgia') ||
     combined.includes('cambria') ||
@@ -564,9 +534,15 @@ export function normalizeFontFamily(rawFontName: string, rawFamily?: string): st
     combined.includes('merriweather') ||
     combined.includes('caslon') ||
     combined.includes('bookman') ||
+    combined.includes('century') ||
+    combined.includes('antiqua') ||
     combined.includes('didot') ||
     combined.includes('bodoni') ||
-    (rawFontName.toLowerCase().includes('serif') && !rawFontName.toLowerCase().includes('sans'))
+    combined.includes('roman') ||
+    combined.includes('tmsrmn') ||
+    combined.includes('liberation serif') ||
+    combined.includes('nimbus rom') ||
+    rawFamily?.toLowerCase() === 'serif'
   ) {
     if (combined.includes('georgia')) {
       return "'Georgia', 'Times New Roman', serif";
@@ -577,11 +553,85 @@ export function normalizeFontFamily(rawFontName: string, rawFamily?: string): st
     if (combined.includes('garamond')) {
       return "'Garamond', 'Georgia', serif";
     }
+    return "'Times New Roman', 'Times', 'Liberation Serif', serif";
+  }
+
+  // 3. Specific Sans-Serif font checks
+  if (combined.includes('calibri')) {
+    return "'Calibri', 'Arial', sans-serif";
+  }
+  if (combined.includes('aptos')) {
+    return "'Aptos', 'Calibri', 'Arial', sans-serif";
+  }
+  if (combined.includes('roboto')) {
+    return "'Roboto', 'Segoe UI', 'Arial', sans-serif";
+  }
+  if (combined.includes('segoe')) {
+    return "'Segoe UI', 'Arial', sans-serif";
+  }
+  if (combined.includes('tahoma')) {
+    return "'Tahoma', 'Arial', sans-serif";
+  }
+  if (combined.includes('verdana')) {
+    return "'Verdana', 'Arial', sans-serif";
+  }
+  if (combined.includes('trebuchet')) {
+    return "'Trebuchet MS', 'Arial', sans-serif";
+  }
+
+  // 4. Fallback based on rawFamily:
+  if (rawFamily?.toLowerCase() === 'serif') {
     return "'Times New Roman', 'Times', serif";
   }
 
-  // 4. Default for modern documents/resumes is clean Sans-Serif
-  return "'Calibri', 'Arial', 'Helvetica Neue', Helvetica, sans-serif";
+  return "'Arial', 'Helvetica Neue', Helvetica, sans-serif";
+}
+
+/**
+ * Accurately sample the text color from the rendered canvas at the given position.
+ * Returns the darkest non-background pixel color (hex) so replacement text matches 100%.
+ */
+function sampleTextColor(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number
+): string {
+  try {
+    const startX = Math.max(0, Math.min(ctx.canvas.width - 1, Math.round(x)));
+    const startY = Math.max(0, Math.min(ctx.canvas.height - 1, Math.round(y)));
+    const sampleW = Math.max(1, Math.min(ctx.canvas.width - startX, Math.round(Math.min(w, 24))));
+    const sampleH = Math.max(1, Math.min(ctx.canvas.height - startY, Math.round(Math.min(h, 20))));
+
+    const imgData = ctx.getImageData(startX, startY, sampleW, sampleH).data;
+    let minBrightness = 255;
+    let bestR = 0;
+    let bestG = 0;
+    let bestB = 0;
+
+    for (let i = 0; i < imgData.length; i += 4) {
+      const r = imgData[i];
+      const g = imgData[i + 1];
+      const b = imgData[i + 2];
+      const a = imgData[i + 3];
+
+      if (a < 50) continue;
+      const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
+      if (brightness < minBrightness && brightness < 220) {
+        minBrightness = brightness;
+        bestR = r;
+        bestG = g;
+        bestB = b;
+      }
+    }
+
+    if (minBrightness < 220) {
+      const toHex = (c: number) => c.toString(16).padStart(2, '0');
+      return `#${toHex(bestR)}${toHex(bestG)}${toHex(bestB)}`;
+    }
+  } catch (_) {}
+  return '#000000';
 }
 
 /**
@@ -637,25 +687,43 @@ export async function loadPdfPageForEditing(
 
     // Viewport coordinates
     const [vx, vy] = viewport.convertToViewportPoint(item.transform[4], item.transform[5]);
-    const fontHeight = Math.sqrt(item.transform[0] * item.transform[0] + item.transform[1] * item.transform[1]) * scale;
-    const itemWidth = Math.max(item.width * scale * 1.02 + 4, 14);
+    const fontHeight = Math.hypot(item.transform[0], item.transform[1]) * scale;
+    const itemWidth = Math.max(item.width * scale * 1.02, 12);
     const itemHeight = Math.max(fontHeight * 1.05, 12);
-    const itemTop = Math.max(0, vy - fontHeight * 0.92);
+    // Baseline-adjusted top
+    const itemTop = Math.max(0, vy - fontHeight * 0.82);
 
     const xPercent = (vx / viewport.width) * 100;
     const yPercent = (itemTop / viewport.height) * 100;
+    const baselineYPercent = (vy / viewport.height) * 100;
     const widthPercent = (itemWidth / viewport.width) * 100;
     const heightPercent = (itemHeight / viewport.height) * 100;
 
+    // Resolve font name from commonObjs if available
+    let rawFontName = item.fontName;
+    try {
+      if ((page as any).commonObjs?.has?.(item.fontName)) {
+        const fontObj = (page as any).commonObjs.get(item.fontName);
+        if (fontObj?.name) {
+          rawFontName = fontObj.name;
+        }
+      }
+    } catch (_) {}
+
     const style = textContent.styles[item.fontName];
-    const fontFam = normalizeFontFamily(item.fontName, style?.fontFamily);
+    const fontFam = normalizeFontFamily(rawFontName, style?.fontFamily);
     const isBold =
+      /bold|black|heavy|700|800|900|\bbd\b|-bd\b|_bd\b/i.test(rawFontName) ||
       /bold|black|heavy|700|800|900|\bbd\b|-bd\b|_bd\b/i.test(item.fontName) ||
       (style?.fontFamily && /bold|black|heavy/i.test(style.fontFamily));
     const isItalic =
+      /italic|oblique|slant|\bital\b|\bit\b|-it\b|_it\b/i.test(rawFontName) ||
       /italic|oblique|slant|\bital\b|\bit\b|-it\b|_it\b/i.test(item.fontName) ||
       (style?.fontFamily && /italic|oblique/i.test(style.fontFamily)) ||
       (Array.isArray(item.transform) && Math.abs(item.transform[2]) > 0.05);
+
+    // Accurately sample the text color from the rendered canvas
+    const detectedColor = sampleTextColor(ctx, vx, vy - fontHeight * 0.7, itemWidth, fontHeight);
 
     textItems.push({
       id: `p${targetPageNum}_t${i}`,
@@ -663,13 +731,14 @@ export async function loadPdfPageForEditing(
       currentText: item.str,
       xPercent,
       yPercent,
+      baselineYPercent,
       widthPercent,
       heightPercent,
       fontSize: Math.round(fontHeight),
       fontFamily: fontFam,
       isBold: !!isBold,
       isItalic: !!isItalic,
-      textColor: '#111827',
+      textColor: detectedColor,
     });
   }
 
@@ -748,7 +817,7 @@ export async function exportEditedPdf(
         }
       }
 
-      // 2. Apply Text Item Edits (in matching font family, size, weight)
+      // 2. Apply Text Item Edits (in matching font family, size, weight, and baseline)
       if (pageEdits.editedItems) {
         for (const [id, newText] of Object.entries(pageEdits.editedItems)) {
           const item = items.find((t) => t.id === id);
@@ -757,7 +826,6 @@ export async function exportEditedPdf(
           const ix = (item.xPercent / 100) * canvas.width;
           const iy = (item.yPercent / 100) * canvas.height;
           const iw = (item.widthPercent / 100) * canvas.width;
-          const ih = (item.heightPercent / 100) * canvas.height;
 
           // Render replacement text in exact matching font
           const scaledFontSize = Math.round(item.fontSize * (scale / 1.5));
@@ -766,16 +834,22 @@ export async function exportEditedPdf(
           // Accurately measure new text width with font set
           const measuredWidth = ctx.measureText(newText).width;
           const fillWidth = Math.max(iw, measuredWidth) + 4;
-          const fillHeight = Math.max(ih, scaledFontSize * 1.05);
+
+          // Calculate exact baseline Y coordinate
+          const baselineY = item.baselineYPercent !== undefined
+            ? (item.baselineYPercent / 100) * canvas.height
+            : iy + scaledFontSize * 0.82;
 
           // Whiteout old text area cleanly without bleeding into adjacent lines
           ctx.fillStyle = '#ffffff';
-          ctx.fillRect(ix - 1, iy, fillWidth, fillHeight);
+          const ascent = scaledFontSize * 0.88;
+          const descent = scaledFontSize * 0.28;
+          ctx.fillRect(ix, baselineY - ascent, fillWidth, ascent + descent);
 
           if (newText.trim()) {
             ctx.fillStyle = item.textColor || '#000000';
-            ctx.textBaseline = 'top';
-            ctx.fillText(newText, ix, iy);
+            ctx.textBaseline = 'alphabetic';
+            ctx.fillText(newText, ix, baselineY);
           }
         }
       }

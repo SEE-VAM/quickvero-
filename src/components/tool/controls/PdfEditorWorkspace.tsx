@@ -1756,16 +1756,16 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
                             ...it,
                             fontFamily:
                               val === 'serif'
-                                ? "'Times New Roman', 'Times', serif"
+                                ? "'Times New Roman', 'Times', 'Liberation Serif', serif"
                                 : val === 'monospace'
-                                ? "'Consolas', 'Courier New', monospace"
-                                : "'Calibri', 'Arial', sans-serif",
+                                ? "'Courier New', 'Courier', monospace"
+                                : "'Arial', 'Helvetica Neue', Helvetica, sans-serif",
                           }));
                         }}
                         className="px-2 py-1 rounded-lg text-[11px] font-medium border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 cursor-pointer"
                       >
-                        <option value="sans-serif">Arial / Calibri</option>
-                        <option value="serif">Times New Roman</option>
+                        <option value="serif">Times New Roman (Serif)</option>
+                        <option value="sans-serif">Arial / Helvetica (Sans)</option>
                         <option value="monospace">Courier (Mono)</option>
                       </select>
 
@@ -1805,7 +1805,7 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
                       {/* Text Color Picker */}
                       <input
                         type="color"
-                        value={item.textColor || '#111827'}
+                        value={item.textColor || '#000000'}
                         onChange={(e) =>
                           updateCurrentItemTypography((it) => ({
                             ...it,
@@ -1898,24 +1898,28 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
                         fontSize: `${item.fontSize}px`,
                         fontWeight: item.isBold ? 'bold' : 'normal',
                         fontStyle: item.isItalic ? 'italic' : 'normal',
-                        color: item.textColor || '#111827',
+                        color: item.textColor || '#000000',
                         minWidth: '100%',
                         width: `${Math.max(displayText.length + 1, 4)}ch`,
                         lineHeight: 1,
+                        padding: 0,
+                        margin: 0,
                       }}
-                      className="bg-white px-1 py-0.5 outline-none border-none leading-none block h-full select-text shadow-xs"
+                      className="bg-white p-0 m-0 outline-none border-none leading-none block h-full select-text shadow-xs"
                     />
                   ) : isEdited ? (
                     <span
                       style={{
                         lineHeight: 1,
-                        color: item.textColor || '#111827',
+                        color: item.textColor || '#000000',
                         fontFamily: item.fontFamily,
                         fontSize: `${item.fontSize}px`,
                         fontWeight: item.isBold ? 'bold' : 'normal',
                         fontStyle: item.isItalic ? 'italic' : 'normal',
+                        padding: 0,
+                        margin: 0,
                       }}
-                      className="block px-1 py-0.5 leading-none whitespace-nowrap overflow-visible select-none"
+                      className="block p-0 m-0 leading-none whitespace-nowrap overflow-visible select-none"
                     >
                       {displayText || '\u00A0'}
                     </span>
