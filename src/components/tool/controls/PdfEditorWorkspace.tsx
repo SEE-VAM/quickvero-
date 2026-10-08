@@ -1721,7 +1721,7 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
                     fontFamily: item.fontFamily,
                     fontSize: `${item.fontSize}px`,
                     lineHeight: 1,
-                    fontWeight: item.fontWeight || (item.isBold ? 700 : 500),
+                    fontWeight: item.fontWeight || (item.isBold ? 700 : 400),
                     fontStyle: item.isItalic ? 'italic' : 'normal',
                     backgroundColor: (isEditing || isEdited) ? (item.backgroundColor || '#ffffff') : undefined,
                   }}
@@ -1919,7 +1919,7 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
                       style={{
                         fontFamily: item.fontFamily,
                         fontSize: `${item.fontSize}px`,
-                        fontWeight: item.fontWeight || (item.isBold ? 700 : 500),
+                        fontWeight: item.fontWeight || (item.isBold ? 700 : 400),
                         fontStyle: item.isItalic ? 'italic' : 'normal',
                         color: item.textColor || '#000000',
                         backgroundColor: item.backgroundColor || '#ffffff',
@@ -1938,7 +1938,7 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
                         color: item.textColor || '#000000',
                         fontFamily: item.fontFamily,
                         fontSize: `${item.fontSize}px`,
-                        fontWeight: item.fontWeight || (item.isBold ? 700 : 500),
+                        fontWeight: item.fontWeight || (item.isBold ? 700 : 400),
                         fontStyle: item.isItalic ? 'italic' : 'normal',
                         padding: 0,
                         margin: 0,

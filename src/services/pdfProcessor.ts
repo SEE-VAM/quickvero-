@@ -517,7 +517,7 @@ export interface FontAnalysis {
 export function normalizeFontFamily(
   rawFontName: string,
   rawFamily?: string,
-  charWidthRatio?: number
+  _charWidthRatio?: number
 ): FontAnalysis {
   const cleanName = rawFontName.includes('+') ? rawFontName.split('+')[1] : rawFontName;
   const combined = `${cleanName} ${rawFontName} ${rawFamily || ''}`.toLowerCase();
@@ -565,8 +565,8 @@ export function normalizeFontFamily(
   ) {
     fontWeight = 300;
   } else {
-    // Normal document font renders with weight 500 for crisp ink contrast
-    fontWeight = 500;
+    // Normal document font renders with standard regular weight 400
+    fontWeight = 400;
   }
 
   // 2. Detect Italic
@@ -577,10 +577,9 @@ export function normalizeFontFamily(
     /\bital\b|\bit\b|-it\b|_it\b/i.test(combined) ||
     /italic|oblique/i.test(rawFamily || '');
 
-  // 3. Monospace fonts (Bank statements, invoices, receipts, code)
+  // 3. Monospace fonts (ONLY if name or family explicitly indicates monospace)
   const isMonoName =
     combined.includes('courier') ||
-    combined.includes('mono') ||
     combined.includes('consolas') ||
     combined.includes('menlo') ||
     combined.includes('inconsolata') ||
@@ -588,12 +587,10 @@ export function normalizeFontFamily(
     combined.includes('ocr') ||
     combined.includes('lineprinter') ||
     combined.includes('draft') ||
+    /\bmono\b|monospace/i.test(combined) ||
     rawFamily?.toLowerCase() === 'monospace';
 
-  const isMonoPitch = charWidthRatio !== undefined && charWidthRatio >= 0.48 && charWidthRatio <= 0.68;
-  const isGenericBankingFont = /^(f\d+|tt\d+|c\d+|r\d+|font|g_d\d+_f\d+)/i.test(cleanName);
-
-  if (isMonoName || (isMonoPitch && isGenericBankingFont)) {
+  if (isMonoName) {
     return {
       fontFamily: "'Courier New', 'Courier', 'Lucida Console', monospace",
       fontWeight: isBold ? 700 : fontWeight,
@@ -639,7 +636,7 @@ export function normalizeFontFamily(
     };
   }
 
-  // 5. Sans-Serif typefaces
+  // 5. Sans-Serif typefaces (Universal default for clean modern documents)
   let sansFam = "'Arial', 'Helvetica Neue', Helvetica, sans-serif";
   if (combined.includes('calibri')) sansFam = "'Calibri', 'Arial', sans-serif";
   else if (combined.includes('aptos')) sansFam = "'Aptos', 'Calibri', 'Arial', sans-serif";
@@ -664,7 +661,8 @@ export function normalizeFontFamily(
 
 /**
  * Accurately sample the background color and text color from the rendered canvas behind the text box.
- * Uses perimeter sampling for background and maximum contrast analysis for text.
+ * Uses color distribution mode (histogram) to find the true document paper/cell background
+ * and high-contrast foreground text color.
  */
 function sampleColors(
   ctx: CanvasRenderingContext2D,
@@ -674,15 +672,15 @@ function sampleColors(
   h: number
 ): { textColor: string; backgroundColor: string } {
   try {
-    const startX = Math.max(0, Math.min(ctx.canvas.width - 1, Math.round(x)));
-    const startY = Math.max(0, Math.min(ctx.canvas.height - 1, Math.round(y)));
-    const sampleW = Math.max(1, Math.min(ctx.canvas.width - startX, Math.round(Math.min(w, 40))));
-    const sampleH = Math.max(1, Math.min(ctx.canvas.height - startY, Math.round(Math.min(h, 24))));
+    const startX = Math.max(0, Math.min(ctx.canvas.width - 2, Math.round(x)));
+    const startY = Math.max(0, Math.min(ctx.canvas.height - 2, Math.round(y)));
+    const sampleW = Math.max(2, Math.min(ctx.canvas.width - startX, Math.round(Math.min(w, 80))));
+    const sampleH = Math.max(2, Math.min(ctx.canvas.height - startY, Math.round(Math.min(h, 40))));
 
     const imgData = ctx.getImageData(startX, startY, sampleW, sampleH).data;
 
-    const bgPixels: { r: number; g: number; b: number; bright: number }[] = [];
-    const allPixels: { r: number; g: number; b: number; bright: number }[] = [];
+    const bins = new Map<string, { count: number; sumR: number; sumG: number; sumB: number }>();
+    let totalPixels = 0;
 
     for (let py = 0; py < sampleH; py++) {
       for (let px = 0; px < sampleW; px++) {
@@ -693,49 +691,87 @@ function sampleColors(
         const a = imgData[i + 3];
         if (a < 50) continue;
 
-        const bright = 0.299 * r + 0.587 * g + 0.114 * b;
-        const pixel = { r, g, b, bright };
-        allPixels.push(pixel);
+        totalPixels++;
+        // Quantize to 16-step bins to group subtle anti-aliasing variations
+        const binR = Math.round(r / 16) * 16;
+        const binG = Math.round(g / 16) * 16;
+        const binB = Math.round(b / 16) * 16;
+        const binKey = `${binR},${binG},${binB}`;
 
-        // Edge perimeter pixels are background
-        if (py === 0 || py === sampleH - 1 || px === 0 || px === sampleW - 1) {
-          bgPixels.push(pixel);
+        const existing = bins.get(binKey);
+        if (existing) {
+          existing.count++;
+          existing.sumR += r;
+          existing.sumG += g;
+          existing.sumB += b;
+        } else {
+          bins.set(binKey, { count: 1, sumR: r, sumG: g, sumB: b });
         }
       }
     }
 
-    // Average background color from perimeter
-    let bgR = 255, bgG = 255, bgB = 255;
-    if (bgPixels.length > 0) {
-      let sR = 0, sG = 0, sB = 0;
-      for (const p of bgPixels) {
-        sR += p.r;
-        sG += p.g;
-        sB += p.b;
-      }
-      bgR = Math.round(sR / bgPixels.length);
-      bgG = Math.round(sG / bgPixels.length);
-      bgB = Math.round(sB / bgPixels.length);
+    if (totalPixels === 0 || bins.size === 0) {
+      return { textColor: '#000000', backgroundColor: '#ffffff' };
     }
+
+    // Find dominant background bin (mode of the color distribution, background is always >= 70% of area)
+    let maxCount = -1;
+    let bgBin: { count: number; sumR: number; sumG: number; sumB: number } | null = null;
+    for (const bin of bins.values()) {
+      if (bin.count > maxCount) {
+        maxCount = bin.count;
+        bgBin = bin;
+      }
+    }
+
+    if (!bgBin) {
+      return { textColor: '#000000', backgroundColor: '#ffffff' };
+    }
+
+    const bgR = Math.round(bgBin.sumR / bgBin.count);
+    const bgG = Math.round(bgBin.sumG / bgBin.count);
+    const bgB = Math.round(bgBin.sumB / bgBin.count);
     const bgBrightness = 0.299 * bgR + 0.587 * bgG + 0.114 * bgB;
 
-    // Foreground text is the pixel that contrasts most with the background
-    let maxContrast = 0;
-    let textR = 0, textG = 0, textB = 0;
+    const toHex = (c: number) => Math.max(0, Math.min(255, c)).toString(16).padStart(2, '0');
 
-    for (const p of allPixels) {
-      const contrast = Math.abs(p.bright - bgBrightness);
-      if (contrast > maxContrast) {
-        maxContrast = contrast;
-        textR = p.r;
-        textG = p.g;
-        textB = p.b;
+    // If brightness is high (paper background >= 230), snap to pure #ffffff to prevent any gray box
+    let backgroundColor = '#ffffff';
+    if (bgBrightness < 230) {
+      backgroundColor = `#${toHex(bgR)}${toHex(bgG)}${toHex(bgB)}`;
+    }
+
+    // Find dominant foreground text bin (pixels with significant distance from background)
+    let fgMaxCount = -1;
+    let fgBin: { count: number; sumR: number; sumG: number; sumB: number } | null = null;
+
+    for (const bin of bins.values()) {
+      if (bin === bgBin) continue;
+      const avgR = bin.sumR / bin.count;
+      const avgG = bin.sumG / bin.count;
+      const avgB = bin.sumB / bin.count;
+      const dist = Math.abs(avgR - bgR) + Math.abs(avgG - bgG) + Math.abs(avgB - bgB);
+      if (dist > 60 && bin.count > fgMaxCount) {
+        fgMaxCount = bin.count;
+        fgBin = bin;
       }
     }
 
-    const toHex = (c: number) => c.toString(16).padStart(2, '0');
-    const backgroundColor = `#${toHex(bgR)}${toHex(bgG)}${toHex(bgB)}`;
-    const textColor = maxContrast > 25 ? `#${toHex(textR)}${toHex(textG)}${toHex(textB)}` : (bgBrightness > 128 ? '#000000' : '#ffffff');
+    let textColor = bgBrightness > 128 ? '#000000' : '#ffffff';
+    if (fgBin) {
+      const textR = Math.round(fgBin.sumR / fgBin.count);
+      const textG = Math.round(fgBin.sumG / fgBin.count);
+      const textB = Math.round(fgBin.sumB / fgBin.count);
+      const textBrightness = 0.299 * textR + 0.587 * textG + 0.114 * textB;
+
+      if (textBrightness <= 50 || (textR <= 45 && textG <= 45 && textB <= 45)) {
+        textColor = '#000000';
+      } else if (textBrightness >= 235) {
+        textColor = '#ffffff';
+      } else {
+        textColor = `#${toHex(textR)}${toHex(textG)}${toHex(textB)}`;
+      }
+    }
 
     return { textColor, backgroundColor };
   } catch (_) {
@@ -850,9 +886,9 @@ export async function loadPdfPageForEditing(
     const fontHeight = pdfFontHeight * scale;
 
     const itemWidth = Math.max(item.width * scale * 1.02, 12);
-    const itemHeight = Math.max(fontHeight * 1.15, 14);
+    const itemHeight = Math.max(fontHeight * 0.96, 12);
     // Baseline-adjusted top
-    const itemTop = Math.max(0, vy - fontHeight * 0.84);
+    const itemTop = Math.max(0, vy - fontHeight * 0.80);
 
     const xPercent = (vx / viewport.width) * 100;
     const yPercent = (itemTop / viewport.height) * 100;
