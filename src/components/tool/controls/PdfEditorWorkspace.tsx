@@ -129,6 +129,7 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
   const imageUploadRef = useRef<HTMLInputElement>(null);
   const sigUploadRef = useRef<HTMLInputElement>(null);
   const documentContainerRef = useRef<HTMLDivElement>(null);
+  const viewportContainerRef = useRef<HTMLDivElement>(null);
   const sigCanvasRef = useRef<HTMLCanvasElement>(null);
 
   // Helper to get or initialize edits for current page
@@ -177,6 +178,15 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
         setPageDataUrl(data.canvasDataUrl);
         setPageDimensions({ width: data.width, height: data.height });
         setNumPages(data.numPages);
+
+        // Auto-fit zoom to viewport on load so the page is crisp and never cut off
+        if (viewportContainerRef.current && data.width > 0) {
+          const availWidth = viewportContainerRef.current.clientWidth - 48;
+          if (availWidth > 100 && data.width > availWidth) {
+            const fitZoom = Math.max(40, Math.min(100, Math.floor((availWidth / data.width) * 100)));
+            setZoomLevel(fitZoom);
+          }
+        }
 
         setPageItemsMap((prev) => ({
           ...prev,
@@ -1568,6 +1578,7 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
 
       {/* Document Viewport */}
       <div
+        ref={viewportContainerRef}
         className="p-4 sm:p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 overflow-auto flex flex-col items-center min-h-[650px] relative select-none pb-20"
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -1584,42 +1595,52 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
 
         {pageDataUrl && (
           <div
-            ref={documentContainerRef}
-            onClick={handleContainerClick}
-            className="relative shadow-2xl rounded-lg bg-white overflow-hidden select-none transition-transform duration-100 origin-top mb-4"
+            className="flex justify-center items-start w-full my-auto shrink-0 mb-4"
             style={{
-              width: `${pageDimensions.width}px`,
-              maxWidth: '100%',
-              height: `${pageDimensions.height}px`,
-              transform: `scale(${zoomLevel / 100})`,
-              transformOrigin: 'top center',
-              cursor: mode === 'add-text' ? 'crosshair' : mode === 'whiteout' ? 'cell' : 'default',
+              width: `${Math.round(pageDimensions.width * (zoomLevel / 100))}px`,
+              height: `${Math.round(pageDimensions.height * (zoomLevel / 100))}px`,
+              minWidth: `${Math.round(pageDimensions.width * (zoomLevel / 100))}px`,
+              minHeight: `${Math.round(pageDimensions.height * (zoomLevel / 100))}px`,
             }}
           >
-            {/* Deleted Page Warning Overlay */}
-            {isCurrentPageDeleted && (
-              <div className="absolute inset-0 bg-rose-900/40 backdrop-blur-[2px] z-40 flex flex-col items-center justify-center text-white p-6 text-center">
-                <Trash2 className="w-12 h-12 text-rose-300 mb-2" />
-                <h4 className="text-xl font-bold">This page is marked as Deleted</h4>
-                <p className="text-sm text-rose-100 mt-1 max-w-sm">
-                  It will be excluded from the final exported PDF.
-                </p>
-                <button
-                  type="button"
-                  onClick={handleToggleDeletePage}
-                  className="mt-4 px-4 py-2 rounded-xl bg-white text-rose-700 font-bold text-xs shadow-md hover:bg-rose-50 cursor-pointer"
-                >
-                  Restore Page
-                </button>
-              </div>
-            )}
+            <div
+              ref={documentContainerRef}
+              onClick={handleContainerClick}
+              className="relative shadow-2xl rounded-lg bg-white overflow-hidden select-none origin-top-left shrink-0"
+              style={{
+                width: `${pageDimensions.width}px`,
+                height: `${pageDimensions.height}px`,
+                minWidth: `${pageDimensions.width}px`,
+                minHeight: `${pageDimensions.height}px`,
+                transform: `scale(${zoomLevel / 100})`,
+                transformOrigin: 'top left',
+                cursor: mode === 'add-text' ? 'crosshair' : mode === 'whiteout' ? 'cell' : 'default',
+              }}
+            >
+              {/* Deleted Page Warning Overlay */}
+              {isCurrentPageDeleted && (
+                <div className="absolute inset-0 bg-rose-900/40 backdrop-blur-[2px] z-40 flex flex-col items-center justify-center text-white p-6 text-center">
+                  <Trash2 className="w-12 h-12 text-rose-300 mb-2" />
+                  <h4 className="text-xl font-bold">This page is marked as Deleted</h4>
+                  <p className="text-sm text-rose-100 mt-1 max-w-sm">
+                    It will be excluded from the final exported PDF.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleToggleDeletePage}
+                    className="mt-4 px-4 py-2 rounded-xl bg-white text-rose-700 font-bold text-xs shadow-md hover:bg-rose-50 cursor-pointer"
+                  >
+                    Restore Page
+                  </button>
+                </div>
+              )}
 
-            {/* Background PDF Page Image */}
-            <img
-              src={pageDataUrl}
-              alt={`PDF Page ${currentPage}`}
-              className="absolute inset-0 w-full h-full object-contain pointer-events-none"
-            />
+              {/* Background PDF Page Image (1:1 aspect match with zero letterboxing) */}
+              <img
+                src={pageDataUrl}
+                alt={`PDF Page ${currentPage}`}
+                className="absolute inset-0 w-full h-full block pointer-events-none select-none"
+              />
 
             {/* Whiteout Eraser Boxes */}
             {currentPageEdits.whiteouts.map((w) => (
@@ -1711,7 +1732,7 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
                     isEditing
                       ? 'z-50 bg-white ring-2 ring-blue-600 border-2 border-blue-600 shadow-2xl rounded-xs'
                       : isEdited
-                      ? 'z-20 bg-white text-slate-900 shadow-xs cursor-text ' +
+                      ? 'z-20 bg-white text-slate-900 cursor-text ' +
                         (mode === 'edit-text'
                           ? 'border-[1.5px] border-dashed border-blue-500 hover:border-blue-700 hover:bg-blue-50/20'
                           : 'hover:outline hover:outline-1 hover:outline-blue-400')
@@ -1905,7 +1926,7 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
                         padding: 0,
                         margin: 0,
                       }}
-                      className="bg-white p-0 m-0 outline-none border-none leading-none block h-full select-text shadow-xs"
+                      className="bg-white p-0 m-0 outline-none border-none leading-none block h-full select-text"
                     />
                   ) : isEdited ? (
                     <span
@@ -2309,6 +2330,7 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
                 </div>
               );
             })}
+            </div>
           </div>
         )}
 
@@ -2345,8 +2367,8 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
           <div className="flex items-center gap-1">
             <button
               type="button"
-              onClick={() => setZoomLevel((z) => Math.max(50, z - 15))}
-              disabled={zoomLevel <= 50}
+              onClick={() => setZoomLevel((z) => Math.max(40, z - 15))}
+              disabled={zoomLevel <= 40}
               className="p-1.5 rounded-full text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 cursor-pointer"
               title="Zoom Out (-15%)"
             >
@@ -2371,9 +2393,17 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
             </button>
             <button
               type="button"
-              onClick={() => setZoomLevel(100)}
+              onClick={() => {
+                if (viewportContainerRef.current && pageDimensions.width > 0) {
+                  const availWidth = viewportContainerRef.current.clientWidth - 48;
+                  const fitZoom = Math.max(30, Math.min(200, Math.floor((availWidth / pageDimensions.width) * 100)));
+                  setZoomLevel(fitZoom);
+                } else {
+                  setZoomLevel(100);
+                }
+              }}
               className="p-1.5 rounded-full text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer ml-0.5"
-              title="Fit to Screen (100%)"
+              title="Fit to Screen Width"
             >
               <Maximize2 className="w-3.5 h-3.5" />
             </button>

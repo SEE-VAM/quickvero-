@@ -689,7 +689,7 @@ export async function loadPdfPageForEditing(
     const [vx, vy] = viewport.convertToViewportPoint(item.transform[4], item.transform[5]);
     const fontHeight = Math.hypot(item.transform[0], item.transform[1]) * scale;
     const itemWidth = Math.max(item.width * scale * 1.02, 12);
-    const itemHeight = Math.max(fontHeight * 1.05, 12);
+    const itemHeight = Math.max(fontHeight * 1.10, 13);
     // Baseline-adjusted top
     const itemTop = Math.max(0, vy - fontHeight * 0.82);
 
