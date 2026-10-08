@@ -432,6 +432,7 @@ export interface DetectedTextItem {
   isItalic: boolean;
   textColor: string;
   backgroundColor?: string;
+  letterSpacing?: number;
 }
 
 export interface CustomTextBox {
@@ -506,12 +507,77 @@ export function loadImageFromDataUrl(dataUrl: string): Promise<HTMLImageElement>
   });
 }
 
-export function normalizeFontFamily(rawFontName: string, rawFamily?: string, charWidthRatio?: number): string {
-  // Strip subset prefix (e.g. "ABCDEF+TimesNewRoman" -> "TimesNewRoman")
+export interface FontAnalysis {
+  fontFamily: string;
+  fontWeight: number;
+  isBold: boolean;
+  isItalic: boolean;
+}
+
+export function normalizeFontFamily(
+  rawFontName: string,
+  rawFamily?: string,
+  charWidthRatio?: number
+): FontAnalysis {
   const cleanName = rawFontName.includes('+') ? rawFontName.split('+')[1] : rawFontName;
   const combined = `${cleanName} ${rawFontName} ${rawFamily || ''}`.toLowerCase();
 
-  // 1. Monospace fonts (Bank statements, invoices, receipts, CBS Finacle outputs)
+  // 1. Detect Font Weight
+  let isBold = false;
+  let fontWeight = 400;
+
+  if (
+    combined.includes('black') ||
+    combined.includes('heavy') ||
+    combined.includes('extrabold') ||
+    combined.includes('ultrabold') ||
+    combined.includes('900') ||
+    combined.includes('800')
+  ) {
+    isBold = true;
+    fontWeight = 800;
+  } else if (
+    combined.includes('bold') ||
+    combined.includes('700') ||
+    /\bbd\b|-bd\b|_bd\b/i.test(combined) ||
+    /bold/i.test(rawFamily || '')
+  ) {
+    isBold = true;
+    fontWeight = 700;
+  } else if (
+    combined.includes('semibold') ||
+    combined.includes('demibold') ||
+    combined.includes('600')
+  ) {
+    isBold = true;
+    fontWeight = 600;
+  } else if (
+    combined.includes('medium') ||
+    combined.includes('500')
+  ) {
+    fontWeight = 500;
+  } else if (
+    combined.includes('light') ||
+    combined.includes('thin') ||
+    combined.includes('hairline') ||
+    combined.includes('300') ||
+    combined.includes('200')
+  ) {
+    fontWeight = 300;
+  } else {
+    // Normal document font renders with weight 500 for crisp ink contrast
+    fontWeight = 500;
+  }
+
+  // 2. Detect Italic
+  const isItalic =
+    combined.includes('italic') ||
+    combined.includes('oblique') ||
+    combined.includes('slant') ||
+    /\bital\b|\bit\b|-it\b|_it\b/i.test(combined) ||
+    /italic|oblique/i.test(rawFamily || '');
+
+  // 3. Monospace fonts (Bank statements, invoices, receipts, code)
   const isMonoName =
     combined.includes('courier') ||
     combined.includes('mono') ||
@@ -524,16 +590,19 @@ export function normalizeFontFamily(rawFontName: string, rawFamily?: string, cha
     combined.includes('draft') ||
     rawFamily?.toLowerCase() === 'monospace';
 
-  // In Indian banking PDFs (Canara, SBI, PNB etc.) fonts often get generic names like F1, F2, C1, TT1, TT2.
-  // Their characters have strict monospace pitch ratio (~0.48 to 0.68 of font height)
   const isMonoPitch = charWidthRatio !== undefined && charWidthRatio >= 0.48 && charWidthRatio <= 0.68;
   const isGenericBankingFont = /^(f\d+|tt\d+|c\d+|r\d+|font|g_d\d+_f\d+)/i.test(cleanName);
 
   if (isMonoName || (isMonoPitch && isGenericBankingFont)) {
-    return "'Courier New', 'Courier', 'Lucida Console', monospace";
+    return {
+      fontFamily: "'Courier New', 'Courier', 'Lucida Console', monospace",
+      fontWeight: isBold ? 700 : fontWeight,
+      isBold,
+      isItalic,
+    };
   }
 
-  // 2. Genuine Serif typefaces (Check Serif before falling back to sans-serif!)
+  // 4. Serif typefaces
   if (
     (combined.includes('serif') && !combined.includes('sans')) ||
     combined.includes('times') ||
@@ -556,141 +625,122 @@ export function normalizeFontFamily(rawFontName: string, rawFamily?: string, cha
     combined.includes('nimbus rom') ||
     rawFamily?.toLowerCase() === 'serif'
   ) {
-    if (combined.includes('georgia')) {
-      return "'Georgia', 'Times New Roman', serif";
-    }
-    if (combined.includes('cambria')) {
-      return "'Cambria', 'Georgia', serif";
-    }
-    if (combined.includes('garamond')) {
-      return "'Garamond', 'Georgia', serif";
-    }
-    return "'Times New Roman', 'Times', 'Liberation Serif', serif";
+    let fam = "'Times New Roman', 'Times', 'Liberation Serif', serif";
+    if (combined.includes('georgia')) fam = "'Georgia', 'Times New Roman', serif";
+    else if (combined.includes('cambria')) fam = "'Cambria', 'Georgia', serif";
+    else if (combined.includes('garamond')) fam = "'Garamond', 'Georgia', serif";
+    else if (combined.includes('palatino')) fam = "'Palatino Linotype', 'Book Antiqua', Palatino, serif";
+
+    return {
+      fontFamily: fam,
+      fontWeight: isBold ? 700 : fontWeight,
+      isBold,
+      isItalic,
+    };
   }
 
-  // 3. Specific Sans-Serif font checks
-  if (combined.includes('calibri')) {
-    return "'Calibri', 'Arial', sans-serif";
-  }
-  if (combined.includes('aptos')) {
-    return "'Aptos', 'Calibri', 'Arial', sans-serif";
-  }
-  if (combined.includes('roboto')) {
-    return "'Roboto', 'Segoe UI', 'Arial', sans-serif";
-  }
-  if (combined.includes('segoe')) {
-    return "'Segoe UI', 'Arial', sans-serif";
-  }
-  if (combined.includes('tahoma')) {
-    return "'Tahoma', 'Arial', sans-serif";
-  }
-  if (combined.includes('verdana')) {
-    return "'Verdana', 'Arial', sans-serif";
-  }
-  if (combined.includes('trebuchet')) {
-    return "'Trebuchet MS', 'Arial', sans-serif";
-  }
+  // 5. Sans-Serif typefaces
+  let sansFam = "'Arial', 'Helvetica Neue', Helvetica, sans-serif";
+  if (combined.includes('calibri')) sansFam = "'Calibri', 'Arial', sans-serif";
+  else if (combined.includes('aptos')) sansFam = "'Aptos', 'Calibri', 'Arial', sans-serif";
+  else if (combined.includes('roboto')) sansFam = "'Roboto', 'Segoe UI', 'Arial', sans-serif";
+  else if (combined.includes('segoe')) sansFam = "'Segoe UI', 'Arial', sans-serif";
+  else if (combined.includes('tahoma')) sansFam = "'Tahoma', 'Arial', sans-serif";
+  else if (combined.includes('verdana')) sansFam = "'Verdana', 'Arial', sans-serif";
+  else if (combined.includes('trebuchet')) sansFam = "'Trebuchet MS', 'Arial', sans-serif";
+  else if (combined.includes('helvetica')) sansFam = "'Helvetica Neue', Helvetica, Arial, sans-serif";
+  else if (combined.includes('open sans') || combined.includes('opensans')) sansFam = "'Open Sans', 'Arial', sans-serif";
+  else if (combined.includes('lato')) sansFam = "'Lato', 'Arial', sans-serif";
+  else if (combined.includes('poppins')) sansFam = "'Poppins', 'Arial', sans-serif";
+  else if (combined.includes('montserrat')) sansFam = "'Montserrat', 'Arial', sans-serif";
 
-  // 4. Fallback based on rawFamily:
-  if (rawFamily?.toLowerCase() === 'serif') {
-    return "'Times New Roman', 'Times', serif";
-  }
-
-  return "'Arial', 'Helvetica Neue', Helvetica, sans-serif";
+  return {
+    fontFamily: sansFam,
+    fontWeight: isBold ? 700 : fontWeight,
+    isBold,
+    isItalic,
+  };
 }
 
 /**
- * Accurately sample the background color from the rendered canvas behind the text box.
- * This guarantees replacement text patches blend 100% invisibly into the paper or table cell.
+ * Accurately sample the background color and text color from the rendered canvas behind the text box.
+ * Uses perimeter sampling for background and maximum contrast analysis for text.
  */
-function sampleBackgroundColor(
+function sampleColors(
   ctx: CanvasRenderingContext2D,
   x: number,
   y: number,
   w: number,
   h: number
-): string {
+): { textColor: string; backgroundColor: string } {
   try {
     const startX = Math.max(0, Math.min(ctx.canvas.width - 1, Math.round(x)));
     const startY = Math.max(0, Math.min(ctx.canvas.height - 1, Math.round(y)));
-    const sampleW = Math.max(1, Math.min(ctx.canvas.width - startX, Math.round(Math.min(w, 24))));
-    const sampleH = Math.max(1, Math.min(ctx.canvas.height - startY, Math.round(Math.min(h, 20))));
+    const sampleW = Math.max(1, Math.min(ctx.canvas.width - startX, Math.round(Math.min(w, 40))));
+    const sampleH = Math.max(1, Math.min(ctx.canvas.height - startY, Math.round(Math.min(h, 24))));
 
     const imgData = ctx.getImageData(startX, startY, sampleW, sampleH).data;
-    let maxBrightness = 0;
-    let bgR = 255;
-    let bgG = 255;
-    let bgB = 255;
 
-    for (let i = 0; i < imgData.length; i += 4) {
-      const r = imgData[i];
-      const g = imgData[i + 1];
-      const b = imgData[i + 2];
-      const a = imgData[i + 3];
+    const bgPixels: { r: number; g: number; b: number; bright: number }[] = [];
+    const allPixels: { r: number; g: number; b: number; bright: number }[] = [];
 
-      if (a < 50) continue;
-      const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
-      if (brightness > maxBrightness) {
-        maxBrightness = brightness;
-        bgR = r;
-        bgG = g;
-        bgB = b;
+    for (let py = 0; py < sampleH; py++) {
+      for (let px = 0; px < sampleW; px++) {
+        const i = (py * sampleW + px) * 4;
+        const r = imgData[i];
+        const g = imgData[i + 1];
+        const b = imgData[i + 2];
+        const a = imgData[i + 3];
+        if (a < 50) continue;
+
+        const bright = 0.299 * r + 0.587 * g + 0.114 * b;
+        const pixel = { r, g, b, bright };
+        allPixels.push(pixel);
+
+        // Edge perimeter pixels are background
+        if (py === 0 || py === sampleH - 1 || px === 0 || px === sampleW - 1) {
+          bgPixels.push(pixel);
+        }
       }
     }
 
-    if (maxBrightness > 160) {
-      const toHex = (c: number) => c.toString(16).padStart(2, '0');
-      return `#${toHex(bgR)}${toHex(bgG)}${toHex(bgB)}`;
+    // Average background color from perimeter
+    let bgR = 255, bgG = 255, bgB = 255;
+    if (bgPixels.length > 0) {
+      let sR = 0, sG = 0, sB = 0;
+      for (const p of bgPixels) {
+        sR += p.r;
+        sG += p.g;
+        sB += p.b;
+      }
+      bgR = Math.round(sR / bgPixels.length);
+      bgG = Math.round(sG / bgPixels.length);
+      bgB = Math.round(sB / bgPixels.length);
     }
-  } catch (_) {}
-  return '#ffffff';
-}
+    const bgBrightness = 0.299 * bgR + 0.587 * bgG + 0.114 * bgB;
 
-/**
- * Accurately sample the text color from the rendered canvas at the given position.
- * Returns the darkest non-background pixel color (hex) so replacement text matches 100%.
- */
-function sampleTextColor(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  w: number,
-  h: number
-): string {
-  try {
-    const startX = Math.max(0, Math.min(ctx.canvas.width - 1, Math.round(x)));
-    const startY = Math.max(0, Math.min(ctx.canvas.height - 1, Math.round(y)));
-    const sampleW = Math.max(1, Math.min(ctx.canvas.width - startX, Math.round(Math.min(w, 24))));
-    const sampleH = Math.max(1, Math.min(ctx.canvas.height - startY, Math.round(Math.min(h, 20))));
+    // Foreground text is the pixel that contrasts most with the background
+    let maxContrast = 0;
+    let textR = 0, textG = 0, textB = 0;
 
-    const imgData = ctx.getImageData(startX, startY, sampleW, sampleH).data;
-    let minBrightness = 255;
-    let bestR = 0;
-    let bestG = 0;
-    let bestB = 0;
-
-    for (let i = 0; i < imgData.length; i += 4) {
-      const r = imgData[i];
-      const g = imgData[i + 1];
-      const b = imgData[i + 2];
-      const a = imgData[i + 3];
-
-      if (a < 50) continue;
-      const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
-      if (brightness < minBrightness && brightness < 220) {
-        minBrightness = brightness;
-        bestR = r;
-        bestG = g;
-        bestB = b;
+    for (const p of allPixels) {
+      const contrast = Math.abs(p.bright - bgBrightness);
+      if (contrast > maxContrast) {
+        maxContrast = contrast;
+        textR = p.r;
+        textG = p.g;
+        textB = p.b;
       }
     }
 
-    if (minBrightness < 220) {
-      const toHex = (c: number) => c.toString(16).padStart(2, '0');
-      return `#${toHex(bestR)}${toHex(bestG)}${toHex(bestB)}`;
-    }
-  } catch (_) {}
-  return '#000000';
+    const toHex = (c: number) => c.toString(16).padStart(2, '0');
+    const backgroundColor = `#${toHex(bgR)}${toHex(bgG)}${toHex(bgB)}`;
+    const textColor = maxContrast > 25 ? `#${toHex(textR)}${toHex(textG)}${toHex(textB)}` : (bgBrightness > 128 ? '#000000' : '#ffffff');
+
+    return { textColor, backgroundColor };
+  } catch (_) {
+    return { textColor: '#000000', backgroundColor: '#ffffff' };
+  }
 }
 
 /**
@@ -740,6 +790,53 @@ export async function loadPdfPageForEditing(
   const textContent = await page.getTextContent();
   const textItems: DetectedTextItem[] = [];
 
+  // Pre-resolve all fonts used across this page from commonObjs
+  const fontMap = new Map<string, any>();
+  const fontPromises: Promise<void>[] = [];
+
+  for (let i = 0; i < textContent.items.length; i++) {
+    const it: any = textContent.items[i];
+    if (!it.fontName || fontMap.has(it.fontName)) continue;
+    fontMap.set(it.fontName, null);
+
+    const p = new Promise<void>((resolve) => {
+      try {
+        if ((page as any).commonObjs?.has?.(it.fontName)) {
+          (page as any).commonObjs.get(it.fontName, async (fontData: any) => {
+            if (fontData) {
+              fontMap.set(it.fontName, fontData);
+              // Register FontFace in browser if embedded data exists
+              if (
+                typeof document !== 'undefined' &&
+                typeof FontFace !== 'undefined' &&
+                fontData.data &&
+                fontData.loadedName &&
+                !document.fonts.check(`12px "${fontData.loadedName}"`)
+              ) {
+                try {
+                  const ff = new FontFace(fontData.loadedName, fontData.data);
+                  await ff.load();
+                  document.fonts.add(ff);
+                } catch (_) {}
+              }
+            }
+            resolve();
+          });
+        } else {
+          resolve();
+        }
+      } catch (_) {
+        resolve();
+      }
+    });
+    fontPromises.push(p);
+  }
+
+  await Promise.race([
+    Promise.all(fontPromises),
+    new Promise((res) => setTimeout(res, 250)),
+  ]);
+
   for (let i = 0; i < textContent.items.length; i++) {
     const item: any = textContent.items[i];
     if (!item.str || !item.str.trim()) continue;
@@ -763,34 +860,24 @@ export async function loadPdfPageForEditing(
     const widthPercent = (itemWidth / viewport.width) * 100;
     const heightPercent = (itemHeight / viewport.height) * 100;
 
-    // Resolve font name from commonObjs if available
+    // Resolve font name from pre-resolved fontMap or commonObjs
     let rawFontName = item.fontName;
-    try {
-      if ((page as any).commonObjs?.has?.(item.fontName)) {
-        const fontObj = (page as any).commonObjs.get(item.fontName);
-        if (fontObj?.name) {
-          rawFontName = fontObj.name;
-        }
-      }
-    } catch (_) {}
+    const fontObj = fontMap.get(item.fontName);
+    if (fontObj?.name) {
+      rawFontName = fontObj.name;
+    }
 
     const style = textContent.styles[item.fontName];
     const charWidthRatio = item.str.length > 0 ? (item.width / item.str.length) / pdfFontHeight : undefined;
-    const fontFam = normalizeFontFamily(rawFontName, style?.fontFamily, charWidthRatio);
+    const analysis = normalizeFontFamily(rawFontName, style?.fontFamily, charWidthRatio);
 
-    const isBold =
-      /bold|black|heavy|700|800|900|\bbd\b|-bd\b|_bd\b/i.test(rawFontName) ||
-      /bold|black|heavy|700|800|900|\bbd\b|-bd\b|_bd\b/i.test(item.fontName) ||
-      (style?.fontFamily && /bold|black|heavy/i.test(style.fontFamily));
-    const isItalic =
-      /italic|oblique|slant|\bital\b|\bit\b|-it\b|_it\b/i.test(rawFontName) ||
-      /italic|oblique|slant|\bital\b|\bit\b|-it\b|_it\b/i.test(item.fontName) ||
-      (style?.fontFamily && /italic|oblique/i.test(style.fontFamily)) ||
-      (Array.isArray(item.transform) && Math.abs(item.transform[2]) > 0.05);
+    // If browser loaded the fontFace, prefer it with fallback
+    const resolvedFontFamily = fontObj?.loadedName
+      ? `"${fontObj.loadedName}", ${analysis.fontFamily}`
+      : analysis.fontFamily;
 
     // Accurately sample the text color and background color from the rendered canvas
-    const detectedColor = sampleTextColor(ctx, vx, vy - fontHeight * 0.7, itemWidth, fontHeight);
-    const detectedBgColor = sampleBackgroundColor(ctx, vx, vy - fontHeight * 0.7, itemWidth, fontHeight);
+    const colors = sampleColors(ctx, vx, vy - fontHeight * 0.7, itemWidth, fontHeight);
 
     textItems.push({
       id: `p${targetPageNum}_t${i}`,
@@ -802,12 +889,12 @@ export async function loadPdfPageForEditing(
       widthPercent,
       heightPercent,
       fontSize: Math.round(fontHeight),
-      fontFamily: fontFam,
-      fontWeight: isBold ? 700 : 500,
-      isBold: !!isBold,
-      isItalic: !!isItalic,
-      textColor: detectedColor,
-      backgroundColor: detectedBgColor,
+      fontFamily: resolvedFontFamily,
+      fontWeight: analysis.fontWeight,
+      isBold: analysis.isBold,
+      isItalic: analysis.isItalic,
+      textColor: colors.textColor,
+      backgroundColor: colors.backgroundColor,
     });
   }
 
