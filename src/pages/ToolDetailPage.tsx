@@ -193,8 +193,8 @@ export const ToolDetailPage: React.FC<ToolDetailPageProps> = ({
           onNavigate={onNavigate}
         />
 
-        {/* Interactive Workspace */}
-        <div className="space-y-6">
+        {/* Interactive Workspace (Protected from Auto Ads injection via google-anno-skip) */}
+        <div className="space-y-6 google-anno-skip">
           {isHashTool && <HashToolWorkspace />}
           {isBase64Tool && <Base64ToolWorkspace />}
           {isCalculatorTool && <CalculatorWorkspace />}

@@ -1621,7 +1621,7 @@ export const PdfEditorWorkspace: React.FC<PdfEditorWorkspaceProps> = ({ onShowTo
             <div
               ref={documentContainerRef}
               onClick={handleContainerClick}
-              className="absolute top-0 left-0 bg-white overflow-hidden select-none origin-top-left shrink-0"
+              className="absolute top-0 left-0 bg-white overflow-hidden select-none origin-top-left shrink-0 google-anno-skip"
               style={{
                 width: `${pageDimensions.width}px`,
                 height: `${pageDimensions.height}px`,
