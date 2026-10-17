@@ -801,23 +801,25 @@ export const TOOLS: ToolDefinition[] = [
     shortDescription: 'Convert photos and scans into a clean PDF document.',
     description: 'Combine single or multiple JPG and PNG images into a clean, multi-page PDF document. 100% processed in your browser using jsPDF.',
     icon: 'FileSpreadsheet',
-    supportedFormats: ['image/jpeg', 'image/png'],
-    maxFileSizeMB: 30,
+    supportedFormats: ['image/jpeg', 'image/png', 'image/webp'],
+    maxFileSizeMB: 50,
     engine: 'browser',
     isPopular: true,
     seoTitle: 'JPG to PDF Converter Online — Fast & In-Browser | QuickVero',
-    seoDescription: 'Convert JPG images to PDF document online with QuickVero. 100% private in-browser conversion with zero server uploads.',
-    keywords: ['jpg to pdf', 'convert jpg to pdf', 'images to pdf', 'photo to pdf', 'picture to pdf'],
+    seoDescription: 'Convert single or multiple JPG/PNG images to a multi-page PDF document online with QuickVero. 100% private in-browser conversion with zero server uploads.',
+    keywords: ['jpg to pdf', 'convert jpg to pdf', 'images to pdf', 'multiple images to pdf', 'photo to pdf', 'picture to pdf'],
     features: [
       'Generates standard ISO-compliant PDF',
+      'Supports single or multiple images (batch convert to multi-page PDF)',
       'Automatic page orientation detection (Portrait/Landscape)',
+      'Reorder images before converting',
       '100% in-browser processing with zero server transmission',
       'High-resolution output'
     ],
     howToSteps: [
-      { step: 1, title: 'Upload image', description: 'Select your JPG or PNG image.' },
-      { step: 2, title: 'Choose Page Orientation', description: 'Select Auto, Portrait, or Landscape.' },
-      { step: 3, title: 'Generate PDF', description: 'Package the image into a clean PDF.' },
+      { step: 1, title: 'Upload images', description: 'Select 1 or multiple JPG, PNG, or WebP images from your device.' },
+      { step: 2, title: 'Organize & Orient', description: 'Rearrange page order and choose Auto, Portrait, or Landscape.' },
+      { step: 3, title: 'Generate PDF', description: 'Package all selected photos into a unified PDF document.' },
       { step: 4, title: 'Download PDF', description: 'Save your PDF document immediately.' }
     ],
     faqs: [

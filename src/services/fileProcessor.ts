@@ -57,6 +57,107 @@ export function base64ToBlob(base64Data: string, mimeType: string = 'application
 }
 
 /**
+ * Real in-browser conversion of single or multiple images to a multi-page PDF using jsPDF
+ */
+export async function convertImagesToPdf(
+  files: File[],
+  orientation: 'auto' | 'p' | 'l' = 'auto',
+  onProgress?: (percent: number) => void
+): Promise<ProcessResult> {
+  if (!files || files.length === 0) {
+    throw new Error('Please select at least one image file.');
+  }
+
+  let pdf: jsPDF | null = null;
+  const totalFiles = files.length;
+  let totalOriginalSize = 0;
+
+  for (let i = 0; i < totalFiles; i++) {
+    const file = files[i];
+    totalOriginalSize += file.size;
+
+    const startPct = Math.round((i / totalFiles) * 85);
+    onProgress?.(startPct + 5);
+
+    const img = await loadImageFromFile(file);
+    const imgWidth = img.naturalWidth || img.width || 800;
+    const imgHeight = img.naturalHeight || img.height || 600;
+
+    let pageOrientation: 'p' | 'l' = 'p';
+    if (orientation === 'auto') {
+      pageOrientation = imgWidth > imgHeight ? 'l' : 'p';
+    } else {
+      pageOrientation = orientation;
+    }
+
+    if (i === 0) {
+      pdf = new jsPDF({
+        orientation: pageOrientation,
+        unit: 'pt',
+        format: 'a4',
+      });
+    } else {
+      pdf!.addPage('a4', pageOrientation);
+    }
+
+    const pageWidth = pdf!.internal.pageSize.getWidth();
+    const pageHeight = pdf!.internal.pageSize.getHeight();
+
+    // Scale image to fit within margins
+    const margin = 20;
+    const maxW = pageWidth - margin * 2;
+    const maxH = pageHeight - margin * 2;
+
+    let renderW = maxW;
+    let renderH = (imgHeight * renderW) / imgWidth;
+
+    if (renderH > maxH) {
+      renderH = maxH;
+      renderW = (imgWidth * renderH) / imgHeight;
+    }
+
+    const posX = (pageWidth - renderW) / 2;
+    const posY = (pageHeight - renderH) / 2;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = imgWidth;
+    canvas.height = imgHeight;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+      pdf!.addImage(dataUrl, 'JPEG', posX, posY, renderW, renderH, undefined, 'FAST');
+    } else {
+      pdf!.addImage(img, 'JPEG', posX, posY, renderW, renderH, undefined, 'FAST');
+    }
+  }
+
+  onProgress?.(92);
+  const pdfBlob = pdf!.output('blob');
+  onProgress?.(100);
+
+  const outName = files.length === 1
+    ? sanitizeFilename(files[0].name, 'pdf')
+    : `quickvero-converted-${files.length}-pages.pdf`;
+
+  return {
+    blob: pdfBlob,
+    downloadUrl: URL.createObjectURL(pdfBlob),
+    filename: outName,
+    originalSize: totalOriginalSize,
+    processedSize: pdfBlob.size,
+    savingsPercentage: 0,
+    metadata: {
+      totalPages: totalFiles,
+      pages: totalFiles,
+      orientation,
+    },
+  };
+}
+
+/**
  * Real in-browser JPG to PDF conversion using jsPDF
  */
 export async function convertImageToPdf(
@@ -64,66 +165,7 @@ export async function convertImageToPdf(
   orientation: 'auto' | 'p' | 'l' = 'auto',
   onProgress?: (percent: number) => void
 ): Promise<ProcessResult> {
-  onProgress?.(20);
-  const img = await loadImageFromFile(file);
-  onProgress?.(50);
-
-  const imgWidth = img.naturalWidth;
-  const imgHeight = img.naturalHeight;
-
-  let chosenOrientation: 'p' | 'l' = 'p';
-  if (orientation === 'auto') {
-    chosenOrientation = imgWidth > imgHeight ? 'l' : 'p';
-  } else {
-    chosenOrientation = orientation;
-  }
-
-  const pdf = new jsPDF({
-    orientation: chosenOrientation,
-    unit: 'pt',
-    format: 'a4',
-  });
-
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const pageHeight = pdf.internal.pageSize.getHeight();
-
-  // Scale image to fit within margins
-  const margin = 20;
-  const maxW = pageWidth - margin * 2;
-  const maxH = pageHeight - margin * 2;
-
-  let renderW = maxW;
-  let renderH = (imgHeight * renderW) / imgWidth;
-
-  if (renderH > maxH) {
-    renderH = maxH;
-    renderW = (imgWidth * renderH) / imgHeight;
-  }
-
-  const posX = (pageWidth - renderW) / 2;
-  const posY = (pageHeight - renderH) / 2;
-
-  onProgress?.(80);
-  pdf.addImage(img, 'JPEG', posX, posY, renderW, renderH, undefined, 'FAST');
-  onProgress?.(95);
-
-  const pdfBlob = pdf.output('blob');
-  onProgress?.(100);
-
-  const outName = sanitizeFilename(file.name, 'pdf');
-
-  return {
-    blob: pdfBlob,
-    downloadUrl: URL.createObjectURL(pdfBlob),
-    filename: outName,
-    originalSize: file.size,
-    processedSize: pdfBlob.size,
-    savingsPercentage: 0,
-    metadata: {
-      pages: 1,
-      orientation: chosenOrientation,
-    },
-  };
+  return convertImagesToPdf([file], orientation, onProgress);
 }
 
 /**

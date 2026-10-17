@@ -15,6 +15,7 @@ import { ExcelToPdfControls } from '../components/tool/controls/ExcelToPdfContro
 import { PdfToWordControls } from '../components/tool/controls/PdfToWordControls';
 import { PdfToExcelControls } from '../components/tool/controls/PdfToExcelControls';
 import { MergePdfWorkspace } from '../components/tool/controls/MergePdfWorkspace';
+import { JpgToPdfWorkspace } from '../components/tool/controls/JpgToPdfWorkspace';
 import { PdfCompressorControls } from '../components/tool/controls/PdfCompressorControls';
 import { SplitPdfControls } from '../components/tool/controls/SplitPdfControls';
 import { PdfToJpgControls } from '../components/tool/controls/PdfToJpgControls';
@@ -174,6 +175,7 @@ export const ToolDetailPage: React.FC<ToolDetailPageProps> = ({
   const isVideoTrimmer = tool.id === 'video-trimmer';
   const isMergePdf = tool.id === 'merge-pdf';
   const isPdfEditor = tool.id === 'pdf-editor';
+  const isJpgToPdf = tool.id === 'jpg-to-pdf';
   const isVideoDownloader =
     tool.id === 'instagram-video-downloader' ||
     tool.id === 'facebook-video-downloader' ||
@@ -182,7 +184,7 @@ export const ToolDetailPage: React.FC<ToolDetailPageProps> = ({
     tool.id === 'twitter-video-downloader' ||
     tool.id === 'all-video-downloader' ||
     tool.id.includes('downloader');
-  const isStandaloneUtility = isHashTool || isBase64Tool || isCalculatorTool || isVideoDownloader || isVideoTrimmer || isMergePdf || isPdfEditor;
+  const isStandaloneUtility = isHashTool || isBase64Tool || isCalculatorTool || isVideoDownloader || isVideoTrimmer || isMergePdf || isPdfEditor || isJpgToPdf;
 
   return (
     <div className="py-8 sm:py-12">
@@ -201,6 +203,7 @@ export const ToolDetailPage: React.FC<ToolDetailPageProps> = ({
           {isVideoTrimmer && <VideoTrimmerWorkspace onShowToast={onShowToast} />}
           {isMergePdf && <MergePdfWorkspace onShowToast={onShowToast} />}
           {isPdfEditor && <PdfEditorWorkspace onShowToast={onShowToast} />}
+          {isJpgToPdf && <JpgToPdfWorkspace onShowToast={onShowToast} />}
           {isVideoDownloader && (
             <VideoDownloaderWorkspace tool={tool} onShowToast={onShowToast} />
           )}
