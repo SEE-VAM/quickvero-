@@ -28,6 +28,7 @@ import {
   RestaurantMenuData,
   MenuItem,
   SAMPLE_MENU,
+  EMPTY_MENU,
   compressMenuData,
   parseMenuText,
 } from '../../../utils/menuDataHelper';
@@ -57,16 +58,9 @@ const THEME_OPTIONS: { id: RestaurantMenuData['theme']; name: string; bg: string
 ];
 
 export const QrMenuWorkspace: React.FC<QrMenuWorkspaceProps> = ({ onShowToast }) => {
-  // Menu State
+  // Menu State (Clean & Fresh by default, zero dummy data)
   const [menu, setMenu] = useState<RestaurantMenuData>(() => {
-    const saved = localStorage.getItem('quickvero_last_menu');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (parsed?.name && parsed?.items?.length) return parsed;
-      } catch (e) {}
-    }
-    return SAMPLE_MENU;
+    return EMPTY_MENU;
   });
 
   // Active view tab in workspace: 'editor' | 'preview'
@@ -93,24 +87,20 @@ export const QrMenuWorkspace: React.FC<QrMenuWorkspaceProps> = ({ onShowToast })
   // Ref to the Standee element for html2canvas
   const standeeRef = useRef<HTMLDivElement>(null);
 
-  // Auto-save & generate QR code whenever menu changes
+  // Generate QR code whenever menu changes
   useEffect(() => {
-    try {
-      localStorage.setItem('quickvero_last_menu', JSON.stringify(menu));
-    } catch (e) {}
-
-    const compressed = compressMenuData(menu);
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.quickvero.in';
-    const fullMenuUrl = `${origin}/menu?d=${compressed}`;
+    const compressed = compressMenuData(menu);
+    const fullMenuUrl = compressed ? `${origin}/menu?d=${compressed}` : `${origin}/menu`;
     setMenuShareUrl(fullMenuUrl);
 
-    // Generate high resolution QR code
+    // Generate high resolution QR code using 'L' for high data density
     QRCode.toDataURL(
       fullMenuUrl,
       {
         width: 600,
         margin: 2,
-        errorCorrectionLevel: 'M',
+        errorCorrectionLevel: 'L',
         color: {
           dark: '#000000',
           light: '#ffffff',
@@ -119,6 +109,15 @@ export const QrMenuWorkspace: React.FC<QrMenuWorkspaceProps> = ({ onShowToast })
       (err, url) => {
         if (!err && url) {
           setQrCodeDataUrl(url);
+        } else {
+          // If error occurs, fallback with base URL so QR is ALWAYS immediately displayed!
+          QRCode.toDataURL(
+            `${origin}/menu`,
+            { width: 600, margin: 2, errorCorrectionLevel: 'L' },
+            (_, fallbackUrl) => {
+              if (fallbackUrl) setQrCodeDataUrl(fallbackUrl);
+            }
+          );
         }
       }
     );
@@ -442,38 +441,49 @@ export const QrMenuWorkspace: React.FC<QrMenuWorkspaceProps> = ({ onShowToast })
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    Currency Symbol
-                  </label>
-                  <select
-                    value={menu.currency}
-                    onChange={(e) => setMenu((prev) => ({ ...prev, currency: e.target.value }))}
-                    className="w-full px-3 py-2 text-sm rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="₹">₹ (INR)</option>
-                    <option value="$">$ (USD)</option>
-                    <option value="€">€ (EUR)</option>
-                    <option value="£">£ (GBP)</option>
-                    <option value="AED">AED</option>
-                    <option value="C$">C$ (CAD)</option>
-                    <option value="A$">A$ (AUD)</option>
-                  </select>
-                </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Contact / WhatsApp No. (Optional)
+                </label>
+                <input
+                  type="tel"
+                  value={menu.phone || ''}
+                  onChange={(e) => setMenu((prev) => ({ ...prev, phone: e.target.value }))}
+                  placeholder="e.g. +91 98765 43210"
+                  className="w-full px-3 py-2 text-sm rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    Table Identifier
-                  </label>
-                  <input
-                    type="text"
-                    value={menu.tableNo || ''}
-                    onChange={(e) => setMenu((prev) => ({ ...prev, tableNo: e.target.value }))}
-                    placeholder="e.g. Table 1"
-                    className="w-full px-3 py-2 text-sm rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Currency Symbol
+                </label>
+                <select
+                  value={menu.currency}
+                  onChange={(e) => setMenu((prev) => ({ ...prev, currency: e.target.value }))}
+                  className="w-full px-3 py-2 text-sm rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="₹">₹ (INR)</option>
+                  <option value="$">$ (USD)</option>
+                  <option value="€">€ (EUR)</option>
+                  <option value="£">£ (GBP)</option>
+                  <option value="AED">AED</option>
+                  <option value="C$">C$ (CAD)</option>
+                  <option value="A$">A$ (AUD)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Table / Counter No. (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={menu.tableNo || ''}
+                  onChange={(e) => setMenu((prev) => ({ ...prev, tableNo: e.target.value }))}
+                  placeholder="e.g. Table 1"
+                  className="w-full px-3 py-2 text-sm rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
               </div>
             </div>
 

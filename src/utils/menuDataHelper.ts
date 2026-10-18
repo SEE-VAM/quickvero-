@@ -19,11 +19,22 @@ export interface RestaurantMenuData {
   items: MenuItem[];
 }
 
+export const EMPTY_MENU: RestaurantMenuData = {
+  name: '',
+  tagline: '',
+  address: '',
+  phone: '',
+  currency: '₹',
+  tableNo: '',
+  theme: 'gold',
+  items: [],
+};
+
 export const SAMPLE_MENU: RestaurantMenuData = {
   name: 'The Rustic Bistro & Cafe',
   tagline: 'Artisanal Coffee, Gourmet Pizzas & Fresh Delights',
   address: 'Connaught Place, New Delhi',
-  phone: '+91 98765 43210',
+  phone: '',
   currency: '₹',
   tableNo: 'Table 1',
   theme: 'gold',

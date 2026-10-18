@@ -1,0 +1,10 @@
+const fs = require('fs');
+
+// Let's inspect what happens in PdfEditorWorkspace.tsx when an item is rendered:
+// Look at item:
+// item.xPercent, item.yPercent, item.widthPercent, item.heightPercent
+// item.fontFamily
+// item.fontSize
+// item.fontWeight
+// item.textColor
+// item.backgroundColor

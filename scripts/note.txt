@@ -1,0 +1,7 @@
+// Let's check how PDF.js loads fonts in browser:
+// In PDF.js pdf.js / font_loader.js:
+// When a font has TrueType / OpenType data:
+// PDF.js creates:
+// const fontFace = new FontFace(loadedName, fontData);
+// document.fonts.add(fontFace);
+// Where loadedName is 'g_d0_f1', 'g_d0_f2', 'g_d0_f3', 'g_d0_f4'!

@@ -31,13 +31,9 @@ export const Hero: React.FC<HeroProps> = ({
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center">
         {/* Release Pill */}
-        <div
-          onClick={onOpenQrMenu}
-          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/80 dark:to-orange-950/60 border border-amber-300/80 dark:border-amber-700/60 text-xs font-semibold text-amber-900 dark:text-amber-200 mb-6 shadow-xs animate-in fade-in slide-in-from-top-3 cursor-pointer hover:scale-105 transition-all"
-        >
-          <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-          <span>🔥 New Tool: Digital QR Menu Maker for Restaurants &amp; Cafes</span>
-          <ArrowRight className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/80 border border-blue-200/80 dark:border-blue-800 text-xs font-medium text-brand-700 dark:text-brand-300 mb-6 shadow-xs animate-in fade-in slide-in-from-top-3">
+          <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+          <span>New: Instant High-Performance Image &amp; PDF Engines</span>
         </div>
 
         {/* Main Headline */}
