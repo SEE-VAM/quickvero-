@@ -228,6 +228,10 @@ export const QrMenuWorkspace: React.FC<QrMenuWorkspaceProps> = ({ onShowToast })
         scale: 3,
         useCORS: true,
         backgroundColor: null,
+        logging: false,
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: 1200,
       });
 
       const imgData = canvas.toDataURL('image/png');
@@ -241,8 +245,15 @@ export const QrMenuWorkspace: React.FC<QrMenuWorkspaceProps> = ({ onShowToast })
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
 
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`${menu.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}-table-standee.pdf`);
+      // Fit neatly on page with safe print margins
+      const margin = 8;
+      const printWidth = pdfWidth - margin * 2;
+      const printHeight = (canvas.height * printWidth) / canvas.width;
+      const posX = margin;
+      const posY = Math.max(margin, (pdfHeight - printHeight) / 2);
+
+      pdf.addImage(imgData, 'PNG', posX, posY, printWidth, printHeight);
+      pdf.save(`${(menu.name || 'restaurant').toLowerCase().replace(/[^a-z0-9]/g, '-')}-table-standee.pdf`);
 
       onShowToast({ type: 'success', message: 'Print-Ready Table Standee PDF generated!' });
     } catch (err: any) {
@@ -259,13 +270,18 @@ export const QrMenuWorkspace: React.FC<QrMenuWorkspaceProps> = ({ onShowToast })
     setIsGeneratingPdf(true);
     try {
       const canvas = await html2canvas(standeeRef.current, {
-        scale: 2.5,
+        scale: 3,
         useCORS: true,
+        backgroundColor: null,
+        logging: false,
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: 1200,
       });
       const dataUrl = canvas.toDataURL('image/png');
       const a = document.createElement('a');
       a.href = dataUrl;
-      a.download = `${menu.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}-table-standee.png`;
+      a.download = `${(menu.name || 'restaurant').toLowerCase().replace(/[^a-z0-9]/g, '-')}-table-standee.png`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -825,14 +841,14 @@ export const QrMenuWorkspace: React.FC<QrMenuWorkspaceProps> = ({ onShowToast })
             {/* The Actual Standee Component captured by html2canvas */}
             <div
               ref={standeeRef}
-              className={`w-full max-w-[340px] aspect-[1/1.42] rounded-3xl p-6 flex flex-col justify-between items-center text-center border-2 transition-all duration-300 shadow-2xl relative overflow-hidden ${themeStyle.wrapper}`}
+              className={`w-full max-w-[350px] min-h-[500px] rounded-3xl p-6 sm:p-7 flex flex-col justify-between items-center text-center border-2 transition-all duration-300 shadow-2xl relative overflow-hidden ${themeStyle.wrapper}`}
             >
               {/* Subtle Decorative Background Lines */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl pointer-events-none" />
               <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full blur-2xl pointer-events-none" />
 
               {/* Standee Header */}
-              <div className="w-full space-y-1 relative z-10">
+              <div className="w-full space-y-1.5 relative z-10">
                 {menu.tableNo ? (
                   <span className={`inline-block px-3 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest border mb-1 ${themeStyle.badge}`}>
                     {menu.tableNo}
@@ -843,13 +859,19 @@ export const QrMenuWorkspace: React.FC<QrMenuWorkspaceProps> = ({ onShowToast })
                   </span>
                 )}
 
-                <h2 className="text-xl sm:text-2xl font-black tracking-tight leading-tight line-clamp-2">
+                <h2 className="text-xl sm:text-2xl font-black tracking-tight leading-normal break-words py-0.5">
                   {menu.name || 'Your Restaurant'}
                 </h2>
 
                 {menu.tagline && (
-                  <p className={`text-[11px] font-medium leading-snug line-clamp-2 ${themeStyle.taglineColor}`}>
+                  <p className={`text-xs font-semibold leading-normal break-words ${themeStyle.taglineColor}`}>
                     {menu.tagline}
+                  </p>
+                )}
+
+                {menu.address && (
+                  <p className={`text-[11px] font-medium leading-normal break-words mt-1 opacity-90 ${themeStyle.taglineColor}`}>
+                    📍 {menu.address}
                   </p>
                 )}
               </div>
@@ -883,7 +905,7 @@ export const QrMenuWorkspace: React.FC<QrMenuWorkspaceProps> = ({ onShowToast })
               {/* Standee Footer with QuickVero Branding (User Requested Feature) */}
               <div className="w-full pt-3 border-t border-white/10 relative z-10 flex items-center justify-between text-[10px] text-slate-400">
                 <span className="font-medium truncate max-w-[150px]">
-                  {menu.phone || 'Contactless Ordering'}
+                  {menu.phone ? menu.phone : 'Contactless Ordering'}
                 </span>
                 <span className="font-semibold flex items-center gap-1 shrink-0">
                   <span>Powered by</span>
