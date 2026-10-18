@@ -75,10 +75,11 @@ export const Header: React.FC<HeaderProps> = ({
             href="https://sarkariframe.quickvero.in"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-gradient-to-r from-orange-500 via-amber-500 to-emerald-600 text-white shadow-xs hover:shadow-md hover:scale-[1.02] transition-all cursor-pointer ml-1"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/60 dark:hover:bg-blue-900/60 text-blue-700 dark:text-blue-300 border border-blue-200/80 dark:border-blue-800/60 transition-colors cursor-pointer ml-1"
             title="Sarkari Photo & Signature Resizer for SSC, UPSC & Govt Exams"
           >
             <span>🇮🇳 Sarkari Tools</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
           </a>
         </nav>
 
@@ -143,10 +144,15 @@ export const Header: React.FC<HeaderProps> = ({
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center justify-between w-full px-3 py-2 text-base font-bold rounded-lg bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-emerald-500/10 text-orange-600 dark:text-orange-400 border border-orange-200/50 dark:border-orange-800/50 my-1"
+            className="flex items-center justify-between w-full px-3 py-2 text-sm font-semibold rounded-lg bg-blue-50/60 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/40 my-1 transition-colors"
           >
-            <span>🇮🇳 Sarkari Exam Tools</span>
-            <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300 font-bold">New</span>
+            <span className="flex items-center gap-2">
+              <span>🇮🇳</span>
+              <span>Sarkari Exam Tools</span>
+            </span>
+            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200">
+              Free
+            </span>
           </a>
 
           <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
