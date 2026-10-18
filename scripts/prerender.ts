@@ -365,6 +365,12 @@ const corePages = [
     desc: 'Legal disclaimer and usage policies for QuickVero utility tools suite.',
     h1: 'Legal Disclaimer',
   },
+  {
+    path: 'menu',
+    title: 'Digital QR Food Menu — QuickVero',
+    desc: 'Contactless digital restaurant and cafe food menu powered by QuickVero.',
+    h1: 'Digital Restaurant Menu',
+  },
 ];
 
 for (const p of corePages) {

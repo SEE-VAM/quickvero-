@@ -83,9 +83,13 @@ import {
   Stamp,
   Hash,
   Trash2,
+  QrCode,
+  Utensils,
 } from 'lucide-react';
 
 const ICON_MAP: Record<string, React.ComponentType<any>> = {
+  QrCode,
+  Utensils,
   ImageIcon,
   Image: ImageIcon,
   VideoIcon,

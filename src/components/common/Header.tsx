@@ -70,6 +70,22 @@ export const Header: React.FC<HeaderProps> = ({
             );
           })}
 
+          {/* QR Menu Maker Direct Link */}
+          <button
+            onClick={() => handleLinkClick('/tools/qr-menu-maker')}
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg border transition-all cursor-pointer ml-1 ${
+              currentPath === '/tools/qr-menu-maker'
+                ? 'bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-200 border-amber-300 dark:border-amber-700'
+                : 'bg-amber-50/80 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-900/40 text-amber-800 dark:text-amber-300 border-amber-200/80 dark:border-amber-800/60'
+            }`}
+            title="Create Free Digital QR Menu & Table Standees"
+          >
+            <span>🍽️ QR Menu</span>
+            <span className="text-[9px] font-black uppercase px-1 py-0.2 rounded bg-amber-500 text-slate-950">
+              NEW
+            </span>
+          </button>
+
           {/* Sarkari Tools Direct Link */}
           <a
             href="https://sarkariframe.quickvero.in"
@@ -139,6 +155,19 @@ export const Header: React.FC<HeaderProps> = ({
               {item.label}
             </button>
           ))}
+          <button
+            onClick={() => handleLinkClick('/tools/qr-menu-maker')}
+            className="flex items-center justify-between w-full px-3 py-2 text-sm font-semibold rounded-lg bg-amber-50/60 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/40 my-1 transition-colors"
+          >
+            <span className="flex items-center gap-2">
+              <span>🍽️</span>
+              <span>QR Menu Maker (Restaurants)</span>
+            </span>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500 text-slate-950">
+              NEW
+            </span>
+          </button>
+
           <a
             href="https://sarkariframe.quickvero.in"
             target="_blank"

@@ -10,6 +10,7 @@ import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsPage } from './pages/TermsPage';
 import { DisclaimerPage } from './pages/DisclaimerPage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { PublicMenuPage } from './pages/PublicMenuPage';
 import { TOOLS } from './data/tools';
 import { CATEGORIES } from './data/categories';
 import { useRecentTools } from './hooks/useRecentTools';
@@ -200,6 +201,16 @@ export function App() {
       />
     );
   };
+
+  let cleanPath = currentPath.replace(/\/index\.html$/i, '').replace(/\/$/, '') || '/';
+  if (cleanPath.startsWith('#')) {
+    cleanPath = cleanPath.substring(1) || '/';
+  }
+
+  // Standalone Customer Mobile Menu Page (Contactless scanning experience)
+  if (cleanPath === '/menu' || cleanPath.startsWith('/menu') || cleanPath === '/m' || cleanPath.startsWith('/m')) {
+    return <PublicMenuPage onNavigate={navigate} />;
+  }
 
   return (
     <MainLayout

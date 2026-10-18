@@ -126,6 +126,7 @@ const TOOL_THEME_MAP: Record<string, keyof typeof THEMES> = {
   'mp3-to-wav': 'indigo',
 
   // Developer & File Utilities
+  'qr-menu-maker': 'amber',
   'hash-generator': 'emerald',
   'base64-encoder-decoder': 'cyan',
   'file-size-calculator': 'blue',

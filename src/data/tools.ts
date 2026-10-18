@@ -1394,6 +1394,64 @@ export const TOOLS: ToolDefinition[] = [
     faqs: [
       { question: 'Is my data secure?', answer: 'Yes! QuickVero adheres to a strict privacy-first policy where files are never retained or indexed.' }
     ]
+  },
+  {
+    id: 'qr-menu-maker',
+    name: 'Digital QR Menu Maker',
+    slug: 'qr-menu-maker',
+    category: 'file',
+    route: '/tools/qr-menu-maker',
+    shortDescription: 'Create a free digital QR code food menu and printable table standee cards for restaurants and cafes.',
+    description: 'Free Digital QR Menu Maker & Standee Generator for restaurants, cafes, food trucks, and hotels. Add dishes with categories, prices, and veg/non-veg tags, generate an instant high-resolution QR code, and download ready-to-print acrylic table standees with zero login required.',
+    icon: 'QrCode',
+    supportedFormats: ['*/*'],
+    maxFileSizeMB: 20,
+    engine: 'browser',
+    isPopular: true,
+    seoTitle: 'Free Digital QR Menu Maker & Table Standee Generator | QuickVero',
+    seoDescription: 'Create a contactless digital QR code food menu and printable table standees for your restaurant, cafe, or hotel in 60 seconds. 100% free with QuickVero.',
+    keywords: [
+      'qr menu maker',
+      'restaurant qr code menu',
+      'digital food menu generator',
+      'free qr menu creator',
+      'cafe table standee maker',
+      'contactless qr menu',
+      'hotel qr menu',
+      'print qr menu card'
+    ],
+    features: [
+      'Instant QR code generation linking to a sleek mobile digital menu',
+      'Ready-to-print table standee cards (PDF & PNG) for acrylic table holders',
+      'Categorized dishes with veg/non-veg tags, prices, and custom badges',
+      'Batch import menu from CSV or plain text in seconds',
+      '100% Free with zero registration or monthly subscriptions',
+      'Fast customer mobile menu with search bar and filter tabs'
+    ],
+    howToSteps: [
+      { step: 1, title: 'Enter Restaurant Details', description: 'Fill in your restaurant name, tagline, address, and phone number.' },
+      { step: 2, title: 'Add Dishes & Prices', description: 'Add your dishes with prices, categories, and veg/non-veg tags, or click "Load Sample Cafe" to test.' },
+      { step: 3, title: 'Customize Standee Theme', description: 'Choose from Royal Gold, Fresh Emerald, Sapphire Blue, or Print-Friendly Minimal White.' },
+      { step: 4, title: 'Download & Display', description: 'Download the print-ready PDF standee to place on tables or counters so customers can scan.' }
+    ],
+    faqs: [
+      {
+        question: 'Do customers need to install an app to view the menu?',
+        answer: 'No! Customers simply open their regular phone camera or Google Lens, point it at the QR code on the table, and the digital menu opens instantly in their browser.'
+      },
+      {
+        question: 'Is this digital QR menu maker completely free?',
+        answer: 'Yes! QuickVero Digital QR Menu Maker is 100% free with no monthly subscription fees, hidden charges, or account login requirements.'
+      },
+      {
+        question: 'Can I print the table standee card on normal paper or acrylic stands?',
+        answer: 'Yes! You can download the ready-to-print A5 / 4x6" PDF or high-resolution PNG image and insert it directly into standard acrylic table tents or counter displays.'
+      },
+      {
+        question: 'How do customers filter vegetarian or non-vegetarian dishes?',
+        answer: 'The customer mobile menu includes an instant "Veg Only" toggle and category tabs (Starters, Main Course, Beverages, etc.) with real-time search.'
+      }
+    ]
   }
 ];
 

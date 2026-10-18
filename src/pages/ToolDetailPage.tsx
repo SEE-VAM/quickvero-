@@ -34,6 +34,7 @@ import { HashToolWorkspace } from '../components/tool/controls/HashToolWorkspace
 import { Base64ToolWorkspace } from '../components/tool/controls/Base64ToolWorkspace';
 import { CalculatorWorkspace } from '../components/tool/controls/CalculatorWorkspace';
 import { VideoDownloaderWorkspace } from '../components/tool/controls/VideoDownloaderWorkspace';
+import { QrMenuWorkspace } from '../components/tool/controls/QrMenuWorkspace';
 import { CloudToolNotice } from '../components/tool/controls/CloudToolNotice';
 import { AdBanner } from '../components/common/AdBanner';
 import { updatePageMeta, generateToolStructuredData, getBaseUrl } from '../utils/seoHelpers';
@@ -176,6 +177,7 @@ export const ToolDetailPage: React.FC<ToolDetailPageProps> = ({
   const isMergePdf = tool.id === 'merge-pdf';
   const isPdfEditor = tool.id === 'pdf-editor';
   const isJpgToPdf = tool.id === 'jpg-to-pdf';
+  const isQrMenuMaker = tool.id === 'qr-menu-maker';
   const isVideoDownloader =
     tool.id === 'instagram-video-downloader' ||
     tool.id === 'facebook-video-downloader' ||
@@ -184,7 +186,7 @@ export const ToolDetailPage: React.FC<ToolDetailPageProps> = ({
     tool.id === 'twitter-video-downloader' ||
     tool.id === 'all-video-downloader' ||
     tool.id.includes('downloader');
-  const isStandaloneUtility = isHashTool || isBase64Tool || isCalculatorTool || isVideoDownloader || isVideoTrimmer || isMergePdf || isPdfEditor || isJpgToPdf;
+  const isStandaloneUtility = isHashTool || isBase64Tool || isCalculatorTool || isVideoDownloader || isVideoTrimmer || isMergePdf || isPdfEditor || isJpgToPdf || isQrMenuMaker;
 
   return (
     <div className="py-8 sm:py-12">
@@ -204,6 +206,7 @@ export const ToolDetailPage: React.FC<ToolDetailPageProps> = ({
           {isMergePdf && <MergePdfWorkspace onShowToast={onShowToast} />}
           {isPdfEditor && <PdfEditorWorkspace onShowToast={onShowToast} />}
           {isJpgToPdf && <JpgToPdfWorkspace onShowToast={onShowToast} />}
+          {isQrMenuMaker && <QrMenuWorkspace onShowToast={onShowToast} />}
           {isVideoDownloader && (
             <VideoDownloaderWorkspace tool={tool} onShowToast={onShowToast} />
           )}

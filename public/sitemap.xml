@@ -249,7 +249,12 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.quickvero.in/tools/base64-encoder-decoder</loc>
+    <loc>https://www.quickvero.in/tools/qr-menu-maker</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
+    <loc>https://www.quickvero.in/menu</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>

@@ -75,6 +75,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           el?.scrollIntoView({ behavior: 'smooth' });
         }}
         onQuickQuery={handleQuickQuery}
+        onOpenQrMenu={() => onNavigate('/tools/qr-menu-maker')}
       />
 
       {/* Popular Tools Section */}
