@@ -63,12 +63,24 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             <ul className="space-y-2.5">
               {FOOTER_LINKS.popular.map((item) => (
                 <li key={item.href}>
-                  <button
-                    onClick={() => onNavigate(item.href)}
-                    className="text-sm text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 transition-colors"
-                  >
-                    {item.label}
-                  </button>
+                  {item.href.startsWith('http') ? (
+                    <a
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-semibold text-orange-600 hover:text-orange-700 dark:text-orange-400 transition-colors inline-flex items-center gap-1"
+                    >
+                      <span>{item.label}</span>
+                      <ArrowUpRight className="w-3.5 h-3.5" />
+                    </a>
+                  ) : (
+                    <button
+                      onClick={() => onNavigate(item.href)}
+                      className="text-sm text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 transition-colors"
+                    >
+                      {item.label}
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>

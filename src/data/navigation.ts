@@ -22,6 +22,7 @@ export const FOOTER_LINKS = {
     { label: 'All Tools Catalog', href: '/tools' },
   ],
   popular: [
+    { label: '🇮🇳 Sarkari Photo Resizer', href: 'https://sarkariframe.quickvero.in' },
     { label: 'Image Compressor', href: '/tools/image-compressor' },
     { label: 'PDF Compressor', href: '/tools/pdf-compressor' },
     { label: 'Image Resizer', href: '/tools/image-resizer' },

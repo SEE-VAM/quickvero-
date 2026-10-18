@@ -69,6 +69,17 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
             );
           })}
+
+          {/* Sarkari Tools Direct Link */}
+          <a
+            href="https://sarkariframe.quickvero.in"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-gradient-to-r from-orange-500 via-amber-500 to-emerald-600 text-white shadow-xs hover:shadow-md hover:scale-[1.02] transition-all cursor-pointer ml-1"
+            title="Sarkari Photo & Signature Resizer for SSC, UPSC & Govt Exams"
+          >
+            <span>🇮🇳 Sarkari Tools</span>
+          </a>
         </nav>
 
         {/* Action Controls */}
@@ -127,6 +138,17 @@ export const Header: React.FC<HeaderProps> = ({
               {item.label}
             </button>
           ))}
+          <a
+            href="https://sarkariframe.quickvero.in"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => setMobileMenuOpen(false)}
+            className="flex items-center justify-between w-full px-3 py-2 text-base font-bold rounded-lg bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-emerald-500/10 text-orange-600 dark:text-orange-400 border border-orange-200/50 dark:border-orange-800/50 my-1"
+          >
+            <span>🇮🇳 Sarkari Exam Tools</span>
+            <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300 font-bold">New</span>
+          </a>
+
           <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
             <button
               onClick={() => {
