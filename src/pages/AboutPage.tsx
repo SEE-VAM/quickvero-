@@ -7,7 +7,7 @@ export const AboutPage: React.FC = () => {
     updatePageMeta({
       title: 'About QuickVero — Powerful Online Tools. Simple & Fast.',
       description: 'Learn about QuickVero, our mission to create private, blazing fast in-browser file utilities for students, developers, and creators worldwide.',
-      canonicalUrl: 'https://quickvero.com/about',
+      canonicalUrl: 'https://www.quickvero.in/about',
     });
   }, []);
 

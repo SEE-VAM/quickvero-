@@ -28,8 +28,25 @@ export const AdBanner: React.FC<AdBannerProps> = ({
   const isRealSlot = Boolean(slot && slot !== '1234567890');
   const isConfigured = Boolean(clientId && !clientId.includes('XXXX') && isRealSlot);
 
+  // Never allow ads on /menu or tool canvases without content
+  const isExcludedRoute = typeof window !== 'undefined' && (
+    window.location.pathname.startsWith('/menu') ||
+    window.location.pathname.includes('/menu/')
+  );
+
   useEffect(() => {
-    if (isConfigured && !isLoaded.current && typeof window !== 'undefined') {
+    if (isConfigured && !isLoaded.current && typeof window !== 'undefined' && !isExcludedRoute) {
+      // Ensure AdSense script is loaded dynamically on content routes
+      const scriptId = 'google-adsense-script';
+      if (!document.getElementById(scriptId)) {
+        const script = document.createElement('script');
+        script.id = scriptId;
+        script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${clientId}`;
+        script.async = true;
+        script.crossOrigin = 'anonymous';
+        document.head.appendChild(script);
+      }
+
       try {
         (window.adsbygoogle = window.adsbygoogle || []).push({});
         isLoaded.current = true;
@@ -37,11 +54,10 @@ export const AdBanner: React.FC<AdBannerProps> = ({
         console.warn('AdSense slot initialization:', e);
       }
     }
-  }, [isConfigured]);
+  }, [isConfigured, clientId, isExcludedRoute]);
 
-  // If no dedicated ad unit slot is configured, return null to avoid empty ad containers
-  // Google Auto Ads from index.html will automatically place ads once approved
-  if (!isConfigured) {
+  // If no dedicated ad unit slot is configured or route is excluded, return null to avoid empty ad containers
+  if (!isConfigured || isExcludedRoute) {
     return null;
   }
 

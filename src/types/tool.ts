@@ -13,6 +13,34 @@ export interface HowToStep {
   description: string;
 }
 
+export interface EditorialSection {
+  heading: string;
+  subheading?: string;
+  paragraphs: string[];
+  bulletPoints?: string[];
+  callout?: {
+    type: 'tip' | 'info' | 'warning';
+    text: string;
+  };
+}
+
+export interface EditorialGuide {
+  title: string;
+  leadParagraph: string;
+  sections: EditorialSection[];
+  comparisonTable?: {
+    title: string;
+    headers: string[];
+    rows: (string | number)[][];
+    caption?: string;
+  };
+  examSpecsTable?: {
+    title: string;
+    headers: string[];
+    rows: string[][];
+  };
+}
+
 export interface ToolDefinition {
   id: string;
   name: string;
@@ -33,6 +61,7 @@ export interface ToolDefinition {
   features: string[];
   howToSteps: HowToStep[];
   faqs: FAQItem[];
+  editorial?: EditorialGuide;
 }
 
 export interface CategoryDefinition {

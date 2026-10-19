@@ -119,7 +119,7 @@ export const PublicMenuPage: React.FC<PublicMenuPageProps> = ({ onNavigate }) =>
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans pb-24">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans pb-24 google-anno-skip">
       {/* Top Banner if Demo */}
       {isSample && (
         <div className="bg-amber-500 text-slate-950 px-4 py-2 text-center text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 shadow-sm">

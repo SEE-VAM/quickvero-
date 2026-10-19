@@ -11,7 +11,10 @@ import { TermsPage } from './pages/TermsPage';
 import { DisclaimerPage } from './pages/DisclaimerPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { PublicMenuPage } from './pages/PublicMenuPage';
+import { GuidesPage } from './pages/GuidesPage';
+import { GuideDetailPage } from './pages/GuideDetailPage';
 import { TOOLS } from './data/tools';
+import { GUIDES } from './data/guides';
 import { CATEGORIES } from './data/categories';
 import { useRecentTools } from './hooks/useRecentTools';
 import { ToastMessage } from './components/common/Toast';
@@ -173,7 +176,20 @@ export function App() {
       return <DisclaimerPage />;
     }
 
-    // 4. Individual Tool Pages (/tools/:slug)
+    // 4. Guides & Tutorials Hub
+    if (cleanPath === '/guides') {
+      return <GuidesPage onNavigate={navigate} />;
+    }
+
+    if (cleanPath.startsWith('/guides/')) {
+      const guideSlug = cleanPath.replace('/guides/', '');
+      const guide = GUIDES.find((g) => g.slug === guideSlug);
+      if (guide) {
+        return <GuideDetailPage guide={guide} onNavigate={navigate} />;
+      }
+    }
+
+    // 5. Individual Tool Pages (/tools/:slug)
     if (cleanPath.startsWith('/tools/')) {
       const toolSlug = cleanPath.replace('/tools/', '');
       const tool = TOOLS.find((t) => t.slug === toolSlug || t.id === toolSlug);

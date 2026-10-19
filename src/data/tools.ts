@@ -1,4 +1,5 @@
 import { ToolDefinition } from '../types/tool';
+import { TOOL_EDITORIALS } from './toolEditorials';
 
 export const TOOLS: ToolDefinition[] = [
   // ================= IMAGE TOOLS =================
@@ -1454,5 +1455,15 @@ export const TOOLS: ToolDefinition[] = [
     ]
   }
 ];
+
+// Attach rich editorial content and expanded FAQs to major tools
+for (const tool of TOOLS) {
+  if (TOOL_EDITORIALS[tool.id]) {
+    tool.editorial = TOOL_EDITORIALS[tool.id].editorial;
+    if (TOOL_EDITORIALS[tool.id].faqs && TOOL_EDITORIALS[tool.id].faqs.length > 0) {
+      tool.faqs = TOOL_EDITORIALS[tool.id].faqs;
+    }
+  }
+}
 
 export const POPULAR_TOOLS: ToolDefinition[] = TOOLS.filter(t => t.isPopular).slice(0, 8);

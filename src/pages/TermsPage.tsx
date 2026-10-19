@@ -6,7 +6,7 @@ export const TermsPage: React.FC = () => {
     updatePageMeta({
       title: 'Terms of Service — QuickVero Online Utilities',
       description: 'Terms and conditions governing the use of QuickVero online conversion and utility services.',
-      canonicalUrl: 'https://quickvero.com/terms',
+      canonicalUrl: 'https://www.quickvero.in/terms',
     });
   }, []);
 

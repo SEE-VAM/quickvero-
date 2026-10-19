@@ -1,6 +1,6 @@
 import React from 'react';
 import { ToolDefinition } from '../../types/tool';
-import { CheckCircle2, ShieldCheck, Zap, HelpCircle } from 'lucide-react';
+import { CheckCircle2, ShieldCheck, Zap, HelpCircle, BookOpen, Table, AlertCircle, Info, Lightbulb } from 'lucide-react';
 import { FaqAccordion } from '../common/FaqAccordion';
 
 interface ToolContentProps {
@@ -66,6 +66,150 @@ export const ToolContent: React.FC<ToolContentProps> = ({ tool }) => {
           ))}
         </div>
       </section>
+
+      {/* In-Depth Publisher Editorial Guide & Technical Breakdown */}
+      {tool.editorial && (
+        <article className="rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 p-6 sm:p-10 space-y-10">
+          <header className="border-b border-slate-200 dark:border-slate-800 pb-6">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-50 dark:bg-brand-950/80 text-brand-700 dark:text-brand-300 text-xs font-semibold mb-3 border border-brand-200/60 dark:border-brand-800/60">
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>Technical &amp; Practical Guide</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              {tool.editorial.title}
+            </h2>
+            <p className="mt-3 text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
+              {tool.editorial.leadParagraph}
+            </p>
+          </header>
+
+          {/* Guide Sections */}
+          <div className="space-y-8">
+            {tool.editorial.sections.map((sec, sIdx) => (
+              <section key={sIdx} className="space-y-3">
+                <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight">
+                  {sec.heading}
+                </h3>
+                {sec.subheading && (
+                  <p className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-brand-600 dark:text-brand-400">
+                    {sec.subheading}
+                  </p>
+                )}
+
+                {sec.paragraphs.map((para, pIdx) => (
+                  <p key={pIdx} className="text-sm sm:text-base text-slate-600 dark:text-slate-400 leading-relaxed">
+                    {para}
+                  </p>
+                ))}
+
+                {sec.bulletPoints && sec.bulletPoints.length > 0 && (
+                  <ul className="list-disc pl-5 space-y-1.5 text-sm sm:text-base text-slate-600 dark:text-slate-400">
+                    {sec.bulletPoints.map((bp, bIdx) => (
+                      <li key={bIdx} className="leading-relaxed">
+                        {bp}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {sec.callout && (
+                  <div
+                    className={`mt-4 p-4 rounded-xl text-sm flex items-start gap-3 border ${
+                      sec.callout.type === 'tip'
+                        ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-900 dark:text-emerald-200 border-emerald-200 dark:border-emerald-800'
+                        : sec.callout.type === 'warning'
+                        ? 'bg-amber-50 dark:bg-amber-950/30 text-amber-900 dark:text-amber-200 border-amber-200 dark:border-amber-800'
+                        : 'bg-blue-50 dark:bg-blue-950/30 text-blue-900 dark:text-blue-200 border-blue-200 dark:border-blue-800'
+                    }`}
+                  >
+                    {sec.callout.type === 'tip' ? (
+                      <Lightbulb className="w-5 h-5 shrink-0 text-emerald-600 mt-0.5" />
+                    ) : sec.callout.type === 'warning' ? (
+                      <AlertCircle className="w-5 h-5 shrink-0 text-amber-600 mt-0.5" />
+                    ) : (
+                      <Info className="w-5 h-5 shrink-0 text-blue-600 mt-0.5" />
+                    )}
+                    <div className="leading-relaxed font-medium">{sec.callout.text}</div>
+                  </div>
+                )}
+              </section>
+            ))}
+          </div>
+
+          {/* Comparison Table */}
+          {tool.editorial.comparisonTable && (
+            <div className="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
+              <div className="flex items-center gap-2 text-base font-bold text-slate-900 dark:text-white">
+                <Table className="w-4 h-4 text-brand-600" />
+                <span>{tool.editorial.comparisonTable.title}</span>
+              </div>
+              <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+                <table className="w-full text-left text-xs sm:text-sm">
+                  <thead className="bg-slate-100 dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 uppercase tracking-wider font-semibold text-[11px]">
+                    <tr>
+                      {tool.editorial.comparisonTable.headers.map((h, i) => (
+                        <th key={i} className="py-3 px-4 border-b border-slate-200 dark:border-slate-700">
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200 dark:divide-slate-800 text-slate-600 dark:text-slate-300">
+                    {tool.editorial.comparisonTable.rows.map((row, rIdx) => (
+                      <tr key={rIdx} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                        {row.map((cell, cIdx) => (
+                          <td key={cIdx} className="py-3 px-4">
+                            {cell}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {tool.editorial.comparisonTable.caption && (
+                <p className="text-xs text-slate-400 italic">
+                  {tool.editorial.comparisonTable.caption}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Exam Specs Table */}
+          {tool.editorial.examSpecsTable && (
+            <div className="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
+              <div className="flex items-center gap-2 text-base font-bold text-slate-900 dark:text-white">
+                <Table className="w-4 h-4 text-emerald-600" />
+                <span>{tool.editorial.examSpecsTable.title}</span>
+              </div>
+              <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+                <table className="w-full text-left text-xs sm:text-sm">
+                  <thead className="bg-slate-100 dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 uppercase tracking-wider font-semibold text-[11px]">
+                    <tr>
+                      {tool.editorial.examSpecsTable.headers.map((h, i) => (
+                        <th key={i} className="py-3 px-4 border-b border-slate-200 dark:border-slate-700">
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200 dark:divide-slate-800 text-slate-600 dark:text-slate-300">
+                    {tool.editorial.examSpecsTable.rows.map((row, rIdx) => (
+                      <tr key={rIdx} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                        {row.map((cell, cIdx) => (
+                          <td key={cIdx} className="py-3 px-4 font-mono text-xs">
+                            {cell}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </article>
+      )}
 
       {/* FAQs */}
       <FaqAccordion

@@ -6,7 +6,7 @@ export const DisclaimerPage: React.FC = () => {
     updatePageMeta({
       title: 'Disclaimer — QuickVero File Utilities',
       description: 'Legal disclaimer and limitation of liability regarding file operations on QuickVero.',
-      canonicalUrl: 'https://quickvero.com/disclaimer',
+      canonicalUrl: 'https://www.quickvero.in/disclaimer',
     });
   }, []);
 

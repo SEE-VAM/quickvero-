@@ -434,13 +434,13 @@ export const ToolDetailPage: React.FC<ToolDetailPageProps> = ({
           )}
         </div>
 
-        {/* In-Content Monetization Placement */}
-        <div className="my-10">
+        {/* SEO Editorial Content: Guides, Exam Specs, Tables & In-Depth FAQs */}
+        <ToolContent tool={tool} />
+
+        {/* Content-Compliant Monetization Placement: Only loaded after comprehensive editorial guide */}
+        <div className="mt-14 mb-8">
           <AdBanner format="leaderboard" />
         </div>
-
-        {/* SEO Content: What is it, How to use, FAQs */}
-        <ToolContent tool={tool} />
       </div>
     </div>
   );

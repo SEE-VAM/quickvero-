@@ -7,7 +7,7 @@ export const PrivacyPolicyPage: React.FC = () => {
     updatePageMeta({
       title: 'Privacy Policy — QuickVero File Security & Data Protection',
       description: 'Review the QuickVero privacy policy. We process files directly in your browser with zero permanent storage.',
-      canonicalUrl: 'https://quickvero.com/privacy-policy',
+      canonicalUrl: 'https://www.quickvero.in/privacy-policy',
     });
   }, []);
 

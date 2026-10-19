@@ -5,6 +5,7 @@ export interface NavItem {
 
 export const HEADER_NAV_ITEMS: NavItem[] = [
   { label: 'Tools', href: '/tools' },
+  { label: 'Guides', href: '/guides' },
   { label: 'Image Tools', href: '/image-tools' },
   { label: 'Video Tools', href: '/video-tools' },
   { label: 'Audio Tools', href: '/audio-tools' },
@@ -22,15 +23,16 @@ export const FOOTER_LINKS = {
     { label: 'All Tools Catalog', href: '/tools' },
   ],
   popular: [
-    { label: '🇮🇳 Sarkari Photo Resizer', href: 'https://sarkariframe.quickvero.in' },
+    { label: 'Sarkari Photo Resizer', href: 'https://sarkariframe.quickvero.in' },
     { label: 'Image Compressor', href: '/tools/image-compressor' },
+    { label: 'Compress to 20KB', href: '/tools/compress-image-to-20kb' },
     { label: 'PDF Compressor', href: '/tools/pdf-compressor' },
-    { label: 'Image Resizer', href: '/tools/image-resizer' },
     { label: 'JPG to PDF', href: '/tools/jpg-to-pdf' },
+    { label: 'QR Menu Maker', href: '/tools/qr-menu-maker' },
     { label: 'MP4 to MP3', href: '/tools/mp4-to-mp3' },
-    { label: 'WebP Converter', href: '/tools/webp-converter' },
   ],
   company: [
+    { label: 'Guides & Tutorials', href: '/guides' },
     { label: 'About Us', href: '/about' },
     { label: 'Contact & Feedback', href: '/contact' },
   ],
