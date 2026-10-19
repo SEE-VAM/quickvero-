@@ -35,25 +35,36 @@ export const AdBanner: React.FC<AdBannerProps> = ({
   );
 
   useEffect(() => {
-    if (isConfigured && !isLoaded.current && typeof window !== 'undefined' && !isExcludedRoute) {
-      // Ensure AdSense script is loaded dynamically on content routes
-      const scriptId = 'google-adsense-script';
-      if (!document.getElementById(scriptId)) {
-        const script = document.createElement('script');
-        script.id = scriptId;
-        script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${clientId}`;
-        script.async = true;
-        script.crossOrigin = 'anonymous';
-        document.head.appendChild(script);
+    const initAd = () => {
+      const consent = typeof window !== 'undefined' ? localStorage.getItem('quickvero_cookie_consent') : null;
+      if (consent === 'essential') {
+        // User opted for essential cookies only
+        return;
       }
 
-      try {
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
-        isLoaded.current = true;
-      } catch (e) {
-        console.warn('AdSense slot initialization:', e);
+      if (isConfigured && !isLoaded.current && typeof window !== 'undefined' && !isExcludedRoute) {
+        const scriptId = 'google-adsense-script';
+        if (!document.getElementById(scriptId)) {
+          const script = document.createElement('script');
+          script.id = scriptId;
+          script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${clientId}`;
+          script.async = true;
+          script.crossOrigin = 'anonymous';
+          document.head.appendChild(script);
+        }
+
+        try {
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+          isLoaded.current = true;
+        } catch (e) {
+          console.warn('AdSense slot initialization:', e);
+        }
       }
-    }
+    };
+
+    initAd();
+    window.addEventListener('cookie_consent_updated', initAd);
+    return () => window.removeEventListener('cookie_consent_updated', initAd);
   }, [isConfigured, clientId, isExcludedRoute]);
 
   // If no dedicated ad unit slot is configured or route is excluded, return null to avoid empty ad containers

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Sun, Moon, Menu, X, Sparkles } from 'lucide-react';
+import { Search, Sun, Moon, Menu, X } from 'lucide-react';
 import { HEADER_NAV_ITEMS } from '../../data/navigation';
 import { Theme } from '../../types/theme';
 
@@ -28,11 +28,11 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-white/80 dark:bg-surface-darker/80 border-b border-slate-200/80 dark:border-slate-800 transition-colors duration-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      <div className="w-full max-w-[1440px] mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2 lg:gap-4">
         {/* Brand Logo */}
         <button
           onClick={() => handleLinkClick('/')}
-          className="flex items-center gap-2.5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 rounded-lg py-1 px-1.5 -ml-1.5"
+          className="flex items-center gap-2 group focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 rounded-lg py-1 px-1 shrink-0"
           aria-label="QuickVero Homepage"
         >
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform duration-150">
@@ -51,15 +51,15 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </button>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-1 lg:gap-2">
+        {/* Desktop Navigation - Always in a single clean horizontal line without wrapping */}
+        <nav className="hidden md:flex items-center gap-1 lg:gap-1.5 shrink-0 overflow-x-auto no-scrollbar">
           {HEADER_NAV_ITEMS.map((item) => {
             const isActive = currentPath === item.href;
             return (
               <button
                 key={item.href}
                 onClick={() => handleLinkClick(item.href)}
-                className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors duration-150 ${
+                className={`whitespace-nowrap shrink-0 px-2.5 xl:px-3 py-1.5 text-xs xl:text-sm font-medium rounded-lg transition-colors duration-150 ${
                   isActive
                     ? 'text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-950/50'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/60'
@@ -75,7 +75,7 @@ export const Header: React.FC<HeaderProps> = ({
             href="https://sarkariframe.quickvero.in"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/60 dark:hover:bg-blue-900/60 text-blue-700 dark:text-blue-300 border border-blue-200/80 dark:border-blue-800/60 transition-colors cursor-pointer ml-1"
+            className="whitespace-nowrap shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/60 dark:hover:bg-blue-900/60 text-blue-700 dark:text-blue-300 border border-blue-200/80 dark:border-blue-800/60 transition-colors cursor-pointer ml-1"
             title="Sarkari Photo & Signature Resizer for SSC, UPSC & Govt Exams"
           >
             <span>🇮🇳 Sarkari Tools</span>
@@ -84,7 +84,7 @@ export const Header: React.FC<HeaderProps> = ({
         </nav>
 
         {/* Action Controls */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {/* Quick Search Button */}
           <button
             onClick={onOpenSearch}

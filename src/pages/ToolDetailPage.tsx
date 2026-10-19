@@ -438,9 +438,11 @@ export const ToolDetailPage: React.FC<ToolDetailPageProps> = ({
         <ToolContent tool={tool} />
 
         {/* Content-Compliant Monetization Placement: Only loaded after comprehensive editorial guide */}
-        <div className="mt-14 mb-8">
-          <AdBanner format="leaderboard" />
-        </div>
+        {tool.editorial && (
+          <div className="mt-14 mb-8">
+            <AdBanner format="leaderboard" />
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react';
-import { ShieldCheck, Lock, EyeOff, Server } from 'lucide-react';
+import { ShieldCheck, Lock, EyeOff, Server, Cookie } from 'lucide-react';
 import { updatePageMeta } from '../utils/seoHelpers';
 
 export const PrivacyPolicyPage: React.FC = () => {
   useEffect(() => {
     updatePageMeta({
-      title: 'Privacy Policy — QuickVero File Security & Data Protection',
-      description: 'Review the QuickVero privacy policy. We process files directly in your browser with zero permanent storage.',
+      title: 'Privacy Policy — QuickVero Security & Data Protection',
+      description: 'Review the QuickVero privacy policy. Learn how in-browser processing protects your files, and how cookies and Google AdSense are managed.',
       canonicalUrl: 'https://www.quickvero.in/privacy-policy',
     });
   }, []);
@@ -19,7 +19,7 @@ export const PrivacyPolicyPage: React.FC = () => {
             Privacy Policy
           </h1>
           <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-            Last Updated: September 2026 &bull; Effective Immediately
+            Last Updated: October 2026 &bull; Effective Immediately
           </p>
         </div>
 
@@ -27,50 +27,80 @@ export const PrivacyPolicyPage: React.FC = () => {
         <div className="p-6 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-100 flex items-start gap-4">
           <ShieldCheck className="w-7 h-7 text-emerald-600 shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <h2 className="text-base font-bold">Browser-First Zero-Retention Commitment</h2>
+            <h2 className="text-base font-bold">100% In-Browser Zero-Retention Architecture</h2>
             <p className="text-sm text-emerald-800 dark:text-emerald-200 leading-relaxed">
-              Whenever supported, QuickVero processes your files directly within your web browser using client-side technologies. Your files do not get uploaded, saved, or indexed on any remote server.
+              QuickVero processes your images, documents, and media directly inside your web browser using HTML5 Canvas, Web Audio, and WebAssembly. Your files are never uploaded to, stored on, or harvested by any remote server.
             </p>
           </div>
         </div>
 
-        <div className="prose dark:prose-invert max-w-none space-y-6 text-sm sm:text-base text-slate-600 dark:text-slate-400 leading-relaxed">
+        <div className="prose dark:prose-invert max-w-none space-y-8 text-sm sm:text-base text-slate-600 dark:text-slate-400 leading-relaxed">
           <section className="space-y-2">
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">1. Information We Do Not Collect</h2>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">1. How Files Are Handled (Client-Side In-Browser Execution)</h2>
             <p>
-              QuickVero does not require account creation, email sign-ups, or personal identity verification. For all in-browser tools (including Image Compressor, Image Resizer, JPG/PNG Converters, WebP Converter, Hash Generator, Base64 Encoder, and PDF Tools), the computational workload occurs strictly in your device&apos;s local volatile memory.
+              Unlike legacy conversion websites that require uploading your private files to cloud servers, QuickVero is engineered with a strict <strong>client-side architecture</strong>.
+            </p>
+            <p>
+              When you use tools such as the Image Compressor, Compress Image to 20KB/50KB, PDF Compressor, JPG to PDF, Video Trimmer, MP4 to MP3, or Digital QR Menu Maker, the computations are executed directly inside your computer or mobile device&apos;s volatile RAM. Your documents, photos, resumes, and signatures never leave your device and are never transmitted across our network.
             </p>
           </section>
 
           <section className="space-y-2">
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">2. Backend Cloud Processing</h2>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">2. Data Retention Policy</h2>
             <p>
-              For tools that require server-side computing resources (such as advanced video transcode clusters), uploaded files are transmitted via secure HTTPS encryption, held in temporary memory solely for the duration of the processing job, and deleted automatically. We never store or inspect user media.
+              Because processing takes place locally in your web browser, <strong>QuickVero maintains zero server retention of your uploaded or generated files</strong>. Once you close your browser tab or navigate away, the file buffers in memory are automatically cleared by your operating system. We do not operate databases storing user files, personal identities, or document history.
             </p>
           </section>
 
           <section className="space-y-2">
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">3. Local Storage (Cookies &amp; Preferences)</h2>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">3. Cookies, Local Storage &amp; Web Beacons</h2>
             <p>
-              QuickVero uses modern browser <code className="text-xs bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">localStorage</code> strictly to remember your preferred UI theme (Dark or Light) and your Recently Visited tools. This data never leaves your browser.
+              QuickVero uses cookies and browser <code className="text-xs bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">localStorage</code> for essential website operations, including remembering your dark/light mode preference, preserving your recent tool history, and recording your cookie consent preferences.
             </p>
           </section>
 
           <section className="space-y-2">
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">4. Telemetry and Analytics</h2>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">4. Google AdSense &amp; Third-Party Advertising Cookies</h2>
             <p>
-              To maintain service uptime and understand tool popularity, we may collect aggregated, non-personally identifiable diagnostic events (e.g., page views, error counts, and browser user-agent types).
+              We use Google AdSense to serve advertisements when you visit our website. Google, as a third-party vendor, uses cookies to serve ads on QuickVero.
+            </p>
+            <ul className="list-disc pl-5 space-y-2">
+              <li>
+                <strong>DoubleClick DART Cookie:</strong> Google&apos;s use of the DART cookie enables it to serve personalized ads to our users based on previous visits to QuickVero and other sites on the Internet.
+              </li>
+              <li>
+                <strong>Opt-Out of Personalized Ads:</strong> Users may opt out of personalized advertising by visiting Google&apos;s <a href="https://adssettings.google.com/" target="_blank" rel="noopener noreferrer" className="text-brand-600 dark:text-brand-400 underline font-semibold">Ads Settings</a>. Alternatively, you can opt out of third-party vendor cookies for personalized advertising by visiting <a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener noreferrer" className="text-brand-600 dark:text-brand-400 underline font-semibold">aboutads.info</a>.
+              </li>
+              <li>
+                <strong>Google Partner Policy:</strong> To learn how Google uses data when you use our site, review the official policy at <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener noreferrer" className="text-brand-600 dark:text-brand-400 underline font-semibold">How Google uses information from sites or apps that use our services</a>.
+              </li>
+            </ul>
+          </section>
+
+          <section className="space-y-2">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">5. Non-Personal Aggregated Telemetry</h2>
+            <p>
+              We may collect standard, non-personally identifiable server access logs (such as HTTP response codes, browser user-agent types, and general referrers) to detect technical errors, prevent denial-of-service abuse, and optimize platform reliability.
             </p>
           </section>
 
           <section className="space-y-2">
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">5. Advertising &amp; Third-Party Partners (Google AdSense)</h2>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">6. Children&apos;s Privacy</h2>
             <p>
-              QuickVero displays advertisements served by Google AdSense and accredited third-party advertising partners to fund ongoing server and development costs. Google, as a third-party vendor, uses cookies (including the DoubleClick cookie) to serve relevant advertisements to users based on visits to this site and other websites across the Internet.
+              QuickVero does not knowingly collect or solicit any personally identifiable information from children under the age of 13.
             </p>
+          </section>
+
+          <section className="space-y-2">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">7. Privacy Inquiries &amp; Contact Information</h2>
             <p>
-              Users may opt out of personalized advertising at any time by visiting Google&apos;s <a href="https://adssettings.google.com/" target="_blank" rel="noopener noreferrer" className="text-brand-600 dark:text-brand-400 underline">Ads Settings</a> or through the Network Advertising Initiative / <a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener noreferrer" className="text-brand-600 dark:text-brand-400 underline">aboutads.info</a> consumer choice opt-out page.
+              If you have any questions or concerns regarding our privacy practices, please contact our designated privacy officer directly at:
             </p>
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+              <p className="font-semibold text-slate-900 dark:text-white">QuickVero Privacy &amp; Data Security</p>
+              <p>Email: <a href="mailto:contact@quickvero.in" className="text-brand-600 dark:text-brand-400 font-mono">contact@quickvero.in</a></p>
+              <p className="text-xs text-slate-400 mt-1">Website: https://www.quickvero.in</p>
+            </div>
           </section>
         </div>
       </div>

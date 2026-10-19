@@ -1,4 +1,5 @@
 import { EditorialGuide, FAQItem } from '../types/tool';
+import { SUPPLEMENTARY_EDITORIALS } from './supplementaryEditorials';
 
 export const TOOL_EDITORIALS: Record<string, { editorial: EditorialGuide; faqs: FAQItem[] }> = {
   // ==========================================
@@ -660,6 +661,23 @@ export const TOOL_EDITORIALS: Record<string, { editorial: EditorialGuide; faqs: 
             'According to the Nyquist-Shannon sampling theorem, capturing audio frequencies up to the limit of human hearing (20,000 Hz) requires a sampling rate of at least double that frequency (40,000 Hz). Standard CD quality is 44.1 kHz, while digital video production uses 48 kHz.',
             'QuickVero preserves native sample rates during conversion, preventing resampling pitch artifacts or audio speed drift.'
           ]
+        },
+        {
+          heading: '4. Constant Bitrate (CBR) vs. Variable Bitrate (VBR): Optimal Encoding Modes',
+          subheading: 'Balancing predictable file sizes with maximum acoustic fidelity',
+          paragraphs: [
+            'Constant Bitrate (CBR) encodes every audio frame with the exact same data allocation regardless of audio complexity. A silent gap in an interview receives the exact same 320 kbps as an explosive orchestral climax. CBR is universally supported by legacy hardware, car stereo receivers, and embedded players.',
+            'Variable Bitrate (VBR) dynamically adjusts the data rate based on the instantaneous complexity of the acoustic signal. Dense multi-instrument choruses are allocated high bitrates, while sparse acoustic passages drop to lower bitrates, achieving maximum perceived fidelity at a significantly smaller overall file weight.',
+            'QuickVero defaults to high-fidelity CBR encoding to ensure 100% playback compatibility across all devices, operating systems, and automotive infotainment systems.'
+          ]
+        },
+        {
+          heading: '5. Audio Normalization, Dynamic Range, and Stereo Separation',
+          subheading: 'Ensuring balanced listening levels without digital clipping or distortion',
+          paragraphs: [
+            'When extracting audio from smartphone recordings or live video clips, volume levels can fluctuate wildly between soft speech and sudden loud noises. Converting the track directly can cause digital clipping (harsh distortion above 0 dBFS).',
+            'QuickVero processes audio through standard floating-point audio buffers, analyzing peak amplitudes to prevent clipping while preserving natural stereo panning and vocal warmth.'
+          ]
         }
       ],
       comparisonTable: {
@@ -709,3 +727,5 @@ export const TOOL_EDITORIALS: Record<string, { editorial: EditorialGuide; faqs: 
     ]
   }
 };
+
+Object.assign(TOOL_EDITORIALS, SUPPLEMENTARY_EDITORIALS);

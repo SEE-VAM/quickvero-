@@ -3,6 +3,7 @@ import { Header } from '../components/common/Header';
 import { Footer } from '../components/common/Footer';
 import { SearchModal } from '../components/common/SearchModal';
 import { Toast, ToastMessage } from '../components/common/Toast';
+import { CookieConsent } from '../components/common/CookieConsent';
 import { useTheme } from '../hooks/useTheme';
 import { useSearch } from '../hooks/useSearch';
 import { useRecentTools } from '../hooks/useRecentTools';
@@ -64,6 +65,9 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
 
       {/* System Toast Notifications */}
       <Toast toasts={toasts} onDismiss={onDismissToast} />
+
+      {/* Cookie Consent Banner */}
+      <CookieConsent onNavigate={onNavigate} />
 
       {/* Structured Footer */}
       <Footer onNavigate={onNavigate} />
