@@ -42,11 +42,14 @@ const CATEGORY_PRESETS = [
   'Starters',
   'Main Course',
   'Breads',
-  'Fast Food',
-  'Beverages',
-  'Desserts',
+  'Rice & Biryani',
+  'Chinese & Fast Food',
+  'Snacks & Pizza',
+  'Beverages & Shakes',
+  'Desserts & Sweets',
   'Breakfast',
-  'Combos',
+  'Combos & Thali',
+  'Soups & Salads',
 ];
 
 const THEME_OPTIONS: { id: RestaurantMenuData['theme']; name: string; bg: string; border: string; accent: string }[] = [
@@ -69,10 +72,48 @@ export const QrMenuWorkspace: React.FC<QrMenuWorkspaceProps> = ({ onShowToast })
   // New item form state
   const [newItemName, setNewItemName] = useState('');
   const [newItemPrice, setNewItemPrice] = useState('');
-  const [newItemCategory, setNewItemCategory] = useState('Main Course');
+  const [newItemCategory, setNewItemCategory] = useState('Starters');
+  const [isCustomCategory, setIsCustomCategory] = useState(false);
+  const [customCategoryInput, setCustomCategoryInput] = useState('');
+  const [selectedCategoryTab, setSelectedCategoryTab] = useState<string>('All');
   const [newItemVeg, setNewItemVeg] = useState<boolean>(true);
   const [newItemBadge, setNewItemBadge] = useState('');
   const [newItemDesc, setNewItemDesc] = useState('');
+
+  // Available categories: presets + any categories already in current menu
+  const allAvailableCategories = React.useMemo(() => {
+    const set = new Set<string>(CATEGORY_PRESETS);
+    menu.items.forEach((item) => {
+      if (item.category && item.category.trim()) {
+        set.add(item.category.trim());
+      }
+    });
+    return Array.from(set);
+  }, [menu.items]);
+
+  // Distinct categories present in current menu items
+  const categoriesInMenu = React.useMemo(() => {
+    const set = new Set<string>();
+    menu.items.forEach((item) => {
+      if (item.category && item.category.trim()) {
+        set.add(item.category.trim());
+      }
+    });
+    return Array.from(set);
+  }, [menu.items]);
+
+  // Filtered dishes for Section 3
+  const displayedDishes = React.useMemo(() => {
+    if (selectedCategoryTab === 'All') return menu.items;
+    return menu.items.filter((item) => (item.category || '').toLowerCase() === selectedCategoryTab.toLowerCase());
+  }, [menu.items, selectedCategoryTab]);
+
+  // Reset tab if selected category was deleted
+  useEffect(() => {
+    if (selectedCategoryTab !== 'All' && !categoriesInMenu.includes(selectedCategoryTab)) {
+      setSelectedCategoryTab('All');
+    }
+  }, [categoriesInMenu, selectedCategoryTab]);
 
   // Batch Import modal state
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -93,6 +134,15 @@ export const QrMenuWorkspace: React.FC<QrMenuWorkspaceProps> = ({ onShowToast })
     const compressed = compressMenuData(menu);
     const fullMenuUrl = compressed ? `${origin}/menu?d=${compressed}` : `${origin}/menu`;
     setMenuShareUrl(fullMenuUrl);
+
+    // Persist menu in localStorage so PublicMenuPage can always load customer view
+    if (menu && menu.items && menu.items.length > 0) {
+      try {
+        localStorage.setItem('quickvero_last_menu', JSON.stringify(menu));
+      } catch (e) {
+        // ignore
+      }
+    }
 
     // Generate high resolution QR code using 'L' for high data density
     QRCode.toDataURL(
@@ -132,11 +182,13 @@ export const QrMenuWorkspace: React.FC<QrMenuWorkspaceProps> = ({ onShowToast })
     }
 
     const priceNum = parseFloat(newItemPrice) || 0;
+    const finalCategory = (isCustomCategory ? customCategoryInput.trim() : newItemCategory.trim()) || 'Main Course';
+
     const item: MenuItem = {
       id: `item-${Date.now()}`,
       name: newItemName.trim(),
       price: priceNum,
-      category: newItemCategory.trim() || 'General',
+      category: finalCategory,
       isVeg: newItemVeg,
       badge: newItemBadge.trim() || undefined,
       description: newItemDesc.trim() || undefined,
@@ -147,13 +199,20 @@ export const QrMenuWorkspace: React.FC<QrMenuWorkspaceProps> = ({ onShowToast })
       items: [item, ...prev.items],
     }));
 
+    // If custom category was used, save as current category and exit custom input
+    if (isCustomCategory && customCategoryInput.trim()) {
+      setNewItemCategory(customCategoryInput.trim());
+      setIsCustomCategory(false);
+      setCustomCategoryInput('');
+    }
+
     // Reset inputs
     setNewItemName('');
     setNewItemPrice('');
     setNewItemDesc('');
     setNewItemBadge('');
 
-    onShowToast({ type: 'success', message: `Added "${item.name}" to menu!` });
+    onShowToast({ type: 'success', message: `Added "${item.name}" under ${finalCategory}!` });
   };
 
   // Remove Item
@@ -224,14 +283,14 @@ export const QrMenuWorkspace: React.FC<QrMenuWorkspaceProps> = ({ onShowToast })
     if (!standeeRef.current) return;
     setIsGeneratingPdf(true);
     try {
-      const canvas = await html2canvas(standeeRef.current, {
+      const element = standeeRef.current;
+      const canvas = await html2canvas(element, {
         scale: 3,
         useCORS: true,
         backgroundColor: null,
         logging: false,
         scrollX: 0,
         scrollY: 0,
-        windowWidth: 1200,
       });
 
       const imgData = canvas.toDataURL('image/png');
@@ -242,15 +301,25 @@ export const QrMenuWorkspace: React.FC<QrMenuWorkspaceProps> = ({ onShowToast })
         format: 'a5',
       });
 
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const pdfWidth = pdf.internal.pageSize.getWidth(); // 148mm
+      const pdfHeight = pdf.internal.pageSize.getHeight(); // 210mm
 
-      // Fit neatly on page with safe print margins
-      const margin = 8;
-      const printWidth = pdfWidth - margin * 2;
-      const printHeight = (canvas.height * printWidth) / canvas.width;
-      const posX = margin;
-      const posY = Math.max(margin, (pdfHeight - printHeight) / 2);
+      // Generous 12mm print margins to ensure 0% clipping on all printers
+      const maxPrintWidth = pdfWidth - 24; // 124mm
+      const maxPrintHeight = pdfHeight - 24; // 186mm
+      const aspect = canvas.width / canvas.height;
+
+      let printWidth = maxPrintWidth;
+      let printHeight = printWidth / aspect;
+
+      if (printHeight > maxPrintHeight) {
+        printHeight = maxPrintHeight;
+        printWidth = printHeight * aspect;
+      }
+
+      // Perfectly center horizontally & vertically on A5 sheet
+      const posX = (pdfWidth - printWidth) / 2;
+      const posY = (pdfHeight - printHeight) / 2;
 
       pdf.addImage(imgData, 'PNG', posX, posY, printWidth, printHeight);
       pdf.save(`${(menu.name || 'restaurant').toLowerCase().replace(/[^a-z0-9]/g, '-')}-table-standee.pdf`);
@@ -269,14 +338,14 @@ export const QrMenuWorkspace: React.FC<QrMenuWorkspaceProps> = ({ onShowToast })
     if (!standeeRef.current) return;
     setIsGeneratingPdf(true);
     try {
-      const canvas = await html2canvas(standeeRef.current, {
+      const element = standeeRef.current;
+      const canvas = await html2canvas(element, {
         scale: 3,
         useCORS: true,
         backgroundColor: null,
         logging: false,
         scrollX: 0,
         scrollY: 0,
-        windowWidth: 1200,
       });
       const dataUrl = canvas.toDataURL('image/png');
       const a = document.createElement('a');
@@ -582,24 +651,99 @@ export const QrMenuWorkspace: React.FC<QrMenuWorkspaceProps> = ({ onShowToast })
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
-                {/* Category */}
+                {/* Category Selection */}
                 <div className="sm:col-span-6">
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    Category
-                  </label>
-                  <input
-                    type="text"
-                    list="category-suggestions"
-                    value={newItemCategory}
-                    onChange={(e) => setNewItemCategory(e.target.value)}
-                    placeholder="e.g. Starters, Main Course..."
-                    className="w-full px-3 py-2 text-sm rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <datalist id="category-suggestions">
-                    {CATEGORY_PRESETS.map((p) => (
-                      <option key={p} value={p} />
-                    ))}
-                  </datalist>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                      Category *
+                    </label>
+                    {!isCustomCategory ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsCustomCategory(true);
+                          setCustomCategoryInput('');
+                        }}
+                        className="text-[11px] text-blue-600 hover:text-blue-700 dark:text-blue-400 font-semibold"
+                      >
+                        + Custom Category
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setIsCustomCategory(false)}
+                        className="text-[11px] text-slate-500 hover:text-slate-700 dark:text-slate-400 font-medium"
+                      >
+                        Choose Preset
+                      </button>
+                    )}
+                  </div>
+
+                  {!isCustomCategory ? (
+                    <select
+                      value={newItemCategory}
+                      onChange={(e) => {
+                        if (e.target.value === '__CUSTOM__') {
+                          setIsCustomCategory(true);
+                          setCustomCategoryInput('');
+                        } else {
+                          setNewItemCategory(e.target.value);
+                        }
+                      }}
+                      className="w-full px-3 py-2 text-sm rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium cursor-pointer"
+                    >
+                      {allAvailableCategories.map((p) => (
+                        <option key={p} value={p}>
+                          {p}
+                        </option>
+                      ))}
+                      <option value="__CUSTOM__">+ Type Custom Category...</option>
+                    </select>
+                  ) : (
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="text"
+                        autoFocus
+                        value={customCategoryInput}
+                        onChange={(e) => setCustomCategoryInput(e.target.value)}
+                        placeholder="e.g. Mocktails, Tandoor Special..."
+                        className="w-full px-3 py-2 text-sm rounded-xl bg-slate-50 dark:bg-slate-900 border-2 border-blue-500 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setIsCustomCategory(false)}
+                        className="px-2.5 py-2 text-xs rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold shrink-0"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
+
+                  {/* 1-Click Quick Category Badges */}
+                  <div className="flex flex-wrap items-center gap-1 pt-1.5">
+                    <span className="text-[10px] text-slate-400 font-medium shrink-0">Quick Pick:</span>
+                    {CATEGORY_PRESETS.slice(0, 6).map((preset) => {
+                      const shortLabel = preset.split('/')[0].split('&')[0].trim();
+                      const isActive = !isCustomCategory && newItemCategory === preset;
+                      return (
+                        <button
+                          key={preset}
+                          type="button"
+                          onClick={() => {
+                            setNewItemCategory(preset);
+                            setIsCustomCategory(false);
+                          }}
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-medium transition-colors ${
+                            isActive
+                              ? 'bg-blue-600 text-white font-bold shadow-xs'
+                              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                          }`}
+                        >
+                          {shortLabel}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 {/* Veg / Non-Veg Toggle */}
@@ -687,7 +831,7 @@ export const QrMenuWorkspace: React.FC<QrMenuWorkspaceProps> = ({ onShowToast })
           </div>
 
           {/* Section 3: Current Dishes List */}
-          <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-surface-cardDark border border-slate-200/90 dark:border-slate-800 shadow-subtle space-y-4">
+          <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-surface-cardDark border border-slate-200/90 dark:border-slate-800 shadow-subtle space-y-3">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <div className="flex items-center gap-2">
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white">
@@ -709,18 +853,56 @@ export const QrMenuWorkspace: React.FC<QrMenuWorkspaceProps> = ({ onShowToast })
               )}
             </div>
 
+            {/* Category Filter Tabs */}
+            {categoriesInMenu.length > 0 && (
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 pt-0.5 scrollbar-none border-b border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategoryTab('All')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
+                    selectedCategoryTab === 'All'
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  All ({menu.items.length})
+                </button>
+                {categoriesInMenu.map((cat) => {
+                  const count = menu.items.filter((i) => i.category === cat).length;
+                  return (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setSelectedCategoryTab(cat)}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
+                        selectedCategoryTab === cat
+                          ? 'bg-blue-600 text-white shadow-xs'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                      }`}
+                    >
+                      {cat} ({count})
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
             {menu.items.length === 0 ? (
               <div className="text-center py-8 text-slate-400 text-xs">
                 No dishes in menu yet. Use the form above or click "Load Sample Cafe" to test.
               </div>
+            ) : displayedDishes.length === 0 ? (
+              <div className="text-center py-8 text-slate-400 text-xs">
+                No dishes found under "{selectedCategoryTab}".
+              </div>
             ) : (
               <div className="max-h-96 overflow-y-auto space-y-2 pr-1 divide-y divide-slate-100 dark:divide-slate-800">
-                {menu.items.map((item) => (
+                {displayedDishes.map((item) => (
                   <div
                     key={item.id}
                     className="pt-2 pb-2 first:pt-0 flex items-center justify-between gap-3 text-xs"
                   >
-                    <div className="flex items-center gap-2 min-w-0">
+                    <div className="flex items-center gap-2.5 min-w-0">
                       {item.isVeg === true ? (
                         <span className="w-3.5 h-3.5 rounded-xs border border-emerald-600 bg-white flex items-center justify-center shrink-0">
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
@@ -732,17 +914,22 @@ export const QrMenuWorkspace: React.FC<QrMenuWorkspaceProps> = ({ onShowToast })
                       ) : null}
 
                       <div className="truncate">
-                        <div className="font-semibold text-slate-900 dark:text-white flex items-center gap-1.5">
+                        <div className="font-semibold text-slate-900 dark:text-white flex items-center gap-1.5 flex-wrap">
                           <span className="truncate">{item.name}</span>
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/60">
+                            {item.category}
+                          </span>
                           {item.badge && (
                             <span className="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
                               {item.badge}
                             </span>
                           )}
                         </div>
-                        <div className="text-slate-400 text-[11px]">
-                          {item.category} {item.description ? `• ${item.description}` : ''}
-                        </div>
+                        {item.description && (
+                          <div className="text-slate-400 text-[11px] truncate mt-0.5">
+                            {item.description}
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -841,49 +1028,48 @@ export const QrMenuWorkspace: React.FC<QrMenuWorkspaceProps> = ({ onShowToast })
             {/* The Actual Standee Component captured by html2canvas */}
             <div
               ref={standeeRef}
-              className={`w-full max-w-[350px] min-h-[500px] rounded-3xl p-6 sm:p-7 flex flex-col justify-between items-center text-center border-2 transition-all duration-300 shadow-2xl relative overflow-hidden ${themeStyle.wrapper}`}
+              className={`w-full max-w-[360px] min-h-[530px] rounded-[24px] pt-7 pb-6 px-6 flex flex-col justify-between items-center text-center border-2 transition-all duration-300 shadow-2xl relative overflow-hidden ${themeStyle.wrapper}`}
+              style={{ boxSizing: 'border-box' }}
             >
-              {/* Subtle Decorative Background Lines */}
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl pointer-events-none" />
-              <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full blur-2xl pointer-events-none" />
-
               {/* Standee Header */}
-              <div className="w-full space-y-1.5 relative z-10">
-                {menu.tableNo ? (
-                  <span className={`inline-block px-3 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest border mb-1 ${themeStyle.badge}`}>
-                    {menu.tableNo}
-                  </span>
-                ) : (
-                  <span className={`inline-block px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest border mb-1 ${themeStyle.badge}`}>
-                    Digital Menu
-                  </span>
-                )}
+              <div className="w-full space-y-2 relative z-10 pt-1">
+                <div className="flex justify-center">
+                  {menu.tableNo ? (
+                    <span className={`inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-wider border shadow-sm ${themeStyle.badge}`}>
+                      <span>🍽️</span> {menu.tableNo}
+                    </span>
+                  ) : (
+                    <span className={`inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider border shadow-sm ${themeStyle.badge}`}>
+                      <span>✨</span> Digital Menu
+                    </span>
+                  )}
+                </div>
 
-                <h2 className="text-xl sm:text-2xl font-black tracking-tight leading-normal break-words py-0.5">
+                <h2 className="text-xl sm:text-2xl font-black tracking-tight leading-snug break-words px-2">
                   {menu.name || 'Your Restaurant'}
                 </h2>
 
                 {menu.tagline && (
-                  <p className={`text-xs font-semibold leading-normal break-words ${themeStyle.taglineColor}`}>
+                  <p className={`text-xs font-semibold leading-normal break-words px-2 ${themeStyle.taglineColor}`}>
                     {menu.tagline}
                   </p>
                 )}
 
                 {menu.address && (
-                  <p className={`text-[11px] font-medium leading-normal break-words mt-1 opacity-90 ${themeStyle.taglineColor}`}>
+                  <p className={`text-[11px] font-medium leading-normal break-words px-2 opacity-90 ${themeStyle.taglineColor}`}>
                     📍 {menu.address}
                   </p>
                 )}
               </div>
 
               {/* QR Code Centerpiece */}
-              <div className="my-auto py-2 relative z-10 flex flex-col items-center">
-                <div className={`p-3 bg-white rounded-2xl border-2 shadow-xl ${themeStyle.qrBorder}`}>
+              <div className="my-auto py-3 relative z-10 flex flex-col items-center">
+                <div className={`p-3.5 bg-white rounded-2xl border-2 shadow-xl ${themeStyle.qrBorder}`}>
                   {qrCodeDataUrl ? (
                     <img
                       src={qrCodeDataUrl}
                       alt="Scan for Menu QR Code"
-                      className="w-40 h-40 sm:w-44 sm:h-44 object-contain rounded-lg"
+                      className="w-40 h-40 sm:w-44 sm:h-44 object-contain rounded-lg block"
                     />
                   ) : (
                     <div className="w-40 h-40 flex items-center justify-center text-slate-400 text-xs">
@@ -892,25 +1078,26 @@ export const QrMenuWorkspace: React.FC<QrMenuWorkspaceProps> = ({ onShowToast })
                   )}
                 </div>
 
-                <div className="mt-3 space-y-0.5">
-                  <span className={`text-xs font-black tracking-wide uppercase ${themeStyle.accent}`}>
+                <div className="mt-3 space-y-1">
+                  <span className={`text-xs font-black tracking-wider uppercase block ${themeStyle.accent}`}>
                     SCAN FOR DIGITAL MENU
                   </span>
-                  <p className="text-[10px] text-slate-400 font-medium">
+                  <p className="text-[10px] text-slate-300/80 font-medium">
                     Point camera or Google Lens to view dishes &amp; prices
                   </p>
                 </div>
               </div>
 
-              {/* Standee Footer with QuickVero Branding (User Requested Feature) */}
-              <div className="w-full pt-3 border-t border-white/10 relative z-10 flex items-center justify-between text-[10px] text-slate-400">
-                <span className="font-medium truncate max-w-[150px]">
-                  {menu.phone ? menu.phone : 'Contactless Ordering'}
-                </span>
-                <span className="font-semibold flex items-center gap-1 shrink-0">
+              {/* Standee Footer - INSET Capsule so phone number is safely away from round corners */}
+              <div className="w-full mt-3 py-2 px-3.5 rounded-xl bg-white/10 dark:bg-black/25 border border-white/15 relative z-10 flex items-center justify-between text-[11px] text-slate-200">
+                <div className="flex items-center gap-1.5 font-medium truncate max-w-[170px]">
+                  <Phone className="w-3 h-3 shrink-0 text-amber-400" />
+                  <span className="truncate">{menu.phone ? menu.phone : 'Contactless Ordering'}</span>
+                </div>
+                <div className="flex items-center gap-1 shrink-0 font-semibold text-[10px] text-slate-300">
                   <span>Powered by</span>
-                  <strong className="text-white font-extrabold">QuickVero.in</strong>
-                </span>
+                  <strong className="text-white font-black">QuickVero.in</strong>
+                </div>
               </div>
             </div>
           </div>
