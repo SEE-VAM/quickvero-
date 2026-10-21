@@ -1048,9 +1048,14 @@ export const QrMenuWorkspace: React.FC<QrMenuWorkspaceProps> = ({ onShowToast })
               {/* Standee Header */}
               <div className="w-full space-y-2 relative z-10 pt-1">
                 <div className="flex justify-center w-full">
-                  <span className={`inline-block px-5 py-2 rounded-full text-xs font-black uppercase tracking-widest border shadow-xs text-center leading-none select-none ${themeStyle.badge}`}>
-                    {displayTableBadge}
-                  </span>
+                  <div
+                    className={`inline-flex items-center justify-center px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest border shadow-xs text-center leading-none select-none ${themeStyle.badge}`}
+                    style={{ minHeight: '28px', boxSizing: 'border-box' }}
+                  >
+                    <span style={{ display: 'inline-block', lineHeight: 1 }}>
+                      {displayTableBadge}
+                    </span>
+                  </div>
                 </div>
 
                 <h2 className="text-xl sm:text-2xl font-black tracking-tight leading-snug break-words px-2">
@@ -1097,15 +1102,21 @@ export const QrMenuWorkspace: React.FC<QrMenuWorkspaceProps> = ({ onShowToast })
               </div>
 
               {/* Standee Footer - INSET Capsule so phone number is safely away from round corners */}
-              <div className="w-full mt-3 py-2.5 px-4 rounded-xl bg-white/10 dark:bg-black/25 border border-white/15 relative z-10 flex items-center justify-between text-xs text-slate-200">
-                <div className="flex items-center gap-1.5 font-bold text-xs shrink-0 leading-normal">
-                  <span className="text-amber-400">Call:</span>
-                  <span className="text-white tracking-wide">{menu.phone ? menu.phone : 'Contactless Ordering'}</span>
-                </div>
-                <div className="flex items-center gap-1 shrink-0 font-medium text-[11px] text-slate-300 leading-normal">
-                  <span>Powered by</span>
-                  <strong className="text-white font-black tracking-wide">QuickVero.in</strong>
-                </div>
+              <div className="w-full mt-3 py-2.5 px-4 rounded-xl bg-white/10 dark:bg-black/25 border border-white/15 relative z-10 text-xs text-slate-200">
+                <table style={{ width: '100%', borderCollapse: 'collapse', margin: 0, padding: 0 }}>
+                  <tbody>
+                    <tr>
+                      <td style={{ textAlign: 'left', verticalAlign: 'middle', whiteSpace: 'nowrap', padding: 0 }}>
+                        <span className="text-amber-400 font-bold text-xs">Call: </span>
+                        <span className="text-white font-bold text-xs tracking-wide">{menu.phone ? menu.phone : 'Contactless Ordering'}</span>
+                      </td>
+                      <td style={{ textAlign: 'right', verticalAlign: 'middle', whiteSpace: 'nowrap', padding: 0 }}>
+                        <span className="text-slate-300 text-[11px] font-medium">Powered by </span>
+                        <strong className="text-white font-black tracking-wide text-[11px]">QuickVero.in</strong>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
