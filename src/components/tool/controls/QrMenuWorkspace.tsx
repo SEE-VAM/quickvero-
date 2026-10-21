@@ -1048,14 +1048,12 @@ export const QrMenuWorkspace: React.FC<QrMenuWorkspaceProps> = ({ onShowToast })
               {/* Standee Header */}
               <div className="w-full space-y-2 relative z-10 pt-1">
                 <div className="flex justify-center w-full">
-                  <div
-                    className={`inline-flex items-center justify-center px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest border shadow-xs text-center leading-none select-none ${themeStyle.badge}`}
-                    style={{ minHeight: '28px', boxSizing: 'border-box' }}
+                  <span
+                    className={`inline-block px-4 rounded-full text-xs font-black uppercase tracking-widest border shadow-xs text-center select-none ${themeStyle.badge}`}
+                    style={{ height: '26px', lineHeight: '24px', boxSizing: 'border-box' }}
                   >
-                    <span style={{ display: 'inline-block', lineHeight: 1 }}>
-                      {displayTableBadge}
-                    </span>
-                  </div>
+                    {displayTableBadge}
+                  </span>
                 </div>
 
                 <h2 className="text-xl sm:text-2xl font-black tracking-tight leading-snug break-words px-2">
