@@ -23,6 +23,7 @@ import {
   AlertCircle,
   HelpCircle,
   UploadCloud,
+  MapPin,
 } from 'lucide-react';
 import {
   RestaurantMenuData,
@@ -1033,15 +1034,17 @@ export const QrMenuWorkspace: React.FC<QrMenuWorkspaceProps> = ({ onShowToast })
             >
               {/* Standee Header */}
               <div className="w-full space-y-2 relative z-10 pt-1">
-                <div className="flex justify-center">
+                <div className="flex justify-center w-full">
                   {menu.tableNo ? (
-                    <span className={`inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-wider border shadow-sm ${themeStyle.badge}`}>
-                      <span>🍽️</span> {menu.tableNo}
-                    </span>
+                    <div className={`inline-flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider border shadow-xs leading-none ${themeStyle.badge}`}>
+                      <Utensils className="w-3.5 h-3.5 shrink-0" />
+                      <span className="leading-none">{menu.tableNo}</span>
+                    </div>
                   ) : (
-                    <span className={`inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider border shadow-sm ${themeStyle.badge}`}>
-                      <span>✨</span> Digital Menu
-                    </span>
+                    <div className={`inline-flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider border shadow-xs leading-none ${themeStyle.badge}`}>
+                      <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                      <span className="leading-none">Digital Menu</span>
+                    </div>
                   )}
                 </div>
 
@@ -1056,8 +1059,9 @@ export const QrMenuWorkspace: React.FC<QrMenuWorkspaceProps> = ({ onShowToast })
                 )}
 
                 {menu.address && (
-                  <p className={`text-[11px] font-medium leading-normal break-words px-2 opacity-90 ${themeStyle.taglineColor}`}>
-                    📍 {menu.address}
+                  <p className={`text-[11px] font-medium leading-normal break-words px-2 opacity-90 flex items-center justify-center gap-1 ${themeStyle.taglineColor}`}>
+                    <MapPin className="w-3.5 h-3.5 shrink-0 opacity-80" />
+                    <span>{menu.address}</span>
                   </p>
                 )}
               </div>
@@ -1089,14 +1093,16 @@ export const QrMenuWorkspace: React.FC<QrMenuWorkspaceProps> = ({ onShowToast })
               </div>
 
               {/* Standee Footer - INSET Capsule so phone number is safely away from round corners */}
-              <div className="w-full mt-3 py-2 px-3.5 rounded-xl bg-white/10 dark:bg-black/25 border border-white/15 relative z-10 flex items-center justify-between text-[11px] text-slate-200">
-                <div className="flex items-center gap-1.5 font-medium truncate max-w-[170px]">
-                  <Phone className="w-3 h-3 shrink-0 text-amber-400" />
-                  <span className="truncate">{menu.phone ? menu.phone : 'Contactless Ordering'}</span>
+              <div className="w-full mt-3 py-2.5 px-4 rounded-xl bg-white/10 dark:bg-black/25 border border-white/15 relative z-10 flex items-center justify-between text-xs text-slate-200">
+                <div className="flex items-center gap-1.5 font-semibold text-xs text-slate-200 shrink-0 leading-normal overflow-visible">
+                  <Phone className="w-3.5 h-3.5 shrink-0 text-amber-400" />
+                  <span className="leading-normal tracking-wide inline-block">
+                    {menu.phone ? menu.phone : 'Contactless Ordering'}
+                  </span>
                 </div>
-                <div className="flex items-center gap-1 shrink-0 font-semibold text-[10px] text-slate-300">
+                <div className="flex items-center gap-1 shrink-0 font-medium text-[11px] text-slate-300 leading-normal">
                   <span>Powered by</span>
-                  <strong className="text-white font-black">QuickVero.in</strong>
+                  <strong className="text-white font-black tracking-wide">QuickVero.in</strong>
                 </div>
               </div>
             </div>
