@@ -109,6 +109,14 @@ export const QrMenuWorkspace: React.FC<QrMenuWorkspaceProps> = ({ onShowToast })
     return menu.items.filter((item) => (item.category || '').toLowerCase() === selectedCategoryTab.toLowerCase());
   }, [menu.items, selectedCategoryTab]);
 
+  // Clean table badge display
+  const displayTableBadge = React.useMemo(() => {
+    if (!menu.tableNo || !menu.tableNo.trim()) return 'DIGITAL MENU';
+    const val = menu.tableNo.trim();
+    if (/^\d+$/.test(val)) return `TABLE ${val}`;
+    return val.toUpperCase();
+  }, [menu.tableNo]);
+
   // Reset tab if selected category was deleted
   useEffect(() => {
     if (selectedCategoryTab !== 'All' && !categoriesInMenu.includes(selectedCategoryTab)) {
@@ -1022,9 +1030,14 @@ export const QrMenuWorkspace: React.FC<QrMenuWorkspaceProps> = ({ onShowToast })
 
           {/* Table Standee Visual Card Preview */}
           <div className="flex flex-col items-center">
-            <span className="text-[11px] font-semibold text-slate-400 mb-2">
-              Live Table Standee Preview (A5 / 4x6" Table Top)
-            </span>
+            <div className="flex items-center gap-1.5 mb-2">
+              <span className="text-[11px] font-semibold text-slate-400">
+                Live Table Standee Preview (A5 / 4x6" Table Top)
+              </span>
+              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                v2.1
+              </span>
+            </div>
 
             {/* The Actual Standee Component captured by html2canvas */}
             <div
@@ -1036,7 +1049,7 @@ export const QrMenuWorkspace: React.FC<QrMenuWorkspaceProps> = ({ onShowToast })
               <div className="w-full space-y-2 relative z-10 pt-1">
                 <div className="flex justify-center w-full">
                   <span className={`inline-block px-5 py-2 rounded-full text-xs font-black uppercase tracking-widest border shadow-xs text-center leading-none select-none ${themeStyle.badge}`}>
-                    {menu.tableNo ? (menu.tableNo.toLowerCase().startsWith('table') ? menu.tableNo.toUpperCase() : `TABLE ${menu.tableNo}`) : 'DIGITAL MENU'}
+                    {displayTableBadge}
                   </span>
                 </div>
 
