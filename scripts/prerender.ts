@@ -1034,5 +1034,255 @@ for (const p of corePages) {
   writePage(p.path, pageHtml);
 }
 
+// 5. Generate Rich Pre-rendered Homepage (/index.html)
+const popularToolList = TOOLS.filter(t => t.popular || ['image-compressor', 'pdf-compressor', 'compress-image-to-20kb', 'compress-image-to-50kb', 'merge-pdf', 'jpg-to-pdf', 'mp4-to-mp3', 'qr-menu-maker'].includes(t.id));
+
+const homepageContent = `
+  <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 32px 16px; color: #1e293b; line-height: 1.6;">
+    
+    <!-- Hero Section -->
+    <header style="text-align: center; margin-bottom: 48px; padding: 32px 16px;">
+      <div style="display: inline-block; background: #dbeafe; color: #1d4ed8; font-size: 13px; font-weight: 700; padding: 6px 16px; border-radius: 9999px; margin-bottom: 16px;">
+        100% Free &bull; Browser-First Utilities &bull; Zero Server Uploads
+      </div>
+      <h1 style="font-size: 38px; font-weight: 900; color: #0f172a; margin: 0 0 16px 0; line-height: 1.2; letter-spacing: -0.02em;">
+        Powerful Online Tools. Simple, Fast &amp; 100% Private.
+      </h1>
+      <p style="font-size: 18px; color: #475569; max-width: 780px; margin: 0 auto 28px auto; line-height: 1.6;">
+        Compress images, edit PDFs, convert audio, and optimize documents directly inside your web browser. 
+        Your files never leave your device &mdash; zero cloud queues, zero privacy risks.
+      </p>
+      <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+        <a href="/tools" style="background: #2563eb; color: white; padding: 12px 24px; border-radius: 12px; font-weight: 700; text-decoration: none; font-size: 15px; box-shadow: 0 4px 12px rgba(37,99,235,0.25);">
+          Browse All 28+ Tools &rarr;
+        </a>
+        <a href="/image-tools" style="background: #f1f5f9; color: #0f172a; padding: 12px 24px; border-radius: 12px; font-weight: 700; text-decoration: none; font-size: 15px; border: 1px solid #cbd5e1;">
+          Image Tools
+        </a>
+        <a href="/pdf-tools" style="background: #f1f5f9; color: #0f172a; padding: 12px 24px; border-radius: 12px; font-weight: 700; text-decoration: none; font-size: 15px; border: 1px solid #cbd5e1;">
+          PDF Tools
+        </a>
+      </div>
+    </header>
+
+    <!-- Tool Categories Grid -->
+    <section style="margin-bottom: 56px;">
+      <h2 style="font-size: 26px; font-weight: 800; color: #0f172a; margin-bottom: 8px; text-align: center;">
+        Explore Utility Suites by Category
+      </h2>
+      <p style="font-size: 15px; color: #64748b; text-align: center; margin-bottom: 28px;">
+        High-performance client-side tools tailored for web developers, designers, students, and businesses.
+      </p>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+        ${CATEGORIES.map(c => `
+          <a href="${c.route}" style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; text-decoration: none; color: inherit; display: block; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+            <div style="font-size: 12px; font-weight: 700; color: #2563eb; text-transform: uppercase; margin-bottom: 6px;">Suite</div>
+            <h3 style="font-size: 18px; font-weight: 800; color: #0f172a; margin: 0 0 8px 0;">${escapeHtml(c.name)}</h3>
+            <p style="font-size: 13px; color: #64748b; margin: 0 0 12px 0; line-height: 1.5;">${escapeHtml(c.description)}</p>
+            <span style="font-size: 13px; font-weight: 700; color: #2563eb;">Explore Tools &rarr;</span>
+          </a>
+        `).join('')}
+      </div>
+    </section>
+
+    <!-- Popular Featured Tools Grid -->
+    <section style="margin-bottom: 56px;">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+        <div>
+          <h2 style="font-size: 26px; font-weight: 800; color: #0f172a; margin: 0 0 6px 0;">
+            Most Popular Online Utilities
+          </h2>
+          <p style="font-size: 15px; color: #64748b; margin: 0;">
+            Fast, free, and secure processing executed entirely in local browser RAM.
+          </p>
+        </div>
+        <a href="/tools" style="font-size: 14px; font-weight: 700; color: #2563eb; text-decoration: none;">
+          View All Tools (${TOOLS.length}) &rarr;
+        </a>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 16px;">
+        ${popularToolList.map(t => `
+          <a href="${t.route}" style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 22px; text-decoration: none; color: inherit; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+            <div>
+              <div style="display: inline-block; background: #f1f5f9; color: #475569; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; margin-bottom: 10px; text-transform: uppercase;">
+                ${t.category}
+              </div>
+              <h3 style="font-size: 17px; font-weight: 800; color: #0f172a; margin: 0 0 8px 0;">${escapeHtml(t.name)}</h3>
+              <p style="font-size: 13px; color: #64748b; line-height: 1.5; margin: 0 0 16px 0;">${escapeHtml(t.shortDescription)}</p>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 12px; font-size: 13px; font-weight: 700; color: #2563eb;">
+              <span>Open Tool</span>
+              <span>&rarr;</span>
+            </div>
+          </a>
+        `).join('')}
+      </div>
+    </section>
+
+    <!-- Deep-Dive Editorial: The Technology Behind QuickVero -->
+    <section style="margin-bottom: 56px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 24px; padding: 36px 28px;">
+      <div style="max-width: 800px; margin-bottom: 32px;">
+        <h2 style="font-size: 26px; font-weight: 800; color: #0f172a; margin: 0 0 8px 0;">
+          The Technology Behind QuickVero
+        </h2>
+        <p style="font-size: 15px; color: #475569; margin: 0; line-height: 1.6;">
+          Explore how client-side computing, next-generation image encoding, and secure memory pipelines deliver professional-grade file optimization directly in your browser without third-party servers.
+        </p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
+        <article style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px;">
+          <h3 style="font-size: 18px; font-weight: 800; color: #0f172a; margin: 0 0 10px 0;">
+            1. Why Client-Side Privacy Matters for File Processing
+          </h3>
+          <p style="font-size: 14px; color: #334155; line-height: 1.65; margin: 0;">
+            Most traditional online converters upload your personal photos, official documents, and sensitive spreadsheets to third-party cloud servers. This exposes you to data leaks, unauthorized storage, and slow upload speeds. QuickVero uses modern HTML5 File API and client-side processing, meaning your files stay strictly within your browser. Once you close the tab, all temporary data is instantly cleared from RAM.
+          </p>
+        </article>
+
+        <article style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px;">
+          <h3 style="font-size: 18px; font-weight: 800; color: #0f172a; margin: 0 0 10px 0;">
+            2. Understanding Lossy vs. Lossless Image Compression
+          </h3>
+          <p style="font-size: 14px; color: #334155; line-height: 1.65; margin: 0;">
+            Lossless compression reduces file sizes by identifying and removing redundant metadata (like EXIF camera data) without modifying a single pixel of the image. In contrast, intelligent lossy compression slightly modifies color patterns that the human eye cannot discern, reducing image weight by up to 80%. This drastic reduction dramatically improves website loading speeds and Core Web Vitals (LCP &amp; CLS).
+          </p>
+        </article>
+
+        <article style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px;">
+          <h3 style="font-size: 18px; font-weight: 800; color: #0f172a; margin: 0 0 10px 0;">
+            3. Modern Image Formats: Why WebP Outperforms JPG &amp; PNG
+          </h3>
+          <p style="font-size: 14px; color: #334155; line-height: 1.65; margin: 0;">
+            WebP is a modern image format developed by Google that provides superior lossless and lossy compression for images on the web. WebP images are typically 26% to 34% smaller than comparable PNGs and JPEGs while retaining identical visual fidelity. QuickVero allows you to seamlessly convert legacy JPG and PNG images to WebP with a single click.
+          </p>
+        </article>
+
+        <article style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px;">
+          <h3 style="font-size: 18px; font-weight: 800; color: #0f172a; margin: 0 0 10px 0;">
+            4. Best Practices for Merging and Compressing PDF Documents
+          </h3>
+          <p style="font-size: 14px; color: #334155; line-height: 1.65; margin: 0;">
+            Whether preparing legal contracts, academic coursework, or official government applications, managing PDF file sizes is critical. QuickVero combines client-side stream compression with precision page re-ordering. Documents can be merged, split, or compressed down to email-friendly thresholds (under 2MB) without blurring critical text or legal signatures.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <!-- Platform FAQ Section -->
+    <section style="margin-bottom: 56px; max-width: 900px; margin-left: auto; margin-right: auto;">
+      <h2 style="font-size: 26px; font-weight: 800; color: #0f172a; text-align: center; margin-bottom: 8px;">
+        Frequently Asked Questions
+      </h2>
+      <p style="font-size: 15px; color: #64748b; text-align: center; margin-bottom: 28px;">
+        Clear answers about our file privacy, technical limits, and zero-cost structure.
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 14px; padding: 20px;">
+          <h3 style="font-size: 16px; font-weight: 800; color: #0f172a; margin: 0 0 8px 0;">
+            Are my files or images uploaded to any remote server?
+          </h3>
+          <p style="font-size: 14px; color: #334155; line-height: 1.6; margin: 0;">
+            No. QuickVero is designed as a browser-first utility suite. All image compression, PDF manipulation, audio extraction, and format conversions happen locally inside your browser using HTML5 Canvas, WebAssembly, and local JavaScript workers. Your files never leave your device.
+          </p>
+        </div>
+
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 14px; padding: 20px;">
+          <h3 style="font-size: 16px; font-weight: 800; color: #0f172a; margin: 0 0 8px 0;">
+            Is QuickVero free for personal, commercial, and student projects?
+          </h3>
+          <p style="font-size: 14px; color: #334155; line-height: 1.6; margin: 0;">
+            Yes, QuickVero is 100% free to use for personal, academic, and commercial purposes. There are no subscriptions, limits on basic usage, or forced watermarks added to your exported files.
+          </p>
+        </div>
+
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 14px; padding: 20px;">
+          <h3 style="font-size: 16px; font-weight: 800; color: #0f172a; margin: 0 0 8px 0;">
+            Will compressing my photos ruin their visual clarity?
+          </h3>
+          <p style="font-size: 14px; color: #334155; line-height: 1.6; margin: 0;">
+            Not at all. QuickVero uses perceptual quality algorithms that target redundant color data that human eyes cannot perceive. You can preview and fine-tune your compression quality slider from 1% to 100% to find the perfect balance between file size and crystal-clear clarity.
+          </p>
+        </div>
+
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 14px; padding: 20px;">
+          <h3 style="font-size: 16px; font-weight: 800; color: #0f172a; margin: 0 0 8px 0;">
+            Which browsers and operating systems are supported?
+          </h3>
+          <p style="font-size: 14px; color: #334155; line-height: 1.6; margin: 0;">
+            QuickVero operates smoothly across all modern web browsers, including Google Chrome, Mozilla Firefox, Apple Safari, Microsoft Edge, Opera, and Brave on Android, iOS, Windows, macOS, Linux, and ChromeOS.
+          </p>
+        </div>
+
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 14px; padding: 20px;">
+          <h3 style="font-size: 16px; font-weight: 800; color: #0f172a; margin: 0 0 8px 0;">
+            How can I contact the QuickVero engineering team?
+          </h3>
+          <p style="font-size: 14px; color: #334155; line-height: 1.6; margin: 0;">
+            You can reach our team anytime via email at <a href="mailto:contact@quickvero.in" style="color: #2563eb; font-weight: 600;">contact@quickvero.in</a> or through our interactive feedback form on our <a href="/contact" style="color: #2563eb; font-weight: 600;">Contact Page</a>.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Platform Footer Navigation -->
+    <footer style="margin-top: 60px; padding-top: 36px; border-top: 1px solid #e2e8f0; color: #64748b; font-size: 13px;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; margin-bottom: 32px;">
+        <div>
+          <strong style="color: #0f172a; font-size: 15px; display: block; margin-bottom: 12px;">QuickVero</strong>
+          <p style="line-height: 1.6; margin: 0;">
+            Free, fast, and private client-side utilities. Compress, convert, and edit files without cloud servers.
+          </p>
+        </div>
+        <div>
+          <strong style="color: #0f172a; font-size: 14px; display: block; margin-bottom: 12px;">Tool Suites</strong>
+          <ul style="list-style: none; padding: 0; margin: 0; line-height: 2;">
+            <li><a href="/image-tools" style="color: inherit; text-decoration: none;">Image Tools</a></li>
+            <li><a href="/pdf-tools" style="color: inherit; text-decoration: none;">PDF Tools</a></li>
+            <li><a href="/audio-tools" style="color: inherit; text-decoration: none;">Audio Tools</a></li>
+            <li><a href="/video-tools" style="color: inherit; text-decoration: none;">Video Tools</a></li>
+            <li><a href="/file-tools" style="color: inherit; text-decoration: none;">File Tools</a></li>
+          </ul>
+        </div>
+        <div>
+          <strong style="color: #0f172a; font-size: 14px; display: block; margin-bottom: 12px;">Popular Tools</strong>
+          <ul style="list-style: none; padding: 0; margin: 0; line-height: 2;">
+            <li><a href="/tools/image-compressor" style="color: inherit; text-decoration: none;">Image Compressor</a></li>
+            <li><a href="/tools/compress-image-to-20kb" style="color: inherit; text-decoration: none;">Compress to 20KB</a></li>
+            <li><a href="/tools/pdf-compressor" style="color: inherit; text-decoration: none;">PDF Compressor</a></li>
+            <li><a href="/tools/merge-pdf" style="color: inherit; text-decoration: none;">Merge PDF</a></li>
+            <li><a href="/tools/qr-menu-maker" style="color: inherit; text-decoration: none;">QR Menu Maker</a></li>
+          </ul>
+        </div>
+        <div>
+          <strong style="color: #0f172a; font-size: 14px; display: block; margin-bottom: 12px;">Company &amp; Legal</strong>
+          <ul style="list-style: none; padding: 0; margin: 0; line-height: 2;">
+            <li><a href="/about" style="color: inherit; text-decoration: none;">About QuickVero</a></li>
+            <li><a href="/contact" style="color: inherit; text-decoration: none;">Contact &amp; Support</a></li>
+            <li><a href="/privacy-policy" style="color: inherit; text-decoration: none;">Privacy Policy</a></li>
+            <li><a href="/terms" style="color: inherit; text-decoration: none;">Terms of Service</a></li>
+            <li><a href="/disclaimer" style="color: inherit; text-decoration: none;">Disclaimer</a></li>
+          </ul>
+        </div>
+      </div>
+      <div style="text-align: center; border-top: 1px solid #f1f5f9; padding-top: 20px;">
+        &copy; ${new Date().getFullYear()} QuickVero. All rights reserved. 100% In-Browser Execution.
+      </div>
+    </footer>
+  </div>
+`;
+
+// Overwrite root dist/index.html with pre-rendered homepage!
+const homepageHtml = replaceMeta(baseTemplate, {
+  title: 'QuickVero — Powerful Online Tools. Simple & Fast.',
+  description: 'Free online image compressor, PDF tools, audio converters, and file utilities directly in your browser with QuickVero. 100% private, zero server uploads.',
+  canonicalUrl: 'https://www.quickvero.in/',
+  rootContent: homepageContent,
+});
+fs.writeFileSync(path.join(distDir, 'index.html'), homepageHtml, 'utf-8');
+console.log('[SSG] Generated: /index.html (HOMEPAGE)');
+
 console.log('✓ QuickVero SSG generation completed successfully! All static HTML files ready for Googlebot!');
 
