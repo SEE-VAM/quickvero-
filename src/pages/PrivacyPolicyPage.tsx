@@ -98,7 +98,7 @@ export const PrivacyPolicyPage: React.FC = () => {
             </p>
             <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
               <p className="font-semibold text-slate-900 dark:text-white">QuickVero Privacy &amp; Data Security</p>
-              <p>Email: <a href="mailto:contact@quickvero.in" className="text-brand-600 dark:text-brand-400 font-mono">contact@quickvero.in</a></p>
+              <p>Inquiries: <a href="/contact" className="text-brand-600 dark:text-brand-400 font-semibold underline">Contact &amp; Support Form</a></p>
               <p className="text-xs text-slate-400 mt-1">Website: https://www.quickvero.in</p>
             </div>
           </section>

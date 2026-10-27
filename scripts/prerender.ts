@@ -65,9 +65,12 @@ function replaceMeta(
   // 3. Remove Meta Keywords completely from all pages (Google policy recommendation against tag stuffing)
   html = html.replace(/<meta name="keywords" content=".*?"\s*\/?>\s*/gi, '');
 
-  // 4. Ensure AdSense meta verification tag is present in <head>
+  // 4. Ensure AdSense meta verification tag and script are present in <head>
   if (!html.includes('google-adsense-account')) {
     html = html.replace('</head>', '    <meta name="google-adsense-account" content="ca-pub-8043431725904194" />\n  </head>');
+  }
+  if (!html.includes('pagead2.googlesyndication.com/pagead/js/adsbygoogle.js')) {
+    html = html.replace('</head>', '    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8043431725904194" crossorigin="anonymous"></script>\n  </head>');
   }
 
   // 5. Replace Canonical URL

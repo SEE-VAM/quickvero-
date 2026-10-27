@@ -54,9 +54,9 @@ export const AboutPage: React.FC = () => {
           </p>
           <div className="pt-2 flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
             <Mail className="w-4 h-4 text-brand-600" />
-            <span>Have questions or suggestions? Reach out directly to our engineering desk at:</span>
-            <a href="mailto:contact@quickvero.in" className="text-brand-600 dark:text-brand-400 font-mono font-medium hover:underline">
-              contact@quickvero.in
+            <span>Have questions or suggestions? Reach out directly via our</span>
+            <a href="/contact" className="text-brand-600 dark:text-brand-400 font-medium hover:underline">
+              Contact &amp; Feedback Form
             </a>
           </div>
         </div>

@@ -234,11 +234,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.quickvero.in/tools/file-converter</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://www.quickvero.in/tools/file-size-calculator</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
