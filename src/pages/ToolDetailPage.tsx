@@ -35,7 +35,7 @@ import { Base64ToolWorkspace } from '../components/tool/controls/Base64ToolWorks
 import { CalculatorWorkspace } from '../components/tool/controls/CalculatorWorkspace';
 import { VideoDownloaderWorkspace } from '../components/tool/controls/VideoDownloaderWorkspace';
 import { QrMenuWorkspace } from '../components/tool/controls/QrMenuWorkspace';
-import { CloudToolNotice } from '../components/tool/controls/CloudToolNotice';
+import { ZipCreatorControls } from '../components/tool/controls/ZipCreatorControls';
 import { AdBanner } from '../components/common/AdBanner';
 import { updatePageMeta, generateToolStructuredData, getBaseUrl } from '../utils/seoHelpers';
 import { toolService } from '../services/toolService';
@@ -399,15 +399,14 @@ export const ToolDetailPage: React.FC<ToolDetailPageProps> = ({
                     />
                   )}
 
-                  {tool.engine === 'cloud-ready' &&
-                    tool.id !== 'mp4-to-mp3' &&
-                    tool.id !== 'audio-extractor' &&
-                    tool.id !== 'wav-to-mp3' &&
-                    tool.id !== 'mp3-to-wav' &&
-                    tool.id !== 'audio-converter' &&
-                    tool.id !== 'audio-compressor' && (
-                    <CloudToolNotice tool={tool} file={selectedFile} />
+                  {tool.id === 'zip-creator' && (
+                    <ZipCreatorControls
+                      selectedFile={selectedFile}
+                      onProcess={(opts) => executeProcessing(opts)}
+                      isProcessing={false}
+                    />
                   )}
+
                 </div>
               )}
 

@@ -1,6 +1,6 @@
 import { ProcessResult, ToolDefinition } from '../types/tool';
 import { compressImage, compressImageToTargetSize, resizeImage, convertImageFormat } from './imageProcessor';
-import { convertImageToPdf } from './fileProcessor';
+import { convertImageToPdf, createZipArchive } from './fileProcessor';
 import {
   compressPdfFile,
   splitPdfFile,
@@ -195,6 +195,12 @@ export class ToolService {
 
       case 'video-to-gif': {
         return await convertVideoToGif(file, options, onProgress);
+      }
+
+      case 'zip-creator': {
+        const archiveName = options.archiveName || file.name.replace(/\.[^/.]+$/, '') + '.zip';
+        const compression = options.compression === 'STORE' ? 'STORE' : 'DEFLATE';
+        return await createZipArchive(options.files || file, archiveName, compression, onProgress);
       }
 
       default: {

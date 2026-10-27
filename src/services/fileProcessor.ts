@@ -1,4 +1,5 @@
 import { jsPDF } from 'jspdf';
+import JSZip from 'jszip';
 import { ProcessResult } from '../types/tool';
 import { sanitizeFilename } from '../utils/fileHelpers';
 import { loadImageFromFile } from './imageProcessor';
@@ -209,6 +210,66 @@ export function calculateBandwidthEstimates(bytes: number): BandwidthCalculation
       broadband100M: formatTime(bits / (100 * 1000 * 1000)),
       fourGLte: formatTime(bits / (25 * 1000 * 1000)),
       dsl10M: formatTime(bits / (10 * 1000 * 1000)),
+    },
+  };
+}
+
+/**
+ * Real in-browser ZIP creation utility using JSZip
+ */
+export async function createZipArchive(
+  files: File[] | File,
+  archiveName: string = 'archive.zip',
+  compression: 'DEFLATE' | 'STORE' = 'DEFLATE',
+  onProgress?: (percent: number) => void
+): Promise<ProcessResult> {
+  const fileList = Array.isArray(files) ? files : [files];
+  if (!fileList || fileList.length === 0) {
+    throw new Error('Please select at least one file to compress into a ZIP.');
+  }
+
+  const zip = new JSZip();
+  let totalOriginalSize = 0;
+
+  for (let i = 0; i < fileList.length; i++) {
+    const f = fileList[i];
+    totalOriginalSize += f.size;
+    zip.file(f.name, f);
+  }
+
+  onProgress?.(30);
+
+  const zipBlob = await zip.generateAsync(
+    {
+      type: 'blob',
+      compression: compression,
+      ...(compression === 'DEFLATE' ? { compressionOptions: { level: 6 } } : {}),
+    },
+    (metadata) => {
+      const p = Math.round(30 + (metadata.percent * 0.65));
+      onProgress?.(p);
+    }
+  );
+
+  onProgress?.(100);
+
+  const cleanBase = archiveName.trim().replace(/\.zip$/i, '');
+  const finalName = `${cleanBase || 'archive'}.zip`;
+
+  const savings = totalOriginalSize > 0
+    ? Math.max(0, Math.round(((totalOriginalSize - zipBlob.size) / totalOriginalSize) * 100))
+    : 0;
+
+  return {
+    blob: zipBlob,
+    downloadUrl: URL.createObjectURL(zipBlob),
+    filename: finalName,
+    originalSize: totalOriginalSize,
+    processedSize: zipBlob.size,
+    savingsPercentage: savings,
+    metadata: {
+      fileCount: fileList.length,
+      compression,
     },
   };
 }

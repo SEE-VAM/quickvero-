@@ -10,11 +10,13 @@
   },
   "dependencies": {
     "@breezystack/lamejs": "^1.2.7",
+    "@types/jszip": "^3.4.0",
     "@types/qrcode": "^1.5.6",
     "canvas-confetti": "^1.9.3",
     "docx-preview": "^0.4.1",
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.2",
+    "jszip": "^3.10.2",
     "lucide-react": "^0.468.0",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^3.11.174",

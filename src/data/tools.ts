@@ -1355,7 +1355,7 @@ export const TOOLS: ToolDefinition[] = [
     icon: 'Archive',
     supportedFormats: ['*/*'],
     maxFileSizeMB: 100,
-    engine: 'cloud-ready',
+    engine: 'browser',
     isPopular: false,
     seoTitle: 'ZIP Creator Online - Compress Files into ZIP Archive | QuickVero',
     seoDescription: 'Package multiple files into a compressed ZIP file online with QuickVero. Free, simple, and clean.',
@@ -1368,32 +1368,6 @@ export const TOOLS: ToolDefinition[] = [
     ],
     faqs: [
       { question: 'Can I unzip this on any computer?', answer: 'Yes, .zip files open natively on Windows, macOS, Linux, iOS, and Android without any extra software.' }
-    ]
-  },
-  {
-    id: 'file-converter',
-    name: 'File Converter',
-    slug: 'file-converter',
-    category: 'file',
-    route: '/tools/file-converter',
-    shortDescription: 'Convert documents and archives between common formats.',
-    description: 'Universal file format converter supporting document interchange, e-books, spreadsheets, and archives.',
-    icon: 'FileCode',
-    supportedFormats: ['*/*'],
-    maxFileSizeMB: 100,
-    engine: 'cloud-ready',
-    isPopular: false,
-    seoTitle: 'File Converter Online - Universal Document & File Conversion | QuickVero',
-    seoDescription: 'Convert files between document and media formats online with QuickVero.',
-    keywords: ['file converter', 'universal converter', 'document converter', 'convert formats'],
-    features: ['Multi-format auto-detection', 'Secure file handling', 'Cloud processing engine ready'],
-    howToSteps: [
-      { step: 1, title: 'Upload file', description: 'Choose your document or file.' },
-      { step: 2, title: 'Select target format', description: 'Pick the desired target extension.' },
-      { step: 3, title: 'Download converted file', description: 'Save your file.' }
-    ],
-    faqs: [
-      { question: 'Is my data secure?', answer: 'Yes! QuickVero adheres to a strict privacy-first policy where files are never retained or indexed.' }
     ]
   },
   {
