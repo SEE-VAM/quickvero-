@@ -861,10 +861,7 @@ const corePages = [
         </p>
 
         <section style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 28px; margin-bottom: 28px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-          <h2 style="font-size: 20px; font-weight: 800; color: #0f172a; margin: 0 0 14px 0;">Direct Support Contacts</h2>
-          <p style="margin: 0 0 10px 0; color: #334155;">
-            <strong>Email:</strong> <a href="mailto:contact@quickvero.in" style="color: #2563eb; font-weight: 600; text-decoration: underline;">contact@quickvero.in</a>
-          </p>
+          <h2 style="font-size: 20px; font-weight: 800; color: #0f172a; margin: 0 0 14px 0;">Support Helpdesk</h2>
           <p style="margin: 0 0 10px 0; color: #334155;">
             <strong>Operating Hours:</strong> Monday – Saturday (9:00 AM – 7:00 PM IST)
           </p>

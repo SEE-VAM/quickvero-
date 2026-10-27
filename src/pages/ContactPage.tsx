@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, Send, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { Send, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { updatePageMeta } from '../utils/seoHelpers';
 
 export const ContactPage: React.FC = () => {
@@ -185,16 +185,6 @@ export const ContactPage: React.FC = () => {
 
           {/* Direct Support Information */}
           <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 text-center space-y-2">
-            <div className="flex items-center justify-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
-              <Mail className="w-4 h-4 text-brand-600" />
-              <span>Direct Support Email:</span>
-              <a
-                href="mailto:contact@quickvero.in"
-                className="text-brand-600 dark:text-brand-400 hover:underline font-mono"
-              >
-                contact@quickvero.in
-              </a>
-            </div>
             <p className="text-[11px] text-slate-400">
               Operating Hours: Monday – Saturday (9:00 AM – 7:00 PM IST) • Average Response Time: 24–48 Hours
             </p>
