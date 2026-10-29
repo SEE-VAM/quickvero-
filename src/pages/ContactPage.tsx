@@ -188,6 +188,16 @@ export const ContactPage: React.FC = () => {
             <p className="text-[11px] text-slate-400">
               Operating Hours: Monday – Saturday (9:00 AM – 7:00 PM IST) • Average Response Time: 24–48 Hours
             </p>
+            <div className="pt-1">
+              <a
+                href="https://www.instagram.com/quickvero.in/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-pink-600 hover:text-pink-700 dark:text-pink-400 transition-colors"
+              >
+                <span>Prefer DMs? Connect with us on Instagram: @quickvero.in &rarr;</span>
+              </a>
+            </div>
           </div>
         </div>
       </div>

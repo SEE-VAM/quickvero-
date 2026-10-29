@@ -35,6 +35,7 @@ export const FOOTER_LINKS = {
     { label: 'Guides & Tutorials', href: '/guides' },
     { label: 'About Us', href: '/about' },
     { label: 'Contact & Feedback', href: '/contact' },
+    { label: 'Instagram (@quickvero.in)', href: 'https://www.instagram.com/quickvero.in/' },
   ],
   legal: [
     { label: 'Privacy Policy', href: '/privacy-policy' },
