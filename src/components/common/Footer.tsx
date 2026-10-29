@@ -17,12 +17,11 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               onClick={() => onNavigate('/')}
               className="flex items-center gap-2.5 group text-left focus:outline-none"
             >
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-sm">
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="m7 15 5 5 5-5" />
-                  <path d="m7 9 5-5 5 5" />
-                </svg>
-              </div>
+              <img
+                src="/logo.png"
+                alt="QuickVero Logo"
+                className="w-8 h-8 object-contain drop-shadow-sm group-hover:scale-105 transition-transform duration-150"
+              />
               <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
                 QuickVero
               </span>
